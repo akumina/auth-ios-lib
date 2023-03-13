@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '10.0'
+
+target 'AkuminaLib_Example' do
+  pod 'AkuminaLib', :path => '../'
+
+  target 'AkuminaLib_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

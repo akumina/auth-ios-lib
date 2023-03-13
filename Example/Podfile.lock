@@ -1,0 +1,16 @@
+PODS:
+  - AkuminaLib (0.1.0)
+
+DEPENDENCIES:
+  - AkuminaLib (from `../`)
+
+EXTERNAL SOURCES:
+  AkuminaLib:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  AkuminaLib: 0f3c820dbd9dd8f99e3f1ec7f87db70463c1fc5a
+
+PODFILE CHECKSUM: 84186ee4a8905bcec404fc323e155ef2b2338ef6
+
+COCOAPODS: 1.11.2

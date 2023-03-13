@@ -1,21 +1,29 @@
-# Microsoft Intune App SDK for iOS 
+# AkuminaLib
 
-Version [17.2.4](https://github.com/msintuneappsdk/ms-intune-app-sdk-ios/releases)
+[![CI Status](https://img.shields.io/travis/anbu77raj@gmail.com/AkuminaLib.svg?style=flat)](https://travis-ci.org/anbu77raj@gmail.com/AkuminaLib)
+[![Version](https://img.shields.io/cocoapods/v/AkuminaLib.svg?style=flat)](https://cocoapods.org/pods/AkuminaLib)
+[![License](https://img.shields.io/cocoapods/l/AkuminaLib.svg?style=flat)](https://cocoapods.org/pods/AkuminaLib)
+[![Platform](https://img.shields.io/cocoapods/p/AkuminaLib.svg?style=flat)](https://cocoapods.org/pods/AkuminaLib)
 
-NOTE: If your app is using ADAL, please make sure to update Intune SDK to version 14.7.0+ and ADAL to version 5.0.0 to avoid crashes on iOS 15.
+## Example
 
-See [release notes](https://github.com/msintuneappsdk/ms-intune-app-sdk-ios/releases) for more information. GitHub users can recieve email notifications for new releases to this repo by clicking on **Releases only** from the "Watch" drop-down menu in the upper right-hand corner.
+To run the example project, clone the repo, and run `pod install` from the Example directory first.
 
-The Microsoft Intune App SDK for iOS enables data protection features and mobile app management via Microsoft Intune.
+## Requirements
 
-Before you install and use Microsoft Intune App SDK for iOS you **must**:
-* Review the [Microsoft License Terms Intune App SDK for iOS](https://github.com/msintuneappsdk/ms-intune-app-sdk-ios/blob/master/Microsoft%20License%20Terms%20Intune%20App%20SDK%20for%20iOS.pdf). Print and retain a copy of the license terms for your records. By downloading and using Intune App SDK for iOS, you agree to such license terms.  If you do not accept them, do not use the software.
-* Review the [Microsoft Intune Privacy Statement](https://docs.microsoft.com/legal/intune/microsoft-intune-privacy-statement) for information on the privacy policy of the Intune App SDK for iOS.
+## Installation
 
-See the [Intune App SDK iOS Developer Guide](https://docs.microsoft.com/en-us/intune/develop/intune-app-sdk-ios) on how to integrate the SDK into your iOS app.
+AkuminaLib is available through [CocoaPods](https://cocoapods.org). To install
+it, simply add the following line to your Podfile:
 
-Supported Xcode and iOS versions:
-| Intune SDK Version  | Supported iOS Versions  | Supported Xcode Version | Support Scope |
-| ----------------------- | ---------------------------- | -----------------------------  | ----------------- |                         
-| 17.0.0+                     | 14+                               | 14                                       | Main release branch - supports all feature work and bug fixes |
-| 15.0.0+                     | 12.2+ (no support for iOS 16 features) | 13 (latest minor version) | High-priority security fixes only |
+```ruby
+pod 'AkuminaLib'
+```
+
+## Author
+
+anbu77raj@gmail.com, anbu77raj@gmail.com
+
+## License
+
+AkuminaLib is available under the MIT license. See the LICENSE file for more info.
