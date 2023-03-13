@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AkuminaLib'
-  s.version          = '0.1.0'
+  s.version          = '0.1.1'
   s.summary          = 'iOS Library for Akumina App'
 
 # This description is used to generate tags and improve search results.
@@ -31,7 +31,7 @@ TODO: Add long description of the pod here.
   s.ios.deployment_target = '14.0'
   s.swift_version = "4.2"
   s.source_files = '**/Classes/*.{h,m,swift}'
-  
+  s.resource = 'ms-intune-app-sdk-ios/IntuneMAMResources.bundle'
   # s.resource_bundles = {
   #   'AkuminaLib' => ['AkuminaLib/Assets/*.png']
   # }
