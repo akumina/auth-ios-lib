@@ -1,4 +1,3 @@
-import Rollbar
 import IntuneMAMSwift
 /*
  This enrollment delegate class can be initialized and set as the enrollment delegate of the IntuneMAMEnrollmentManager
@@ -11,7 +10,7 @@ import IntuneMAMSwift
 class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
     
     var presentingViewController: UIViewController?
-    
+    var completionHandler:  (MSALResponse) -> Void =  {_ in MSALResponse()}
     override init() {
         super.init()
         self.presentingViewController = nil
@@ -22,9 +21,10 @@ class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
      
      @param viewController - the view controller this class should use when triggered
      */
-    init(viewController : UIViewController){
+    init(viewController : UIViewController, completionHandler: @escaping (MSALResponse) -> Void){
         super.init()
         self.presentingViewController = viewController
+        self.completionHandler = completionHandler
     }
     
     /*
@@ -34,39 +34,24 @@ class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
      */
     func enrollmentRequest(with status: IntuneMAMEnrollmentStatus) {
         if status.didSucceed{
-            //If enrollment was successful, change from the current view (which should have been initialized with the class) to the desired page on the app (in this case ChatPage)
             print("Login successful")
-            
             MSALUtils.instance.getSharePointAccessTokenAsync();
             
         } else if IntuneMAMEnrollmentStatusCode.loginCanceled != status.statusCode {
-            //In the case of a failure, log failure error status and code
+            
             if(status.statusCode == IntuneMAMEnrollmentStatusCode.alreadyEnrolled) {
                 let msg = "Application already enrolled, so proceed to get token";
                 print(msg);
-                Rollbar.warning(msg);
                 MSALUtils.instance.getSharePointAccessTokenAsync();
                 return
                 
             }
             var msg = "Enrollment result for identity \(status.identity) with status code \(status.statusCode)";
             print(msg)
-            Rollbar.error(msg)
             msg = "Debug message: \(String(describing: status.errorString))";
             print(msg)
-            Rollbar.error(msg)
-            //Present the user with an alert asking them to sign in again.
-//            let alert = UIAlertController(title: "Error Authenticating", message: "There was an error while logging you into your account. Please check your log in credentials and try again.", preferredStyle: .alert)
-//            let closeAlert = UIAlertAction.init(title: "OK", style: .default, handler: nil)
-//            alert.addAction(closeAlert)
-//            if nil != self.presentingViewController {
-//                    self.presentingViewController!.present(alert, animated: true, completion: nil)
-//            } else {
-//                print("Warning: EnrollmentDelegate initialized without a view controller before attempting enrollment.")
-//                UIUtils.getCurrentViewController().present(alert, animated: true, completion: nil)
-//            }
-            UIUtils.showToast(controller: presentingViewController!, message: msg, seconds: 10);
-          
+            completionHandler(MSALResponse(token: "", error: MSALException.HTTPError(msg: msg) ))
+            return
         }
     }
     

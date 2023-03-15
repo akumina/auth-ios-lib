@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AkuminaLib'
-  s.version          = '0.1.1'
+  s.version          = '0.1.2'
   s.summary          = 'iOS Library for Akumina App'
 
 # This description is used to generate tags and improve search results.
@@ -21,16 +21,16 @@ Pod::Spec.new do |s|
 TODO: Add long description of the pod here.
                        DESC
 
-  s.homepage         = 'https://github.com/Anbu77raj/AkuminaLib'
+  s.homepage         = 'https://akuminadev.visualstudio.com/DefaultCollection/Akumina/_git/MobileDev-iOS-PoC'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'anbu77raj@gmail.com' => 'anbu77raj@gmail.com' }
-  s.source           = { :git => 'https://github.com/Anbu77raj/AkuminaLib.git', :tag => s.version.to_s }
+  s.author           = { 'Akumina' => 'anburaj.pandi@akumina.com' }
+  s.source           = { :git => 'https://akuminadev.visualstudio.com/DefaultCollection/Akumina/_git/MobileDev-iOS-PoC', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '14.0'
   s.swift_version = "4.2"
-  s.source_files = '**/Classes/*.{h,m,swift}'
+  s.source_files = '**/Classes/**/*.{h,m,swift}'
   s.resource = 'ms-intune-app-sdk-ios/IntuneMAMResources.bundle'
   # s.resource_bundles = {
   #   'AkuminaLib' => ['AkuminaLib/Assets/*.png']
@@ -39,8 +39,7 @@ TODO: Add long description of the pod here.
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
    s.dependency 'MSAL'
-   s.dependency 'Rollbar'
+#   s.dependency 'Rollbar'
    s.dependency 'Schedule'
-   s.dependency '
    s.vendored_frameworks = 'ms-intune-app-sdk-ios/IntuneMAMSwift.xcframework', 'ms-intune-app-sdk-ios/IntuneMAMSwiftStub.xcframework'
 end

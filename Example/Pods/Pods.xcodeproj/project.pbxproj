@@ -1296,7 +1296,7 @@
 		076CD1E00673C49810D33D1418005E81 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		07C7EDFB3D58CFF34EC518A28FE848A8 /* MSIDAADV1WebviewFactory.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MSIDAADV1WebviewFactory.m; path = MSAL/IdentityCore/IdentityCore/src/oauth2/aad_v1/MSIDAADV1WebviewFactory.m; sourceTree = "<group>"; };
 		07FE991D9A92525C77730DC8E49C3465 /* MSIDCacheItemJsonSerializer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSIDCacheItemJsonSerializer.h; path = MSAL/IdentityCore/IdentityCore/src/cache/serializers/MSIDCacheItemJsonSerializer.h; sourceTree = "<group>"; };
-		07FF532D124FFF8567F6B7C7585EB6E6 /* MSAL */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MSAL; path = MSAL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		07FF532D124FFF8567F6B7C7585EB6E6 /* MSAL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MSAL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		081A98158295E70D57B3AD00E4AF7A42 /* MSIDAdfsAuthorityResolver.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSIDAdfsAuthorityResolver.h; path = MSAL/IdentityCore/IdentityCore/src/validation/MSIDAdfsAuthorityResolver.h; sourceTree = "<group>"; };
 		088280D5D0D6DBCCE27401819ECCD856 /* KSCString.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = KSCString.m; path = KSCrash/Source/KSCrash/Reporting/Tools/KSCString.m; sourceTree = "<group>"; };
 		08845E46D076C2C71A0D00B5A7234712 /* MSALSliceConfig.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSALSliceConfig.h; path = MSAL/src/public/configuration/publicClientApplication/MSALSliceConfig.h; sourceTree = "<group>"; };
@@ -2210,7 +2210,7 @@
 		CA9D8A7FF7096B27608E0CB8BF805A7A /* Pods-AkuminaLib_Tests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-AkuminaLib_Tests-Info.plist"; sourceTree = "<group>"; };
 		CAAE903D695B491414862295160AF169 /* MSIDJsonObject.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSIDJsonObject.h; path = MSAL/IdentityCore/IdentityCore/src/util/MSIDJsonObject.h; sourceTree = "<group>"; };
 		CAC7DA04FC4C26B7FAC5C931A817474E /* MSIDOAuth2EmbeddedWebviewController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MSIDOAuth2EmbeddedWebviewController.m; path = MSAL/IdentityCore/IdentityCore/src/webview/embeddedWebview/MSIDOAuth2EmbeddedWebviewController.m; sourceTree = "<group>"; };
-		CAE60DDA775CC2D71870594DD68BD654 /* Rollbar */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Rollbar; path = Rollbar.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CAE60DDA775CC2D71870594DD68BD654 /* Rollbar.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Rollbar.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF13BA0F8C492245B741E942B87FF9B /* Monthday.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Monthday.swift; path = Sources/Schedule/Monthday.swift; sourceTree = "<group>"; };
 		CAFFB9BA818712E5317E96FDCDBB2BB8 /* MSIDAADV1TokenResponse.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSIDAADV1TokenResponse.h; path = MSAL/IdentityCore/IdentityCore/src/oauth2/aad_v1/MSIDAADV1TokenResponse.h; sourceTree = "<group>"; };
 		CB0220729DC103295153B6CF312527C8 /* MSIDHttpRequestTelemetry.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSIDHttpRequestTelemetry.h; path = MSAL/IdentityCore/IdentityCore/src/network/request_telemetry/MSIDHttpRequestTelemetry.h; sourceTree = "<group>"; };
@@ -3493,10 +3493,10 @@
 			isa = PBXGroup;
 			children = (
 				AB86EE07BBFF6C745D94B583ED9B095B /* AkuminaLib */,
-				07FF532D124FFF8567F6B7C7585EB6E6 /* MSAL */,
+				07FF532D124FFF8567F6B7C7585EB6E6 /* MSAL.framework */,
 				88F3E164EA17E7A33B9BA46D3B499693 /* Pods-AkuminaLib_Example */,
 				5C551576905147B7B6731E8FF56CFD9A /* Pods-AkuminaLib_Tests */,
-				CAE60DDA775CC2D71870594DD68BD654 /* Rollbar */,
+				CAE60DDA775CC2D71870594DD68BD654 /* Rollbar.framework */,
 				AC6DCADE2BF18FD0126E80C9FD17C397 /* Schedule */,
 			);
 			name = Products;
@@ -4626,7 +4626,7 @@
 			);
 			name = Rollbar;
 			productName = Rollbar;
-			productReference = CAE60DDA775CC2D71870594DD68BD654 /* Rollbar */;
+			productReference = CAE60DDA775CC2D71870594DD68BD654 /* Rollbar.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		246E10EDFEFDA319C68DD0E787136642 /* Pods-AkuminaLib_Tests */ = {
@@ -4707,7 +4707,7 @@
 			);
 			name = MSAL;
 			productName = MSAL;
-			productReference = 07FF532D124FFF8567F6B7C7585EB6E6 /* MSAL */;
+			productReference = 07FF532D124FFF8567F6B7C7585EB6E6 /* MSAL.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		EEF3AA99B6E82B55EE172E45E6EF4674 /* Schedule */ = {
@@ -5737,7 +5737,7 @@
 				GCC_PREFIX_HEADER = "Target Support Files/Rollbar/Rollbar-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/Rollbar/Rollbar-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/Rollbar/Rollbar.modulemap";
 				PRODUCT_MODULE_NAME = Rollbar;
@@ -5769,7 +5769,7 @@
 				GCC_PREFIX_HEADER = "Target Support Files/Rollbar/Rollbar-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/Rollbar/Rollbar-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/Rollbar/Rollbar.modulemap";
 				PRODUCT_MODULE_NAME = Rollbar;
@@ -5801,7 +5801,7 @@
 				GCC_PREFIX_HEADER = "Target Support Files/MSAL/MSAL-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/MSAL/MSAL-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/MSAL/MSAL.modulemap";
 				PRODUCT_MODULE_NAME = MSAL;
@@ -5967,7 +5967,7 @@
 				GCC_PREFIX_HEADER = "Target Support Files/MSAL/MSAL-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/MSAL/MSAL-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/MSAL/MSAL.modulemap";
 				PRODUCT_MODULE_NAME = MSAL;

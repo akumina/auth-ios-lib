@@ -35,13 +35,10 @@ public class AppSettings {
     }
     
     public static func updateToken (token: String) {
-        do {
-            var appAccount = try AppSettings.getAccount();
+       
+            var appAccount = AppSettings.getAccount();
             appAccount.pushToken = token;
             AppSettings.saveAccount(account: appAccount);
-        }catch
-        {
-            print("Error while get or update token \(error) " );
-        }
+       
     }
 }

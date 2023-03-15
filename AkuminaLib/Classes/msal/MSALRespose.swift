@@ -18,8 +18,10 @@ public struct MSALResponse {
     }
     public init(token: String) {
         self.token = token
+        self.error = nil
     }
     public init() {
         self.token = ""
+        self.error = nil
     }
 }

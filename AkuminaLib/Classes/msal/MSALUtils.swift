@@ -7,7 +7,6 @@
 
 import Foundation
 import MSAL
-import Rollbar
 import IntuneMAMSwift
 
 class MSALUtils {
@@ -191,7 +190,8 @@ class MSALUtils {
         params.add(key: "resource", value: scope);
         params.add(key: "id_token", value: result.idToken!);
         params.add(key: "access_token", value: result.accessToken)
-        params.add(key: "expires_on", value: String(result.expiresOn.timeIntervalSince1970 / 1000));
+//        var date: Date = result.expiresOn
+//        params.add(key: "expires_on", value: String(date.timeIntervalSince1970 / 1000));
         scope = firstScope.replacingOccurrences(of: "/.default", with: "");
         
         params.add(key: "scope", value: scope);
@@ -207,7 +207,7 @@ class MSALUtils {
         
         AppSettings.saveAccount(account: self.mAccount!);
         if (withIntune) {
-            IntuneMAMEnrollmentManager.instance().delegate = EnrollmentDelegateClass(viewController: parentViewController!)
+            IntuneMAMEnrollmentManager.instance().delegate = EnrollmentDelegateClass(viewController: parentViewController!, completionHandler: self.completionHandler)
             IntuneMAMEnrollmentManager.instance().loginAndEnrollAccount(upn);
         }else {
             self.getSharePointAccessTokenAsync();
@@ -217,12 +217,6 @@ class MSALUtils {
     }
     
     func updateLogging(text : String, error: Bool) {
-        
-        if(error == false) {
-            Rollbar.info(text);
-        }else {
-            Rollbar.error(text);
-        }
         
         if Thread.isMainThread {
             print( text);
@@ -245,7 +239,7 @@ class MSALUtils {
             applicationContext.acquireTokenSilent(with: parameters) { (result, error) in
                 
                 if let error = error {
-                    var errorMsg = "Could not acquire sharepoint token silently: \(error)";
+                    let errorMsg = "Could not acquire sharepoint token silently: \(error)";
                     
 //                    UIUtils.showToast(controller: self.parentViewController!, message: errorMsg, seconds: 10)
                     self.completionHandler(MSALResponse(token: "", error: error));
@@ -255,7 +249,7 @@ class MSALUtils {
                 
                 guard let result = result else {
                     
-                    var errorMsg = "Could not acquire token: No result returned";
+                    let errorMsg = "Could not acquire token: No result returned";
                     
 //                    UIUtils.showToast(controller: self.parentViewController!, message: errorMsg, seconds: 10)
                     self.completionHandler(MSALResponse(token: "", error: MSALException.NoResultFound));
@@ -267,7 +261,7 @@ class MSALUtils {
             }
             
         }catch {
-            var errorMsg = "Could not acquire sharepoint token silently: \(error)";
+            let errorMsg = "Could not acquire sharepoint token silently: \(error)";
             
             self.completionHandler(MSALResponse(token: "", error: error));
             self.updateLogging(text: errorMsg,error:true)
@@ -276,11 +270,11 @@ class MSALUtils {
     
     func getAkuminaToken(result: MSALResult) {
         
-        var params = Params();
+        let params = Params();
         params.add(key: "resource", value: clientDetails.sharePointURL);
         params.add(key: "id_token", value: result.idToken!);
         params.add(key:"access_token",value: result.accessToken);
-        params.add(key: "expires_on", value: String(result.expiresOn.timeIntervalSince1970 / 1000));
+//        params.add(key: "expires_on", value: String(result.expiresOn.timeIntervalSince1970 / 1000));
         
         let firstScope: String = clientDetails.sharePointURL;
         var scope = firstScope.replacingOccurrences(of: ".default", with: "");
@@ -303,7 +297,7 @@ class MSALUtils {
         
         let appAccount = AppSettings.getAccount();
         
-        let existingToken = String(appAccount?.accessToken ??  "");
+        let existingToken = String(appAccount.accessToken ??  "");
         
         let postData = JSONString.data(using: .utf8)
         
@@ -316,23 +310,20 @@ class MSALUtils {
         }
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard error == nil else {
-                var errMsg = "Error: error calling POST " + self.clientDetails.appManagerURL.description;
-                print("Error: " + errMsg)
-                Rollbar.error(errMsg);
+                let errMsg = "Error: error calling POST " + self.clientDetails.appManagerURL.description;
+                self.updateLogging(text: "Error: " + errMsg, error: true)
                 self.completionHandler(MSALResponse(token: "", error: MSALException.HTTPError(msg: errMsg)))
                 return
             }
             guard let data = data else {
-                var errMsg = "Error: Did not receive data " + self.clientDetails.appManagerURL.description;
-                print("Error: " + errMsg)
-                Rollbar.error(errMsg);
+                let errMsg = "Error: Did not receive data " + self.clientDetails.appManagerURL.description;
+                self.updateLogging(text: "Error: " + errMsg, error: true)
                 self.completionHandler(MSALResponse(token: "", error: MSALException.HTTPError(msg: errMsg)))
                 return
             }
             guard let response = response as? HTTPURLResponse, (200 ..< 299) ~= response.statusCode else {
-                var errMsg = "Error: HTTP request failed " + response.debugDescription  + "URL " + self.clientDetails.appManagerURL.description;
-                print(errMsg)
-                Rollbar.error(errMsg);
+                let errMsg = "Error: HTTP request failed " + response.debugDescription  + "URL " + self.clientDetails.appManagerURL.description;
+                self.updateLogging(text: "Error: " + errMsg, error: true)
                 self.completionHandler(MSALResponse(token: "", error: MSALException.HTTPError(msg: errMsg)))
                 return
             }
