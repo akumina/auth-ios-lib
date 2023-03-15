@@ -177,9 +177,19 @@ code_sign_if_enabled() {
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/AkuminaLib/AkuminaLib.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/MSAL/MSAL.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/Rollbar/Rollbar.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/Schedule/Schedule.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwift.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwiftStub.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/AkuminaLib/AkuminaLib.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/MSAL/MSAL.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/Rollbar/Rollbar.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/Schedule/Schedule.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwift.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwiftStub.framework"
 fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait

@@ -28,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0476D50C29C08A5C00C173A9 /* AkuminaLib_Example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AkuminaLib_Example.entitlements; sourceTree = "<group>"; };
 		2367D6C0AA9C0EBD3EE9039B /* Pods-AkuminaLib_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AkuminaLib_Example.release.xcconfig"; path = "Target Support Files/Pods-AkuminaLib_Example/Pods-AkuminaLib_Example.release.xcconfig"; sourceTree = "<group>"; };
 		4A1DE57B3FE7C83E1832BC1F /* Pods_AkuminaLib_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AkuminaLib_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD01AFB9204008FA782 /* AkuminaLib_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AkuminaLib_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -92,6 +93,7 @@
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
+				0476D50C29C08A5C00C173A9 /* AkuminaLib_Example.entitlements */,
 				607FACF51AFB993E008FA782 /* Podspec Metadata */,
 				607FACD21AFB9204008FA782 /* Example for AkuminaLib */,
 				607FACE81AFB9204008FA782 /* Tests */,
@@ -315,10 +317,20 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AkuminaLib_Example/Pods-AkuminaLib_Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/AkuminaLib/AkuminaLib.framework",
+				"${BUILT_PRODUCTS_DIR}/MSAL/MSAL.framework",
+				"${BUILT_PRODUCTS_DIR}/Rollbar/Rollbar.framework",
+				"${BUILT_PRODUCTS_DIR}/Schedule/Schedule.framework",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwift.framework/IntuneMAMSwift",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwiftStub.framework/IntuneMAMSwiftStub",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AkuminaLib.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSAL.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Rollbar.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Schedule.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IntuneMAMSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IntuneMAMSwiftStub.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -420,7 +432,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -466,7 +478,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -479,6 +491,7 @@
 			baseConfigurationReference = 6F5AC68EF3769D9318803C49 /* Pods-AkuminaLib_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = AkuminaLib_Example.entitlements;
 				CURRENT_PROJECT_VERSION = 1.0;
 				DEVELOPMENT_TEAM = LM5JV7M9U4;
 				INFOPLIST_FILE = AkuminaLib/Info.plist;
@@ -499,6 +512,7 @@
 			baseConfigurationReference = 2367D6C0AA9C0EBD3EE9039B /* Pods-AkuminaLib_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = AkuminaLib_Example.entitlements;
 				CURRENT_PROJECT_VERSION = 1.0;
 				DEVELOPMENT_TEAM = LM5JV7M9U4;
 				INFOPLIST_FILE = AkuminaLib/Info.plist;

@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "E8897F0F-47BD-4E33-A62C-48B91A002DD4"
+   type = "0"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F0A43428-497E-420D-8AFD-D17E25B87EC6"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../AkuminaLib/Classes/AkuminaLib.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "11"
+            endingLineNumber = "11"
+            landmarkName = "init()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "48C9150F-F894-4F12-B2A7-DF6A86BAC41E"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../ClientDetails.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "18"
+            endingLineNumber = "18"
+            landmarkName = "init(authority:clientId:redirectUri:scopes:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "3D3B1422-2C0B-4BD5-9201-662BEF864BED"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../ClientDetails.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "35"
+            endingLineNumber = "35"
+            landmarkName = "init(authority:clientId:redirectUri:scopes:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F8825DA8-9202-4295-ADF2-16BB868B4C98"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "39"
+            endingLineNumber = "39"
+            landmarkName = "initMSAL(parentViewController:clientDetails:withIntune:completionHandler:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "F8825DA8-9202-4295-ADF2-16BB868B4C98 - 13e9f2d81e8a76ee"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AkuminaLib.MSALUtils.initMSAL(parentViewController: __C.UIViewController, clientDetails: AkuminaLib.ClientDetails) throws -&gt; ()"
+                  moduleName = "AkuminaLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Volumes/project/uthai/AkuminaLib/AkuminaLib/Classes/msal/MSALUtils.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "35"
+                  endingLineNumber = "35"
+                  offsetFromSymbolStart = "266">
+               </Location>
+               <Location
+                  uuid = "F8825DA8-9202-4295-ADF2-16BB868B4C98 - 718c9aa2aca209c9"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AkuminaLib.MSALUtils.initMSAL(parentViewController: __C.UIViewController, clientDetails: AkuminaLib.ClientDetails, withIntune: Swift.Bool, completionHandler: (Swift.String) -&gt; ()) throws -&gt; ()"
+                  moduleName = "AkuminaLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Volumes/project/uthai/AkuminaLib/AkuminaLib/Classes/msal/MSALUtils.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "39"
+                  endingLineNumber = "39"
+                  offsetFromSymbolStart = "326">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A6E965C9-9F32-4E1E-8BE5-E232F4A20897"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../AkuminaLib/Classes/AkuminaLib.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "16"
+            endingLineNumber = "16"
+            landmarkName = "authenticateWithIntune(parentViewController:clientDetails:completionHandler:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "60AA93A6-C6EB-486F-92EA-9ECA7B2FC4C0"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../AkuminaLib/Classes/modal/ClientDetails.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "25"
+            endingLineNumber = "25"
+            landmarkName = "init(authority:clientId:redirectUri:scopes:sharePointScope:appManagerURL:tenantId:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "EDAF8E10-0D06-4CE7-8A19-8A5FEE93A04A"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "59"
+            endingLineNumber = "59"
+            landmarkName = "callGraphAPI()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "EDAF8E10-0D06-4CE7-8A19-8A5FEE93A04A - ce520522f33ff2a4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AkuminaLib.MSALUtils.callGraphAPI() throws -&gt; ()"
+                  moduleName = "AkuminaLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Volumes/project/uthai/AkuminaLib/AkuminaLib/Classes/msal/MSALUtils.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "53"
+                  endingLineNumber = "53"
+                  offsetFromSymbolStart = "36">
+               </Location>
+               <Location
+                  uuid = "EDAF8E10-0D06-4CE7-8A19-8A5FEE93A04A - ce520522f33ff2a4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AkuminaLib.MSALUtils.callGraphAPI() throws -&gt; ()"
+                  moduleName = "AkuminaLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Volumes/project/uthai/AkuminaLib/AkuminaLib/Classes/msal/MSALUtils.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "53"
+                  endingLineNumber = "53"
+                  offsetFromSymbolStart = "56">
+               </Location>
+               <Location
+                  uuid = "EDAF8E10-0D06-4CE7-8A19-8A5FEE93A04A - ec50d9bee22de8f5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;__C.MSALAccount&gt;) -&gt; () in AkuminaLib.MSALUtils.callGraphAPI() throws -&gt; ()"
+                  moduleName = "AkuminaLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Volumes/project/uthai/AkuminaLib/AkuminaLib/Classes/msal/MSALUtils.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "55"
+                  endingLineNumber = "55"
+                  offsetFromSymbolStart = "82">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "052AFC24-F046-4B20-B223-907B41AFDB4E"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../AkuminaLib/Classes/AkuminaLib.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "18"
+            endingLineNumber = "18"
+            landmarkName = "authenticateWithIntune(parentViewController:clientDetails:completionHandler:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "FA83BAB7-DE7A-43DB-A384-BBE21381F153"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "49"
+            endingLineNumber = "49"
+            landmarkName = "initMSAL(parentViewController:clientDetails:withIntune:completionHandler:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C7B66979-C778-4015-A3C8-FA28D4E7D0D5"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "158"
+            endingLineNumber = "158"
+            landmarkName = "loadCurrentAccount(completion:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "C7B66979-C778-4015-A3C8-FA28D4E7D0D5 - 142068cc0310f449"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AkuminaLib.MSALUtils.loadCurrentAccount(completion: Swift.Optional&lt;(Swift.Optional&lt;__C.MSALAccount&gt;) -&gt; ()&gt;) -&gt; ()"
+                  moduleName = "AkuminaLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Volumes/project/uthai/AkuminaLib/AkuminaLib/Classes/msal/MSALUtils.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "105"
+                  endingLineNumber = "105"
+                  offsetFromSymbolStart = "392">
+               </Location>
+               <Location
+                  uuid = "C7B66979-C778-4015-A3C8-FA28D4E7D0D5 - 142068cc0310f468"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AkuminaLib.MSALUtils.loadCurrentAccount(completion: Swift.Optional&lt;(Swift.Optional&lt;__C.MSALAccount&gt;) -&gt; ()&gt;) -&gt; ()"
+                  moduleName = "AkuminaLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Volumes/project/uthai/AkuminaLib/AkuminaLib/Classes/msal/MSALUtils.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "106"
+                  endingLineNumber = "106"
+                  offsetFromSymbolStart = "392">
+               </Location>
+               <Location
+                  uuid = "C7B66979-C778-4015-A3C8-FA28D4E7D0D5 - 142068cc0310f468"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AkuminaLib.MSALUtils.loadCurrentAccount(completion: Swift.Optional&lt;(Swift.Optional&lt;__C.MSALAccount&gt;) -&gt; ()&gt;) -&gt; ()"
+                  moduleName = "AkuminaLib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Volumes/project/uthai/AkuminaLib/AkuminaLib/Classes/msal/MSALUtils.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "106"
+                  endingLineNumber = "106"
+                  offsetFromSymbolStart = "411">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "359F2FF3-C91A-4163-B0E0-E922C6648583"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AkuminaLib/ViewController.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "22"
+            endingLineNumber = "22"
+            landmarkName = "contineAction(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "4046D588-652D-44FD-9D04-9586B23A1484"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "345"
+            endingLineNumber = "345"
+            landmarkName = "saveToken(json:appAccount:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
