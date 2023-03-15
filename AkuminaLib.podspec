@@ -29,7 +29,7 @@ TODO: Add long description of the pod here.
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '14.0'
-  s.swift_version = "4.2"
+  s.swift_version = "5.7.3"
   s.source_files = '**/Classes/**/*.{h,m,swift}'
   s.resource = 'ms-intune-app-sdk-ios/IntuneMAMResources.bundle'
   # s.resource_bundles = {

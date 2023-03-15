@@ -190,8 +190,10 @@ class MSALUtils {
         params.add(key: "resource", value: scope);
         params.add(key: "id_token", value: result.idToken!);
         params.add(key: "access_token", value: result.accessToken)
-//        var date: Date = result.expiresOn ?? Date()
-        params.add(key: "expires_on", value: String(result.expiresOn.timeIntervalSince1970 / 1000));
+        var date: Date = result.expiresOn!;
+       
+        
+        params.add(key: "expires_on", value: String(date.timeIntervalSince1970 / 1000));
         scope = firstScope.replacingOccurrences(of: "/.default", with: "");
         
         params.add(key: "scope", value: scope);
@@ -274,7 +276,7 @@ class MSALUtils {
         params.add(key: "resource", value: clientDetails.sharePointURL);
         params.add(key: "id_token", value: result.idToken!);
         params.add(key:"access_token",value: result.accessToken);
-        params.add(key: "expires_on", value: String(result.expiresOn.timeIntervalSince1970 / 1000));
+        params.add(key: "expires_on", value: String(result.expiresOn!.timeIntervalSince1970 / 1000));
         
         let firstScope: String = clientDetails.sharePointURL;
         var scope = firstScope.replacingOccurrences(of: ".default", with: "");
