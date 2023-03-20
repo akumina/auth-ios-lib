@@ -7,9 +7,9 @@
 #
 
 Pod::Spec.new do |s|
-  s.name             = 'AkuminaLib'
+  s.name             = 'Akumina Auth iOS Lib'
   s.version          = '0.1.5'
-  s.summary          = 'iOS Library for Akumina App'
+  s.summary          = 'iOS Auth Library for Akumina App'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -21,8 +21,8 @@ Pod::Spec.new do |s|
 TODO: Add long description of the pod here.
                        DESC
 
-  s.homepage         = 'https://akuminadev.visualstudio.com/DefaultCollection/Akumina/_git/MobileDev-iOS-PoC'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
+  # s.homepage         = 'https://akuminadev.visualstudio.com/DefaultCollection/Akumina/_git/MobileDev-iOS-PoC'
+  # s.s creenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Akumina' => 'anburaj.pandi@akumina.com' }
   s.source           = { :git => 'https://github.com/akumina/auth-ios-lib.git', :tag => s.version.to_s }
