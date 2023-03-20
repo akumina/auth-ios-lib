@@ -7,7 +7,7 @@
 #
 
 Pod::Spec.new do |s|
-  s.name             = 'Akumina Auth iOS Lib'
+  s.name             = 'AkuminaAuthiOSLib'
   s.version          = '0.1.5'
   s.summary          = 'iOS Auth Library for Akumina App'
 
