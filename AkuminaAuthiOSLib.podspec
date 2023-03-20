@@ -25,8 +25,7 @@ TODO: Add long description of the pod here.
   # s.s creenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Akumina' => 'anburaj.pandi@akumina.com' }
-  s.source           = { :git => 'https://AnburajPandi:App Token : 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
-@github.com/akumina/auth-ios-lib.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://AnburajPandi:App Token : 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@github.com/akumina/auth-ios-lib.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '14.0'
