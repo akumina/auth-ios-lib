@@ -39,7 +39,7 @@ TODO: Add long description of the pod here.
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
    s.dependency 'MSAL'
-#   s.dependency 'Rollbar'
+   s.dependency 'Rollbar'
    s.dependency 'Schedule'
    s.vendored_frameworks = 'ms-intune-app-sdk-ios/IntuneMAMSwift.xcframework', 'ms-intune-app-sdk-ios/IntuneMAMSwiftStub.xcframework'
 end

@@ -1,4 +1,5 @@
 import Foundation
+import Rollbar
 
 public final class AkuminaLib {
     
@@ -10,6 +11,10 @@ public final class AkuminaLib {
         //        Rollbar.info(Constants.ROLLBAR_APP_ID +  " has started ");
     }
     
+    public func initRollbar(token: String, config: RollbarConfiguration ) {
+        
+        Rollbar.initWithAccessToken(token, configuration: config)
+    }
     public func authenticateWithMSALAndMAM(parentViewController: UIViewController, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void) throws {
         do {
             try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: true,completionHandler: completionHandler)

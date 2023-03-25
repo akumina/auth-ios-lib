@@ -3,7 +3,7 @@ use_frameworks!
 platform :ios, '14.0'
 
 target 'AkuminaLib_Example' do
-  pod 'AkuminaLib', :path => '../'
+  pod 'AkuminaAuthiOSLib', :path => '../'
 
   target 'AkuminaLib_Tests' do
     inherit! :search_paths
