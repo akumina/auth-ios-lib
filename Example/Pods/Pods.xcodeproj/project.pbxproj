@@ -34,16 +34,15 @@
 		03C98DDB70841A2E1E638AE9B16A0FC3 /* MSALPublicClientApplication+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 7FCF05048FDE46E4E9B0D78B613682B2 /* MSALPublicClientApplication+Internal.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		03F409418D55B4D92C07953238916D7A /* type_traits.h in Headers */ = {isa = PBXBuildFile; fileRef = FCA3B5C1FBBD46453605D1B2BB645A28 /* type_traits.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		0460A5C0620BAC2646EC7337B01B8D8B /* KSCrashReportSinkQuincyHockey.h in Headers */ = {isa = PBXBuildFile; fileRef = 6363095E000E440C6C2B758C2CDBD649 /* KSCrashReportSinkQuincyHockey.h */; settings = {ATTRIBUTES = (Project, ); }; };
-		0464F64229CEA9F300DF9AA6 /* TokenType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0464F64129CEA9F300DF9AA6 /* TokenType.swift */; };
 		0464F64429CEF0A400DF9AA6 /* AkuminaAuthiOSLib.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 0464F64329CEF0A400DF9AA6 /* AkuminaAuthiOSLib.podspec */; };
-		0464F64629CEFDF600DF9AA6 /* TokenError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0464F64529CEFDF600DF9AA6 /* TokenError.swift */; };
+		0464F64929CF0FD100DF9AA6 /* TokenError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0464F64729CF0FD100DF9AA6 /* TokenError.swift */; };
+		0464F64A29CF0FD100DF9AA6 /* TokenType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0464F64829CF0FD100DF9AA6 /* TokenType.swift */; };
 		0476D4F729C01D8D00C173A9 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D4F629C01D8D00C173A9 /* Constants.swift */; };
 		0476D4FE29C01EBE00C173A9 /* ClientDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D4F929C01EBD00C173A9 /* ClientDetails.swift */; };
 		0476D4FF29C01EBE00C173A9 /* TokenResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D4FA29C01EBD00C173A9 /* TokenResult.swift */; };
 		0476D50029C01EBE00C173A9 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D4FB29C01EBD00C173A9 /* AppSettings.swift */; };
 		0476D50129C01EBE00C173A9 /* ClientDetailsError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D4FC29C01EBD00C173A9 /* ClientDetailsError.swift */; };
 		0476D50229C01EBE00C173A9 /* AppAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D4FD29C01EBE00C173A9 /* AppAccount.swift */; };
-		0476D50529C01F1100C173A9 /* MSALException.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D50329C01F1000C173A9 /* MSALException.swift */; };
 		0476D50629C01F1100C173A9 /* MSALUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D50429C01F1000C173A9 /* MSALUtils.swift */; };
 		0476D50929C01FA900C173A9 /* UIUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D50829C01FA900C173A9 /* UIUtils.swift */; };
 		0476D50B29C0295A00C173A9 /* Params.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D50A29C0295A00C173A9 /* Params.swift */; };
@@ -1268,16 +1267,15 @@
 		03FE26C0FE9556A9E2911C3730D2F4BF /* KSCrashReportFilterJSON.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = KSCrashReportFilterJSON.m; path = KSCrash/Source/KSCrash/Reporting/Filters/KSCrashReportFilterJSON.m; sourceTree = "<group>"; };
 		0434E54ADAE2E37CB7C651999348EF0C /* KSDemangle_CPP.cpp */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.cpp.cpp; name = KSDemangle_CPP.cpp; path = KSCrash/Source/KSCrash/Recording/Tools/KSDemangle_CPP.cpp; sourceTree = "<group>"; };
 		04591EB89114807550DBA896DE77D024 /* KSCrashReportSinkConsole.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = KSCrashReportSinkConsole.h; path = KSCrash/Source/KSCrash/Reporting/Sinks/KSCrashReportSinkConsole.h; sourceTree = "<group>"; };
-		0464F64129CEA9F300DF9AA6 /* TokenType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenType.swift; sourceTree = "<group>"; };
 		0464F64329CEF0A400DF9AA6 /* AkuminaAuthiOSLib.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AkuminaAuthiOSLib.podspec; sourceTree = "<group>"; };
-		0464F64529CEFDF600DF9AA6 /* TokenError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenError.swift; sourceTree = "<group>"; };
+		0464F64729CF0FD100DF9AA6 /* TokenError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TokenError.swift; path = AkuminaLib/Classes/modal/TokenError.swift; sourceTree = "<group>"; };
+		0464F64829CF0FD100DF9AA6 /* TokenType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TokenType.swift; path = AkuminaLib/Classes/modal/TokenType.swift; sourceTree = "<group>"; };
 		0476D4F629C01D8D00C173A9 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = AkuminaLib/Classes/utils/Constants.swift; sourceTree = "<group>"; };
 		0476D4F929C01EBD00C173A9 /* ClientDetails.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ClientDetails.swift; path = AkuminaLib/Classes/modal/ClientDetails.swift; sourceTree = "<group>"; };
 		0476D4FA29C01EBD00C173A9 /* TokenResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TokenResult.swift; path = AkuminaLib/Classes/modal/TokenResult.swift; sourceTree = "<group>"; };
 		0476D4FB29C01EBD00C173A9 /* AppSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppSettings.swift; path = AkuminaLib/Classes/modal/AppSettings.swift; sourceTree = "<group>"; };
 		0476D4FC29C01EBD00C173A9 /* ClientDetailsError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ClientDetailsError.swift; path = AkuminaLib/Classes/modal/ClientDetailsError.swift; sourceTree = "<group>"; };
 		0476D4FD29C01EBE00C173A9 /* AppAccount.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppAccount.swift; path = AkuminaLib/Classes/modal/AppAccount.swift; sourceTree = "<group>"; };
-		0476D50329C01F1000C173A9 /* MSALException.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MSALException.swift; path = AkuminaLib/Classes/msal/MSALException.swift; sourceTree = "<group>"; };
 		0476D50429C01F1000C173A9 /* MSALUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MSALUtils.swift; path = AkuminaLib/Classes/msal/MSALUtils.swift; sourceTree = "<group>"; };
 		0476D50829C01FA900C173A9 /* UIUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UIUtils.swift; path = AkuminaLib/Classes/utils/UIUtils.swift; sourceTree = "<group>"; };
 		0476D50A29C0295A00C173A9 /* Params.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Params.swift; path = AkuminaLib/Classes/utils/Params.swift; sourceTree = "<group>"; };
@@ -2528,7 +2526,6 @@
 		04AB45BA29BF55DA0081E183 /* msal */ = {
 			isa = PBXGroup;
 			children = (
-				0476D50329C01F1000C173A9 /* MSALException.swift */,
 				0476D50429C01F1000C173A9 /* MSALUtils.swift */,
 				0476D50D29C0936100C173A9 /* EnrollmentDelegate.swift */,
 				0476D50F29C0D65000C173A9 /* MSALRespose.swift */,
@@ -2539,13 +2536,13 @@
 		04AB45BD29BF561E0081E183 /* modal */ = {
 			isa = PBXGroup;
 			children = (
+				0464F64729CF0FD100DF9AA6 /* TokenError.swift */,
+				0464F64829CF0FD100DF9AA6 /* TokenType.swift */,
 				0476D4FD29C01EBE00C173A9 /* AppAccount.swift */,
 				0476D4FB29C01EBD00C173A9 /* AppSettings.swift */,
 				0476D4F929C01EBD00C173A9 /* ClientDetails.swift */,
 				0476D4FC29C01EBD00C173A9 /* ClientDetailsError.swift */,
 				0476D4FA29C01EBD00C173A9 /* TokenResult.swift */,
-				0464F64129CEA9F300DF9AA6 /* TokenType.swift */,
-				0464F64529CEFDF600DF9AA6 /* TokenError.swift */,
 			);
 			name = modal;
 			sourceTree = "<group>";
@@ -4853,18 +4850,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0464F64929CF0FD100DF9AA6 /* TokenError.swift in Sources */,
 				0476D4FE29C01EBE00C173A9 /* ClientDetails.swift in Sources */,
 				0DF1643FB13E291037E4D594F285CDF4 /* AkuminaLib.swift in Sources */,
 				0476D4FF29C01EBE00C173A9 /* TokenResult.swift in Sources */,
 				0476D51029C0D65000C173A9 /* MSALRespose.swift in Sources */,
 				0476D50B29C0295A00C173A9 /* Params.swift in Sources */,
 				0476D50129C01EBE00C173A9 /* ClientDetailsError.swift in Sources */,
-				0464F64629CEFDF600DF9AA6 /* TokenError.swift in Sources */,
 				CE464D2B049A7E3FD5CD529D88B6B441 /* AkuminaLib-dummy.m in Sources */,
 				0476D50E29C0936100C173A9 /* EnrollmentDelegate.swift in Sources */,
+				0464F64A29CF0FD100DF9AA6 /* TokenType.swift in Sources */,
 				0476D50929C01FA900C173A9 /* UIUtils.swift in Sources */,
-				0464F64229CEA9F300DF9AA6 /* TokenType.swift in Sources */,
-				0476D50529C01F1100C173A9 /* MSALException.swift in Sources */,
 				0476D50629C01F1100C173A9 /* MSALUtils.swift in Sources */,
 				0476D4F729C01D8D00C173A9 /* Constants.swift in Sources */,
 				0476D50029C01EBE00C173A9 /* AppSettings.swift in Sources */,
