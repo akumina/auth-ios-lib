@@ -75,7 +75,6 @@ class MSALUtils {
             case .error(let error):
                 let errorMsg = "Unable to acquire MSAL token \(error)"
                 self.updateLogging(text: errorMsg, error: true)
-                UIUtils.showToast(controller: self.parentViewController!, message: errorMsg, seconds: 10)
             }
         }
     }
