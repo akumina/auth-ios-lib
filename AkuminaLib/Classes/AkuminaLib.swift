@@ -14,6 +14,8 @@ public final class AkuminaLib {
     public func initRollbar(token: String, config: RollbarConfiguration ) {
         
         Rollbar.initWithAccessToken(token, configuration: config)
+        
+        Constants.ROLL_BAR = true;
     }
     public func authenticateWithMSALAndMAM(parentViewController: UIViewController, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void) throws {
         do {

@@ -8,6 +8,7 @@
 import Foundation
 import MSAL
 import IntuneMAMSwift
+import Rollbar
 
 class MSALUtils {
     
@@ -73,7 +74,7 @@ class MSALUtils {
                 self.getContentWithToken(result: result);
             case .error(let error):
                 let errorMsg = "Unable to acquire MSAL token \(error)"
-                print(errorMsg)
+                self.updateLogging(error: errorMsg)
                 UIUtils.showToast(controller: self.parentViewController!, message: errorMsg, seconds: 10)
             }
         }
@@ -167,7 +168,7 @@ class MSALUtils {
             completion!(acc)
             return
         }catch{
-            print("Unable to get Account from Cache \(error)")
+            self.updateLogging(text: "Unable to get Account from Cache \(error)", error: true)
             completion!(nil)
         }
     }
@@ -218,7 +219,13 @@ class MSALUtils {
     }
     
     func updateLogging(text : String, error: Bool) {
-        
+        if(Constants.ROLL_BAR) {
+            if(error) {
+                Rollbar.error(text)
+            }else {
+                Rollbar.info(text)
+            }
+        }
         if Thread.isMainThread {
             print( text);
         } else {
