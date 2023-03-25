@@ -37,6 +37,7 @@
 		0464F64429CEF0A400DF9AA6 /* AkuminaAuthiOSLib.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 0464F64329CEF0A400DF9AA6 /* AkuminaAuthiOSLib.podspec */; };
 		0464F64929CF0FD100DF9AA6 /* TokenError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0464F64729CF0FD100DF9AA6 /* TokenError.swift */; };
 		0464F64A29CF0FD100DF9AA6 /* TokenType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0464F64829CF0FD100DF9AA6 /* TokenType.swift */; };
+		0464F64C29CF10B000DF9AA6 /* MSALException.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0464F64B29CF10B000DF9AA6 /* MSALException.swift */; };
 		0476D4F729C01D8D00C173A9 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D4F629C01D8D00C173A9 /* Constants.swift */; };
 		0476D4FE29C01EBE00C173A9 /* ClientDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D4F929C01EBD00C173A9 /* ClientDetails.swift */; };
 		0476D4FF29C01EBE00C173A9 /* TokenResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0476D4FA29C01EBD00C173A9 /* TokenResult.swift */; };
@@ -1270,6 +1271,7 @@
 		0464F64329CEF0A400DF9AA6 /* AkuminaAuthiOSLib.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AkuminaAuthiOSLib.podspec; sourceTree = "<group>"; };
 		0464F64729CF0FD100DF9AA6 /* TokenError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TokenError.swift; path = AkuminaLib/Classes/modal/TokenError.swift; sourceTree = "<group>"; };
 		0464F64829CF0FD100DF9AA6 /* TokenType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TokenType.swift; path = AkuminaLib/Classes/modal/TokenType.swift; sourceTree = "<group>"; };
+		0464F64B29CF10B000DF9AA6 /* MSALException.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MSALException.swift; path = AkuminaLib/Classes/msal/MSALException.swift; sourceTree = "<group>"; };
 		0476D4F629C01D8D00C173A9 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = AkuminaLib/Classes/utils/Constants.swift; sourceTree = "<group>"; };
 		0476D4F929C01EBD00C173A9 /* ClientDetails.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ClientDetails.swift; path = AkuminaLib/Classes/modal/ClientDetails.swift; sourceTree = "<group>"; };
 		0476D4FA29C01EBD00C173A9 /* TokenResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TokenResult.swift; path = AkuminaLib/Classes/modal/TokenResult.swift; sourceTree = "<group>"; };
@@ -2526,6 +2528,7 @@
 		04AB45BA29BF55DA0081E183 /* msal */ = {
 			isa = PBXGroup;
 			children = (
+				0464F64B29CF10B000DF9AA6 /* MSALException.swift */,
 				0476D50429C01F1000C173A9 /* MSALUtils.swift */,
 				0476D50D29C0936100C173A9 /* EnrollmentDelegate.swift */,
 				0476D50F29C0D65000C173A9 /* MSALRespose.swift */,
@@ -4860,6 +4863,7 @@
 				CE464D2B049A7E3FD5CD529D88B6B441 /* AkuminaLib-dummy.m in Sources */,
 				0476D50E29C0936100C173A9 /* EnrollmentDelegate.swift in Sources */,
 				0464F64A29CF0FD100DF9AA6 /* TokenType.swift in Sources */,
+				0464F64C29CF10B000DF9AA6 /* MSALException.swift in Sources */,
 				0476D50929C01FA900C173A9 /* UIUtils.swift in Sources */,
 				0476D50629C01F1100C173A9 /* MSALUtils.swift in Sources */,
 				0476D4F729C01D8D00C173A9 /* Constants.swift in Sources */,
