@@ -16,4 +16,9 @@ public class Constants {
     public static let ROLLBAR_ENV: String = "production";
     
     public static let ROLLBAR_APP_ID: String = Bundle.main.bundleIdentifier!;
+    
+    public static var GRAPH_TOKEN: String = "";
+    
+    public static var SHAREPOINT_TOKEN: String = "";
+    
 }
