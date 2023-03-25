@@ -2077,7 +2077,7 @@
 		AB86EE07BBFF6C745D94B583ED9B095B /* AkuminaLib */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = AkuminaLib; path = AkuminaLib.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB92D0133F5A8574AFB29E23FB3B0F45 /* NSDictionary+MSIDExtensions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSDictionary+MSIDExtensions.h"; path = "MSAL/IdentityCore/IdentityCore/src/util/NSDictionary+MSIDExtensions.h"; sourceTree = "<group>"; };
 		AC09EA6BB02D05A8935FEA16D3D2EC06 /* MSIDErrorConverter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSIDErrorConverter.h; path = MSAL/IdentityCore/IdentityCore/src/MSIDErrorConverter.h; sourceTree = "<group>"; };
-		AC6DCADE2BF18FD0126E80C9FD17C397 /* Schedule */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Schedule; path = Schedule.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AC6DCADE2BF18FD0126E80C9FD17C397 /* Schedule.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Schedule.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC7C98F63743E1EA9DD6CD875D8D060E /* MSIDURLSessionManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSIDURLSessionManager.h; path = MSAL/IdentityCore/IdentityCore/src/network/MSIDURLSessionManager.h; sourceTree = "<group>"; };
 		AD239BE8F201C7A129033C0EF621B2B2 /* MSIDInteractiveRequestParameters+MSALRequest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "MSIDInteractiveRequestParameters+MSALRequest.m"; path = "MSAL/src/MSIDInteractiveRequestParameters+MSALRequest.m"; sourceTree = "<group>"; };
 		AD644A643EC6856C153145B967C473AF /* NSString+URLEncode.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSString+URLEncode.m"; path = "KSCrash/Source/KSCrash/Reporting/Tools/NSString+URLEncode.m"; sourceTree = "<group>"; };
@@ -3505,7 +3505,7 @@
 				88F3E164EA17E7A33B9BA46D3B499693 /* Pods-AkuminaLib_Example */,
 				5C551576905147B7B6731E8FF56CFD9A /* Pods-AkuminaLib_Tests */,
 				CAE60DDA775CC2D71870594DD68BD654 /* Rollbar.framework */,
-				AC6DCADE2BF18FD0126E80C9FD17C397 /* Schedule */,
+				AC6DCADE2BF18FD0126E80C9FD17C397 /* Schedule.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -4734,7 +4734,7 @@
 			);
 			name = Schedule;
 			productName = Schedule;
-			productReference = AC6DCADE2BF18FD0126E80C9FD17C397 /* Schedule */;
+			productReference = AC6DCADE2BF18FD0126E80C9FD17C397 /* Schedule.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -5524,7 +5524,7 @@
 				GCC_PREFIX_HEADER = "Target Support Files/Schedule/Schedule-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/Schedule/Schedule-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/Schedule/Schedule.modulemap";
 				PRODUCT_MODULE_NAME = Schedule;
@@ -5844,7 +5844,7 @@
 				GCC_PREFIX_HEADER = "Target Support Files/Schedule/Schedule-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/Schedule/Schedule-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/Schedule/Schedule.modulemap";
 				PRODUCT_MODULE_NAME = Schedule;
