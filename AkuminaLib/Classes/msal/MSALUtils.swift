@@ -8,7 +8,7 @@
 import Foundation
 import MSAL
 import IntuneMAMSwift
-import Rollbar
+//import Rollbar
 
 class MSALUtils {
     
@@ -220,9 +220,9 @@ class MSALUtils {
     func updateLogging(text : String, error: Bool) {
         if(Constants.ROLL_BAR) {
             if(error) {
-                Rollbar.error(text)
+//                Rollbar.error(text)
             }else {
-                Rollbar.info(text)
+//                Rollbar.info(text)
             }
         }
         if Thread.isMainThread {
