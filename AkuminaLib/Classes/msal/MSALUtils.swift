@@ -347,4 +347,26 @@ class MSALUtils {
         AppSettings.saveAccount(account: acc);
         self.completionHandler(MSALResponse(token: acc.accessToken ?? ""));
     }
+    
+    func signOut(completionHandler: @escaping (MSALSignoutResponse) -> Void ) {
+            guard let applicationContext = self.applicationContext else { return }
+            guard let account = self.currentAccount else { return }
+            self.initWebViewParams();
+            let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParamaters!);
+        applicationContext.signout(with: account, signoutParameters: signoutParameters) { success, error in
+            completionHandler(MSALSignoutResponse(error: error))
+        }
+//            applicationContext.signout(with: account, signoutParameters: signoutParameters, completionBlock: {(success, error) in
+//
+//                if let error = error {
+//                    self.updateLogging(text: "Couldn't sign out account with error: \(error)" ,error:true)
+//                    return
+//                }
+//
+//                self.updateLogging(text: "Sign out completed successfully", error: false)
+//                self.accessToken = ""
+//                self.updateCurrentAccount(account: nil)
+//            })
+            
+        }
 }

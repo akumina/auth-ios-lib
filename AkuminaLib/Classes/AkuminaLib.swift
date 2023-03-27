@@ -31,7 +31,9 @@ public final class AkuminaLib {
             throw MSALException.TokenFailedException(error: error)
         }
     }
-    
+    public func signOut(parentViewController: UIViewController){
+        MSALUtils.instance.signOut()
+    }
     public func getToken(type: TokenType) throws -> String  {
         
         switch type {
