@@ -1,5 +1,5 @@
 import Foundation
-import Rollbar
+//import Rollbar
 
 public final class AkuminaLib {
     
@@ -11,12 +11,12 @@ public final class AkuminaLib {
         //        Rollbar.info(Constants.ROLLBAR_APP_ID +  " has started ");
     }
     
-    public func initRollbar(token: String, config: RollbarConfiguration ) {
+//    public func initRollbar(token: String, config: RollbarConfiguration ) {
         
 //        Rollbar.initWithAccessToken(token, configuration: config)
         
-        Constants.ROLL_BAR = true;
-    }
+//        Constants.ROLL_BAR = true;
+//    }
     public func authenticateWithMSALAndMAM(parentViewController: UIViewController, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void) throws {
         do {
             try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: true,completionHandler: completionHandler)
@@ -31,8 +31,8 @@ public final class AkuminaLib {
             throw MSALException.TokenFailedException(error: error)
         }
     }
-    public func signOut(parentViewController: UIViewController){
-        MSALUtils.instance.signOut()
+    public func signOut(completionHandler: @escaping (MSALSignoutResponse) -> Void){
+        MSALUtils.instance.signOut(completionHandler: completionHandler)
     }
     public func getToken(type: TokenType) throws -> String  {
         
