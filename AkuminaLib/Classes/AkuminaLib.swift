@@ -3,7 +3,9 @@ import Foundation
 
 public final class AkuminaLib {
     
-    public init() {
+    public static let instance = AkuminaLib();
+    
+    private init() {
         //        let config: RollbarConfiguration = RollbarConfiguration()
         //                    config.environment = "production"
         //        Rollbar.initWithAccessToken(Constants.ROLLBAR_TOKEN, configuration: config)
@@ -20,6 +22,14 @@ public final class AkuminaLib {
     public func authenticateWithMSALAndMAM(parentViewController: UIViewController, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void) throws {
         do {
             try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: true,completionHandler: completionHandler)
+        }catch {
+            throw MSALException.TokenFailedException(error: error)
+        }
+    }
+    
+    public func refreshToken() throws {
+        do {
+            try MSALUtils.instance.callGraphAPI();
         }catch {
             throw MSALException.TokenFailedException(error: error)
         }

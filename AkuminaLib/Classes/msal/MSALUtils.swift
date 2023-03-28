@@ -8,7 +8,6 @@
 import Foundation
 import MSAL
 import IntuneMAMSwift
-//import Rollbar
 
 class MSALUtils {
     
@@ -55,7 +54,7 @@ class MSALUtils {
     private func updateCurrentAccount(account: MSALAccount?) {
         self.currentAccount = account
     }
-    private func callGraphAPI() throws {
+    public func callGraphAPI() throws {
         
         self.loadCurrentAccount { [self] (account) in
             

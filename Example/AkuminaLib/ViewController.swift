@@ -11,7 +11,7 @@ import AkuminaLib
 
 class ViewController: UIViewController {
 
-    let akuminaLib : AkuminaLib = AkuminaLib();
+    let akuminaLib : AkuminaLib = AkuminaLib.instance;
     
     @IBOutlet weak var contineButton: UIButton!
     
