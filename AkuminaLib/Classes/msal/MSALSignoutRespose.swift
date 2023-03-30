@@ -9,7 +9,7 @@ import Foundation
 
 public struct MSALSignoutResponse {
     
-    var error: Error?
+    public var error: Error?
     
     init(error: Error?) {
         self.error = error
