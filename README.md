@@ -1,4 +1,4 @@
-# AkuminaLib
+# AkuminaAuthiOSLib
 
 [![CI Status](https://img.shields.io/travis/anbu77raj@gmail.com/AkuminaLib.svg?style=flat)](https://travis-ci.org/anbu77raj@gmail.com/AkuminaLib)
 [![Version](https://img.shields.io/cocoapods/v/AkuminaLib.svg?style=flat)](https://cocoapods.org/pods/AkuminaLib)
@@ -17,13 +17,13 @@ AkuminaLib is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'AkuminaLib'
+pod 'AkuminaAuthiOSLib'
 ```
 
 ## Author
 
-anbu77raj@gmail.com, anbu77raj@gmail.com
+  Akumina
 
 ## License
 
-AkuminaLib is available under the MIT license. See the LICENSE file for more info.
+AkuminaAuthiOSLib is available under the MIT license. See the LICENSE file for more info.
