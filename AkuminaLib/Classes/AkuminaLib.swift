@@ -97,6 +97,7 @@ public final class AkuminaLib {
         }
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(token, forHTTPHeaderField: "x-akumina-auth-id")
+        request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
         
         return request
     }
