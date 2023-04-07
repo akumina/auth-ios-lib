@@ -67,19 +67,22 @@ public final class AkuminaLib {
         }
     }
     
-    public func callAkuminaAPI(endPoint: String, method: String, completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void ) throws {
+    public func callAkuminaAPI(endPoint: String, method: String, query:
+                               Dictionary<String,String>? , completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void ) throws {
         
-        let request = try createURLRequest(endPoint: endPoint, method: method, payLoad: nil);
+        let request = try createURLRequest(endPoint: endPoint, method: method, payLoad: nil,query: query);
         URLSession.shared.dataTask(with: request, completionHandler: completionHandler);
     }
     
-    public func callAkuminaAPI(endPoint: String, method: String, payLoad: Data? , completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void ) throws {
+    public func callAkuminaAPI(endPoint: String, method: String, query:
+                               Dictionary<String,String>, payLoad: Data? , completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void ) throws {
         
-        let request = try createURLRequest(endPoint: endPoint, method: method, payLoad: payLoad);
+        let request = try createURLRequest(endPoint: endPoint, method: method, payLoad: payLoad, query: query);
         URLSession.shared.dataTask(with: request, completionHandler: completionHandler);
     }
     
-    private func createURLRequest(endPoint: String, method: String, payLoad: Data?) throws  -> URLRequest {
+    private func createURLRequest(endPoint: String, method: String, payLoad: Data? , query:
+                                  Dictionary<String,String>?) throws  -> URLRequest {
         
         let appAccount = AppSettings.getAccount();
         
@@ -89,7 +92,13 @@ public final class AkuminaLib {
             throw TokenError.tokenNotFoundError
         }
         
-        var request = URLRequest(url: URL(string: endPoint)!);
+        var request : URLRequest;
+        
+        if( query == nil) {
+           request =  URLRequest(url: URL(string: endPoint)!);
+        }else {
+            request = URLRequest(url: URL(string: queryItems(dictionary: query!, url: endPoint))!);
+        }
         
         request.httpMethod = method;
         if(payLoad != nil) {
@@ -100,6 +109,15 @@ public final class AkuminaLib {
         request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
         
         return request
+    }
+    
+    func queryItems(dictionary: Dictionary<String,String>, url: String ) -> String {
+        var components = URLComponents(string: url);
+        print(components?.url! as Any)
+        components?.queryItems = dictionary.map {
+            URLQueryItem(name: $0, value: String(describing: $1))
+        }
+        return (components?.url?.absoluteString)!
     }
 }
 
