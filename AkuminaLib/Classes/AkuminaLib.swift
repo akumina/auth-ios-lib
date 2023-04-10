@@ -67,28 +67,48 @@ public final class AkuminaLib {
         }
     }
     
-    public func callAkuminaAPI(endPoint: String, method: String, query:
-                               Dictionary<String,String>? , completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void ) throws {
+    public func callAkuminaAPI(endPoint: String, method: String, accessToken: String?, query:
+                               Dictionary<String,String>? , completionHandler: @escaping (_ success: Bool, _ data: Data?) -> Void) throws {
         
-        let request = try createURLRequest(endPoint: endPoint, method: method, payLoad: nil,query: query);
-        URLSession.shared.dataTask(with: request, completionHandler: completionHandler);
+        let request = try createURLRequest(endPoint: endPoint, method: method, accessToken: accessToken, payLoad: nil,query: query);
+       
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+              if let data = data {
+                 // Success, call the completion handler with the data
+                  completionHandler(true, data)
+              } else {
+                 // Failure, call the completion handler with nil data
+                  completionHandler(false, nil)
+              }
+           }
+        task.resume()
     }
     
-    public func callAkuminaAPI(endPoint: String, method: String, query:
-                               Dictionary<String,String>, payLoad: Data? , completionHandler: @escaping @Sendable (Data?, URLResponse?, Error?) -> Void ) throws {
+    public func callAkuminaAPI(endPoint: String, method: String,accessToken: String?, query:
+                               Dictionary<String,String>, payLoad: Data? , completionHandler: @escaping (_ success: Bool, _ data: Data?) -> Void ) throws {
         
-        let request = try createURLRequest(endPoint: endPoint, method: method, payLoad: payLoad, query: query);
-        URLSession.shared.dataTask(with: request, completionHandler: completionHandler);
+        let request = try createURLRequest(endPoint: endPoint, method: method,accessToken: accessToken, payLoad: payLoad, query: query);
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+              if let data = data {
+                 // Success, call the completion handler with the data
+                  completionHandler(true, data)
+              } else {
+                 // Failure, call the completion handler with nil data
+                  completionHandler(false, nil)
+              }
+           }
+           task.resume()
     }
     
-    private func createURLRequest(endPoint: String, method: String, payLoad: Data? , query:
+    private func createURLRequest(endPoint: String, method: String, accessToken: String?, payLoad: Data? , query:
                                   Dictionary<String,String>?) throws  -> URLRequest {
         
         let appAccount = AppSettings.getAccount();
-        
+
         let existingToken = String(appAccount.accessToken ??  "");
         
-        guard let token = appAccount.accessToken else {
+        if  accessToken == nil {
             throw TokenError.tokenNotFoundError
         }
         
@@ -105,8 +125,8 @@ public final class AkuminaLib {
             request.httpBody = payLoad;
         }
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(token, forHTTPHeaderField: "x-akumina-auth-id")
-        request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
+        request.setValue(appAccount.accessToken, forHTTPHeaderField: "x-akumina-auth-id")
+        request.setValue("Bearer " + accessToken!, forHTTPHeaderField: "Authorization")
         
         return request
     }
