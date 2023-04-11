@@ -2356,7 +2356,6 @@
 		E55BC5E122DB588AE13EF408780027C0 /* MSIDSSOExtensionSignoutController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSIDSSOExtensionSignoutController.h; path = MSAL/IdentityCore/IdentityCore/src/controllers/broker/MSIDSSOExtensionSignoutController.h; sourceTree = "<group>"; };
 		E598AC5D0683BE77A2A63231FAED6990 /* MSIDAADAuthorizationCodeGrantRequest.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MSIDAADAuthorizationCodeGrantRequest.m; path = MSAL/IdentityCore/IdentityCore/src/network/request/MSIDAADAuthorizationCodeGrantRequest.m; sourceTree = "<group>"; };
 		E59B64675E057EF2438BDEE6A27996F9 /* RollbarDeploysProtocol.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = RollbarDeploysProtocol.h; path = Rollbar/Abstraction_Deploys/RollbarDeploysProtocol.h; sourceTree = "<group>"; };
-		E5B95B3B99BCD724817CF5772F160599 /* AkuminaLib.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; path = AkuminaLib.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		E5E183C644CA17F89A5BDB6B5DF17FDB /* MSIDSafariViewController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSIDSafariViewController.h; path = MSAL/IdentityCore/IdentityCore/src/webview/systemWebview/ios/MSIDSafariViewController.h; sourceTree = "<group>"; };
 		E5F091906088A231EF78EBCFE5E8C5C1 /* KSCrashInstallation.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = KSCrashInstallation.m; path = KSCrash/Source/KSCrash/Installations/KSCrashInstallation.m; sourceTree = "<group>"; };
 		E60C7DC5F6636CC01ADB2DC8B17EA1C7 /* MSIDAssymetricKeyKeychainGenerator.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MSIDAssymetricKeyKeychainGenerator.h; path = MSAL/IdentityCore/IdentityCore/src/cache/crypto/MSIDAssymetricKeyKeychainGenerator.h; sourceTree = "<group>"; };
@@ -3836,7 +3835,6 @@
 			isa = PBXGroup;
 			children = (
 				0464F64329CEF0A400DF9AA6 /* AkuminaAuthiOSLib.podspec */,
-				E5B95B3B99BCD724817CF5772F160599 /* AkuminaLib.podspec */,
 				076CD1E00673C49810D33D1418005E81 /* LICENSE */,
 				84E3EC3CF567DCDB4861953E9AF34702 /* README.md */,
 			);
