@@ -68,34 +68,34 @@ public final class AkuminaLib {
     }
     
     public func callAkuminaAPI(endPoint: String, method: String, accessToken: String?, query:
-                               Dictionary<String,String>? , completionHandler: @escaping (_ success: Bool, _ data: Data?) -> Void) throws {
+                               Dictionary<String,String>? , completionHandler: @escaping (_ success: Bool, _ data: Data?, _ error: Error?) -> Void) throws {
         
         let request = try createURLRequest(endPoint: endPoint, method: method, accessToken: accessToken, payLoad: nil,query: query);
        
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
               if let data = data {
                  // Success, call the completion handler with the data
-                  completionHandler(true, data)
+                  completionHandler(true, data, nil)
               } else {
                  // Failure, call the completion handler with nil data
-                  completionHandler(false, nil)
+                  completionHandler(false, data, error)
               }
            }
         task.resume()
     }
     
     public func callAkuminaAPI(endPoint: String, method: String,accessToken: String?, query:
-                               Dictionary<String,String>, payLoad: Data? , completionHandler: @escaping (_ success: Bool, _ data: Data?) -> Void ) throws {
+                               Dictionary<String,String>, payLoad: Data? , completionHandler: @escaping (_ success: Bool, _ data: Data? , _ error: Error?) -> Void ) throws {
         
         let request = try createURLRequest(endPoint: endPoint, method: method,accessToken: accessToken, payLoad: payLoad, query: query);
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
               if let data = data {
                  // Success, call the completion handler with the data
-                  completionHandler(true, data)
+                  completionHandler(true, data, nil)
               } else {
                  // Failure, call the completion handler with nil data
-                  completionHandler(false, nil)
+                  completionHandler(false, nil, error)
               }
            }
            task.resume()
