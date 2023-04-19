@@ -74,6 +74,7 @@ class MSALUtils {
             case .error(let error):
                 let errorMsg = "Unable to acquire MSAL token \(error)"
                 self.updateLogging(text: errorMsg, error: true)
+                self.completionHandler(MSALResponse(token: "", error: TokenError.customError(errorMsg)))
             }
         }
     }

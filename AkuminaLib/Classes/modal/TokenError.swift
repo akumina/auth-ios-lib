@@ -10,4 +10,5 @@ import Foundation
 enum TokenError: Error {
     case tokenNotGeneratedError
     case tokenNotFoundError
+    case customError(String)
 }
