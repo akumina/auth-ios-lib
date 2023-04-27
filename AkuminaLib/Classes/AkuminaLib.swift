@@ -19,8 +19,9 @@ public final class AkuminaLib {
         
 //        Constants.ROLL_BAR = true;
 //    }
-    public func authenticateWithMSALAndMAM(parentViewController: UIViewController, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void) throws {
+    public func authenticateWithMSALAndMAM(parentViewController: UIViewController, clientDetails: ClientDetails, enableRollbar: Bool, completionHandler: @escaping (MSALResponse) -> Void) throws {
         do {
+            Constants.ROLL_BAR = enableRollbar;
             try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: true,completionHandler: completionHandler)
         }catch {
             throw MSALException.TokenFailedException(error: error)
@@ -34,8 +35,9 @@ public final class AkuminaLib {
             throw MSALException.TokenFailedException(error: error)
         }
     }
-    public func authenticateWithMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void) throws {
+    public func authenticateWithMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, enableRollbar: Bool, completionHandler: @escaping (MSALResponse) -> Void) throws {
         do {
+            Constants.ROLL_BAR = enableRollbar;
             try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: false,completionHandler: completionHandler)
         }catch {
             throw MSALException.TokenFailedException(error: error)

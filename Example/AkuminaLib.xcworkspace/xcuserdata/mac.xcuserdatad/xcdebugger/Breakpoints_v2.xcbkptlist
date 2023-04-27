@@ -62,8 +62,8 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "38"
-            endingLineNumber = "38"
+            startingLineNumber = "42"
+            endingLineNumber = "42"
             landmarkName = "initMSAL(parentViewController:clientDetails:withIntune:completionHandler:)"
             landmarkType = "7">
             <Locations>
@@ -110,9 +110,9 @@
             filePath = "../AkuminaLib/Classes/AkuminaLib.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "24"
-            endingLineNumber = "24"
-            landmarkName = "authenticateWithMSALAndMAM(parentViewController:clientDetails:completionHandler:)"
+            startingLineNumber = "25"
+            endingLineNumber = "25"
+            landmarkName = "authenticateWithMSALAndMAM(parentViewController:clientDetails:enableRollbar:completionHandler:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -142,8 +142,8 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "58"
-            endingLineNumber = "58"
+            startingLineNumber = "62"
+            endingLineNumber = "62"
             landmarkName = "callGraphAPI()"
             landmarkType = "7">
             <Locations>
@@ -205,9 +205,9 @@
             filePath = "../AkuminaLib/Classes/AkuminaLib.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "26"
-            endingLineNumber = "26"
-            landmarkName = "authenticateWithMSALAndMAM(parentViewController:clientDetails:completionHandler:)"
+            startingLineNumber = "27"
+            endingLineNumber = "27"
+            landmarkName = "authenticateWithMSALAndMAM(parentViewController:clientDetails:enableRollbar:completionHandler:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -221,8 +221,8 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "48"
-            endingLineNumber = "48"
+            startingLineNumber = "52"
+            endingLineNumber = "52"
             landmarkName = "initMSAL(parentViewController:clientDetails:withIntune:completionHandler:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -237,8 +237,8 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "157"
-            endingLineNumber = "157"
+            startingLineNumber = "161"
+            endingLineNumber = "161"
             landmarkName = "loadCurrentAccount(completion:)"
             landmarkType = "7">
             <Locations>
@@ -316,8 +316,8 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "344"
-            endingLineNumber = "344"
+            startingLineNumber = "348"
+            endingLineNumber = "348"
             landmarkName = "saveToken(json:appAccount:)"
             landmarkType = "7">
          </BreakpointContent>

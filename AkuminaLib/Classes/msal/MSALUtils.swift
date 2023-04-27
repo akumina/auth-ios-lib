@@ -8,6 +8,7 @@
 import Foundation
 import MSAL
 import IntuneMAMSwift
+import Rollbar
 
 class MSALUtils {
     
@@ -27,10 +28,13 @@ class MSALUtils {
     
     var completionHandler: (MSALResponse) -> Void  = {_ in MSALResponse()}
     
+    let dateFormatter = DateFormatter();
+    
     typealias AccountCompletion = (MSALAccount?) -> Void
     
     private init(){
         clientDetails = ClientDetails();
+        dateFormatter.dateFormat = "dd MMM yyyy HH:mm:ss Z"
     }
     
     public func initMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, withIntune: Bool, completionHandler: @escaping (MSALResponse) -> Void ) throws {
@@ -191,8 +195,7 @@ class MSALUtils {
         params.add(key: "id_token", value: result.idToken!);
         params.add(key: "access_token", value: result.accessToken)
         Constants.GRAPH_TOKEN = result.accessToken;
-        var date: Date? = result.expiresOn;
-        params.add(key: "expires_on", value: String(date!.timeIntervalSince1970 / 1000));
+        params.add(key: "expires_on", value: dateFormatter.string(from: result.expiresOn));
         scope = firstScope.replacingOccurrences(of: "/.default", with: "");
         
         params.add(key: "scope", value: scope);
@@ -220,9 +223,9 @@ class MSALUtils {
     func updateLogging(text : String, error: Bool) {
         if(Constants.ROLL_BAR) {
             if(error) {
-//                Rollbar.error(text)
+                Rollbar.error(text)
             }else {
-//                Rollbar.info(text)
+                Rollbar.info(text)
             }
         }
         if Thread.isMainThread {
@@ -282,8 +285,8 @@ class MSALUtils {
         params.add(key: "id_token", value: result.idToken!);
         params.add(key:"access_token",value: result.accessToken);
         Constants.SHAREPOINT_TOKEN = result.accessToken
-        var date: Date? = result.expiresOn;
-        params.add(key: "expires_on", value: String(date!.timeIntervalSince1970 / 1000));
+        var date  = result.expiresOn;
+        params.add(key: "expires_on", value: dateFormatter.string(from: result.expiresOn));
         let firstScope: String = clientDetails.sharePointURL;
         var scope = firstScope.replacingOccurrences(of: ".default", with: "");
         scope = firstScope.replacingOccurrences(of: "/.default", with: "");
@@ -301,7 +304,8 @@ class MSALUtils {
             return
         }
         let JSONString = String(data: jsonData, encoding: String.Encoding.ascii)!
-        print(JSONString);
+        
+        updateLogging(text: JSONString, error: false);
         
         let appAccount = AppSettings.getAccount();
         
@@ -313,9 +317,9 @@ class MSALUtils {
         request.httpMethod = "POST";
         request.httpBody = postData;
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        if(existingToken != "") {
+//        if(existingToken != "") {
             request.setValue(existingToken, forHTTPHeaderField: "x-akumina-auth-id");
-        }
+//        }
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard error == nil else {
                 let errMsg = "Error: error calling POST " + self.clientDetails.appManagerURL.description;
