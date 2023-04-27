@@ -62,9 +62,9 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "42"
-            endingLineNumber = "42"
-            landmarkName = "initMSAL(parentViewController:clientDetails:withIntune:completionHandler:)"
+            startingLineNumber = "43"
+            endingLineNumber = "43"
+            landmarkName = "initMSAL(parentViewController:clientDetails:withIntune:completionHandler:loggingHandler:)"
             landmarkType = "7">
             <Locations>
                <Location
@@ -110,9 +110,9 @@
             filePath = "../AkuminaLib/Classes/AkuminaLib.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "25"
-            endingLineNumber = "25"
-            landmarkName = "authenticateWithMSALAndMAM(parentViewController:clientDetails:enableRollbar:completionHandler:)"
+            startingLineNumber = "24"
+            endingLineNumber = "24"
+            landmarkName = "authenticateWithMSALAndMAM(parentViewController:clientDetails:completionHandler:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -142,8 +142,8 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "62"
-            endingLineNumber = "62"
+            startingLineNumber = "63"
+            endingLineNumber = "63"
             landmarkName = "callGraphAPI()"
             landmarkType = "7">
             <Locations>
@@ -205,9 +205,9 @@
             filePath = "../AkuminaLib/Classes/AkuminaLib.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "27"
-            endingLineNumber = "27"
-            landmarkName = "authenticateWithMSALAndMAM(parentViewController:clientDetails:enableRollbar:completionHandler:)"
+            startingLineNumber = "26"
+            endingLineNumber = "26"
+            landmarkName = "authenticateWithMSALAndMAM(parentViewController:clientDetails:completionHandler:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -221,9 +221,9 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "52"
-            endingLineNumber = "52"
-            landmarkName = "initMSAL(parentViewController:clientDetails:withIntune:completionHandler:)"
+            startingLineNumber = "53"
+            endingLineNumber = "53"
+            landmarkName = "initMSAL(parentViewController:clientDetails:withIntune:completionHandler:loggingHandler:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -237,8 +237,8 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "161"
-            endingLineNumber = "161"
+            startingLineNumber = "162"
+            endingLineNumber = "162"
             landmarkName = "loadCurrentAccount(completion:)"
             landmarkType = "7">
             <Locations>
@@ -316,9 +316,9 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "349"
-            endingLineNumber = "349"
-            landmarkName = "saveToken(json:appAccount:)"
+            startingLineNumber = "344"
+            endingLineNumber = "344"
+            landmarkName = "callAkuminaPreAuth()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
