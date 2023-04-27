@@ -19,9 +19,9 @@ public final class AkuminaLib {
         
 //        Constants.ROLL_BAR = true;
 //    }
-    public func authenticateWithMSALAndMAM(parentViewController: UIViewController, clientDetails: ClientDetails,completionHandler: @escaping (MSALResponse) -> Void) throws {
+    public func authenticateWithMSALAndMAM(parentViewController: UIViewController, clientDetails: ClientDetails,completionHandler: @escaping (MSALResponse) -> Void, loggingHandler: @escaping (String, Bool) -> Void) throws {
         do {
-            try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: true,completionHandler: completionHandler)
+            try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: true,completionHandler: completionHandler, loggingHandler: loggingHandler)
         }catch {
             throw MSALException.TokenFailedException(error: error)
         }
@@ -34,9 +34,9 @@ public final class AkuminaLib {
             throw MSALException.TokenFailedException(error: error)
         }
     }
-    public func authenticateWithMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void) throws {
+    public func authenticateWithMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void, loggingHandler: @escaping (String, Bool) -> Void) throws {
         do {
-            try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: false,completionHandler: completionHandler)
+            try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: false,completionHandler: completionHandler, loggingHandler: loggingHandler)
         }catch {
             throw MSALException.TokenFailedException(error: error)
         }
