@@ -291,6 +291,7 @@ class MSALUtils {
         self.callAkuminaPreAuth();
     }
     
+    
     func callAkuminaPreAuth () {
         
         guard let jsonData = try? JSONSerialization.data(withJSONObject: self.postParamenters, options: []) else
@@ -305,20 +306,24 @@ class MSALUtils {
         
         let appAccount = AppSettings.getAccount();
         
-        let existingToken = String(appAccount.accessToken ??  "");
-        
         let postData = JSONString.data(using: .utf8)
         
         var request = URLRequest(url: clientDetails.appManagerURL);
         request.httpMethod = "POST";
         request.httpBody = postData;
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//        if(existingToken != "") {
-            request.setValue(existingToken, forHTTPHeaderField: "x-akumina-auth-id");
-//        }
+        if (appAccount.accessToken != "") {
+            if(appAccount.oldToken != "") {
+                if(appAccount.oldToken != appAccount.accessToken) {
+                    request.setValue(appAccount.oldToken, forHTTPHeaderField: "x-akumina-auth-id");
+                    self.loggingHandler("App Manager URL called with x-akumina-auth-id " + (appAccount.oldToken ?? "Empty Header"), false);
+                }
+            }
+        }
+        
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard error == nil else {
-                let errMsg = "Error: error calling POST " + self.clientDetails.appManagerURL.description;
+                let errMsg = "error calling POST " + self.clientDetails.appManagerURL.description + "\(String(describing: error))";
                 self.updateLogging(text: "Error: " + errMsg, error: true)
                 self.completionHandler(MSALResponse(token: "", error: MSALException.HTTPError(msg: errMsg)))
                 return
@@ -341,9 +346,10 @@ class MSALUtils {
     }
     
     func saveToken(json: Dictionary<String, AnyObject>, appAccount: AppAccount) {
-        let token = json["Data"]
+        let token = (json["Data"] as! String)
         var acc = AppSettings.getAccount();
-        acc.accessToken = (token as! String);
+        acc.oldToken = acc.accessToken;
+        acc.accessToken = token;
         AppSettings.saveAccount(account: acc);
         self.completionHandler(MSALResponse(token: acc.accessToken ?? ""));
     }

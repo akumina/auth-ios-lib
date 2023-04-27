@@ -25,6 +25,8 @@ public struct AppAccount : Codable {
     
     public var uuid : String? = nil;
     
+    public var oldToken: String? = nil;
+    
     init(mUPN: String, mAADID: String, mTenantID: String, mAuthority: String) {
         self.mUPN = mUPN
         self.mAADID = mAADID
@@ -52,5 +54,6 @@ public struct AppAccount : Codable {
         accessToken = try container.decodeIfPresent(String.self, forKey: .accessToken) ?? ""
         pushToken = try container.decodeIfPresent(String.self, forKey: .pushToken) ?? ""
         workMail = try container.decodeIfPresent(String.self, forKey: .workMail) ?? ""
+        oldToken = try container.decodeIfPresent(String.self, forKey: .oldToken) ?? ""
     }
 }
