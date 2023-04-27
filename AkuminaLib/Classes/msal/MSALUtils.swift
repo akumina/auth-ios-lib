@@ -195,7 +195,7 @@ class MSALUtils {
         params.add(key: "id_token", value: result.idToken!);
         params.add(key: "access_token", value: result.accessToken)
         Constants.GRAPH_TOKEN = result.accessToken;
-        params.add(key: "expires_on", value: dateFormatter.string(from: result.expiresOn));
+        params.add(key: "expires_on", value: dateFormatter.string(from: result.expiresOn ));
         scope = firstScope.replacingOccurrences(of: "/.default", with: "");
         
         params.add(key: "scope", value: scope);

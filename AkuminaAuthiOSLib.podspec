@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AkuminaAuthiOSLib'
-  s.version          = '0.1.30'
+  s.version          = '0.1.31'
   s.summary          = 'iOS Auth Library for Akumina App'
 
 # This description is used to generate tags and improve search results.
@@ -29,7 +29,7 @@ TODO: Add long description of the pod here.
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '14.0'
-  s.swift_version = "5.7.3"
+  s.swift_version = "5.8"
   s.source_files = '**/Classes/**/*.{h,m,swift}'
   s.resource = 'ms-intune-app-sdk-ios/IntuneMAMResources.bundle'
   # s.resource_bundles = {
@@ -39,6 +39,7 @@ TODO: Add long description of the pod here.
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
    s.dependency 'MSAL'
+   s.dependency 'Rollbar'
  # s.dependency 'Schedule'
    s.vendored_frameworks = 'ms-intune-app-sdk-ios/IntuneMAMSwift.xcframework', 'ms-intune-app-sdk-ios/IntuneMAMSwiftStub.xcframework'
 end
