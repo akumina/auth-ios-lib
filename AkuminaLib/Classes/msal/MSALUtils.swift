@@ -195,7 +195,8 @@ class MSALUtils {
         params.add(key: "id_token", value: result.idToken!);
         params.add(key: "access_token", value: result.accessToken)
         Constants.GRAPH_TOKEN = result.accessToken;
-        params.add(key: "expires_on", value: dateFormatter.string(from: result.expiresOn ));
+        let date:  Date? =  result.expiresOn;
+        params.add(key: "expires_on", value: dateFormatter.string(from: date ?? Date() ));
         scope = firstScope.replacingOccurrences(of: "/.default", with: "");
         
         params.add(key: "scope", value: scope);
@@ -285,8 +286,8 @@ class MSALUtils {
         params.add(key: "id_token", value: result.idToken!);
         params.add(key:"access_token",value: result.accessToken);
         Constants.SHAREPOINT_TOKEN = result.accessToken
-        var date  = result.expiresOn;
-        params.add(key: "expires_on", value: dateFormatter.string(from: result.expiresOn));
+        let date:  Date? =  result.expiresOn;
+        params.add(key: "expires_on", value: dateFormatter.string(from: date ?? Date() ));
         let firstScope: String = clientDetails.sharePointURL;
         var scope = firstScope.replacingOccurrences(of: ".default", with: "");
         scope = firstScope.replacingOccurrences(of: "/.default", with: "");
