@@ -20,9 +20,14 @@ pod 'AkuminaAuthiOSLib'
 
 ## Usage example
 
-    ** import AkuminaAuthiOSLib
+    **import AkuminaAuthiOSLib**
     
-    Create Client details 
+    **Create Client details **
+    let clientDetails = ClientDetails(authority:,clientId:,redirectUri:,scopes: ,sharePointScope: appManagerURL: tenantId: )    
+    
+   ** Sign-in with MSAL** 
+    
+    AkuminaLib.
         
 ## License
 
