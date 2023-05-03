@@ -20,9 +20,9 @@ pod 'AkuminaAuthiOSLib'
 
 ## Usage example
 
-    __import AkuminaAuthiOSLib__
+   import AkuminaAuthiOSLib
     
-    ### Sign-in MSAL with MSAL 
+   ### Sign-in MSAL with MSAL 
     
      do {
             let clientDetails : ClientDetails =  try ClientDetails(authority: , clientId: , redirectUri: , scopes: , sharePointScope: , appManagerURL: , tenantId: )
@@ -44,7 +44,41 @@ pod 'AkuminaAuthiOSLib'
         }catch{
             // Handle exception here
         }
+   ### Sign-in MSAL only
+           
+       do {
+            let clientDetails : ClientDetails =  try ClientDetails(authority: , clientId: , redirectUri: , scopes: , sharePointScope: , appManagerURL: , tenantId: )
+                
+            try AkuminaLib.instance.authenticateWithMSAL(parentViewController: self, clientDetails: clientDetails, completionHandler: { result in
+                if (result.error != nil) {
+                    // Handle MSAL or MAM Error 
+                }else {
+                    // Check for the token in result. 
+                        
+                }
+            }, loggingHandler: { message, error in
+                if(error) {
+                    // Handle Error messge
+                }else {
+                    // Handle Info message 
+                }
+            })
+        }catch{
+            // Handle exception here
+        }
+   ### After sign-in to get token 
         
+        do {
+            try let token = AkuminaLib.instance.getToken(type: TokenType);
+            // TokenType are 
+                TokenType.ACCESS --  To get Akumina Token 
+                TokenType.GRAPH --  To get Graph token 
+                TokenType.SHAREPOINT -- To get sharepoint token 
+        }catch{
+            // Handle exception here. 
+        }
+   
+   
 ## License
 
 AkuminaAuthiOSLib is available under the MIT license. See the LICENSE file for more info.
