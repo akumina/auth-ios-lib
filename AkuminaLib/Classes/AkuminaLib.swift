@@ -35,6 +35,7 @@ public final class AkuminaLib {
         }
     }
     public func authenticateWithMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void, loggingHandler: @escaping (String, Bool) -> Void) throws {
+        
         do {
             try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: false,completionHandler: completionHandler, loggingHandler: loggingHandler)
         }catch {
@@ -125,7 +126,7 @@ public final class AkuminaLib {
             request.httpBody = payLoad;
         }
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue(appAccount.accessToken, forHTTPHeaderField: "x-akumina-auth-id")
+//        request.setValue(appAccount.accessToken, forHTTPHeaderField: "x-akumina-auth-id")
         request.setValue("Bearer " + accessToken!, forHTTPHeaderField: "Authorization")
         
         return request

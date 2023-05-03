@@ -21,9 +21,15 @@ pod 'AkuminaAuthiOSLib'
 ```
 
 ## Author
+    Akumina
 
-  Akumina
+## Usage example
 
+    ** import AkuminaAuthiOSLib
+    
+    Create Client details 
+        
 ## License
 
 AkuminaAuthiOSLib is available under the MIT license. See the LICENSE file for more info.
+
