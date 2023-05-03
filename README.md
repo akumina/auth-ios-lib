@@ -77,7 +77,14 @@ pod 'AkuminaAuthiOSLib'
         }catch{
             // Handle exception here. 
         }
-   
+   ### To call Akumina REST API 
+   #### To call REST API with out Payload 
+          do {
+                Akumina.instance.callAkuminaAPI(endPoint: String, method: String,accessToken: String?, query:
+                               Dictionary<String,String>, payLoad: Data? , completionHandler: @escaping (_ success: Bool, _ data: Data? , _ error: Error?) -> Void )
+          }catch{
+                // Handle exception 
+          }
    
 ## License
 
