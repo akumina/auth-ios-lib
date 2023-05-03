@@ -20,14 +20,28 @@ pod 'AkuminaAuthiOSLib'
 
 ## Usage example
 
-    **import AkuminaAuthiOSLib**
+    __import AkuminaAuthiOSLib__
     
-    **Create Client details **
-    let clientDetails = ClientDetails(authority:,clientId:,redirectUri:,scopes: ,sharePointScope: appManagerURL: tenantId: )    
-    
-   ** Sign-in with MSAL** 
-    
-    AkuminaLib.
+     do {
+            let clientDetails : ClientDetails =  try ClientDetails(authority: , clientId: , redirectUri: , scopes: , sharePointScope: , appManagerURL: , tenantId: )
+                
+            try AkuminaLib.instance.authenticateWithMSALAndMAM(parentViewController: self, clientDetails: clientDetails, completionHandler: { result in
+                if (result.error != nil) {
+                    // Handle MSAL Error 
+                }else {
+                    // Check for the token in result. 
+                        
+                }
+            }, loggingHandler: { message, error in
+                if(error) {
+                    // Handle Error messge
+                }else {
+                    // Handle Info message 
+                }
+            })
+        }catch{
+            // Handle exception here
+        }
         
 ## License
 
