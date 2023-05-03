@@ -86,6 +86,16 @@ pod 'AkuminaAuthiOSLib'
                 // Handle exception 
           }
    
+   #### To call REST API with Payload 
+    
+     do {
+                Akumina.instance.callAkuminaAPI(endPoint: String, method: String,accessToken: String?, query:
+                               Dictionary<String,String>, payLoad: Data? , completionHandler: @escaping (_ success: Bool, _ data: Data? , _ error: Error?) -> Void)
+          }catch{
+                // Handle exception 
+          }
+   
+        
 ## License
 
 AkuminaAuthiOSLib is available under the MIT license. See the LICENSE file for more info.
