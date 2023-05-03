@@ -22,12 +22,14 @@ pod 'AkuminaAuthiOSLib'
 
     __import AkuminaAuthiOSLib__
     
+    ### Sign-in MSAL with MSAL 
+    
      do {
             let clientDetails : ClientDetails =  try ClientDetails(authority: , clientId: , redirectUri: , scopes: , sharePointScope: , appManagerURL: , tenantId: )
                 
             try AkuminaLib.instance.authenticateWithMSALAndMAM(parentViewController: self, clientDetails: clientDetails, completionHandler: { result in
                 if (result.error != nil) {
-                    // Handle MSAL Error 
+                    // Handle MSAL or MAM Error 
                 }else {
                     // Check for the token in result. 
                         
