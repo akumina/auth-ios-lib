@@ -1,0 +1,40 @@
+{
+  "name": "AkuminaLib",
+  "version": "0.1.1",
+  "summary": "iOS Library for Akumina App",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/Anbu77raj/AkuminaLib",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "anbu77raj@gmail.com": "anbu77raj@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/Anbu77raj/AkuminaLib.git",
+    "tag": "0.1.1"
+  },
+  "platforms": {
+    "ios": "14.0"
+  },
+  "swift_versions": "4.2",
+  "source_files": "**/Classes/*.{h,m,swift}",
+  "resources": "ms-intune-app-sdk-ios/IntuneMAMResources.bundle",
+  "dependencies": {
+    "MSAL": [
+
+    ],
+    "Rollbar": [
+
+    ],
+    "Schedule": [
+
+    ]
+  },
+  "vendored_frameworks": [
+    "ms-intune-app-sdk-ios/IntuneMAMSwift.xcframework",
+    "ms-intune-app-sdk-ios/IntuneMAMSwiftStub.xcframework"
+  ],
+  "swift_version": "4.2"
+}

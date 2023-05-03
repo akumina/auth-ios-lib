@@ -1,0 +1,6 @@
+framework module Pods_AkuminaLib_Tests {
+  umbrella header "Pods-AkuminaLib_Tests-umbrella.h"
+
+  export *
+  module * { export * }
+}

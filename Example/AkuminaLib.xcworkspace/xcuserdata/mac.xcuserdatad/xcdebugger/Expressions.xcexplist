@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "AkuminaLib.init():AkuminaLib.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "Constants.ROLLBAR_APP_ID">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>

@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '14.0'
+
+target 'AkuminaLib_Example' do
+  pod 'AkuminaAuthiOSLib', :path => '../'
+
+  target 'AkuminaLib_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

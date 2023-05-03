@@ -1,0 +1,33 @@
+PODS:
+  - AkuminaLib (0.1.1):
+    - MSAL
+    - Rollbar
+    - Schedule
+  - MSAL (1.1.7):
+    - MSAL/app-lib (= 1.1.7)
+  - MSAL/app-lib (1.1.7)
+  - Rollbar (1.12.14)
+  - Schedule (2.1.0)
+
+DEPENDENCIES:
+  - AkuminaLib (from `../`)
+
+SPEC REPOS:
+  trunk:
+    - MSAL
+    - Rollbar
+    - Schedule
+
+EXTERNAL SOURCES:
+  AkuminaLib:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  AkuminaLib: d433b5241e6fead2b8510b4a9aafa13aec86c713
+  MSAL: 778e3fadb1d581d6afa05fbf4c657d1b1cf8810d
+  Rollbar: 58f315609433558a82af5a54d7888bb020bec561
+  Schedule: 00e6d7bbdbdb000fd1f51a7d10e9f88a8c451fda
+
+PODFILE CHECKSUM: 4606d1e88b046c675364da5c98190fd11cb62d97
+
+COCOAPODS: 1.11.2
