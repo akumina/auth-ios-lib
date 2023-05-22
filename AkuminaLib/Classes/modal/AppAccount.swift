@@ -36,7 +36,7 @@ public struct AppAccount : Codable {
     
     public init() {
         if( uuid != nil) {
-            uuid = UUID().uuidString
+            uuid = UIDevice.current.identifierForVendor?.uuidString
         }
     }
 
@@ -44,7 +44,7 @@ public struct AppAccount : Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         uuid = try container.decodeIfPresent(String.self, forKey: .uuid) ?? ""
         if(uuid == "") {
-            uuid = UUID().uuidString
+            uuid = UIDevice.current.identifierForVendor?.uuidString
         }
         print("UUID =" + (uuid ?? ""));
         mUPN = try container.decodeIfPresent(String.self, forKey: .mUPN) ?? ""

@@ -255,7 +255,7 @@ class MSALUtils {
                 
                 guard let result = result else {
                     
-                    let errorMsg = "Could not acquire token: No result returned";
+                    let errorMsg = "Could not acquire sharepoint token: No result returned";
                     
 //                    UIUtils.showToast(controller: self.parentViewController!, message: errorMsg, seconds: 10)
                     self.completionHandler(MSALResponse(token: "", error: MSALException.NoResultFound));
@@ -297,7 +297,7 @@ class MSALUtils {
         guard let jsonData = try? JSONSerialization.data(withJSONObject: self.postParamenters, options: []) else
         {
             print("Error: Trying to convert model to JSON data")
-            self.completionHandler(MSALResponse(token: "", error: MSALException.JSONError(msg: "Error: Trying to convert model to JSON data")))
+            self.completionHandler(MSALResponse(token: "", error: MSALException.JSONError(msg: "callAkuminaPreAuth Error: Trying to convert model to JSON data")))
             return
         }
         let JSONString = String(data: jsonData, encoding: String.Encoding.ascii)!
@@ -323,20 +323,20 @@ class MSALUtils {
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard error == nil else {
-                let errMsg = "error calling POST " + self.clientDetails.appManagerURL.description + "\(String(describing: error))";
-                self.updateLogging(text: "Error: " + errMsg, error: true)
+                let errMsg = "Error calling POST " + self.clientDetails.appManagerURL.description + "\(String(describing: error))";
+                self.updateLogging(text: "callAkuminaPreAuth : " + errMsg, error: true)
                 self.completionHandler(MSALResponse(token: "", error: MSALException.HTTPError(msg: errMsg)))
                 return
             }
             guard let data = data else {
                 let errMsg = "Error: Did not receive data " + self.clientDetails.appManagerURL.description;
-                self.updateLogging(text: "Error: " + errMsg, error: true)
+                self.updateLogging(text: "callAkuminaPreAuth : " + errMsg, error: true)
                 self.completionHandler(MSALResponse(token: "", error: MSALException.HTTPError(msg: errMsg)))
                 return
             }
             guard let response = response as? HTTPURLResponse, (200 ..< 299) ~= response.statusCode else {
                 let errMsg = "Error: HTTP request failed " + response.debugDescription  + "URL " + self.clientDetails.appManagerURL.description;
-                self.updateLogging(text: "Error: " + errMsg, error: true)
+                self.updateLogging(text: "callAkuminaPreAuth :" + errMsg, error: true)
                 self.completionHandler(MSALResponse(token: "", error: MSALException.HTTPError(msg: errMsg)))
                 return
             }
