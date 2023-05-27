@@ -41,4 +41,8 @@ public class AppSettings {
             AppSettings.saveAccount(account: appAccount);
        
     }
+    
+    public static func clearAll() {
+        UserDefaults.resetStandardUserDefaults()
+    }
 }
