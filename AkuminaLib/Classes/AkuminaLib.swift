@@ -84,7 +84,9 @@ public final class AkuminaLib {
            }
         task.resume()
     }
-    
+    public func reset() {
+        AppSettings.clearAll();
+    }
     public func callAkuminaAPI(endPoint: String, method: String,accessToken: String?, query:
                                Dictionary<String,String>, payLoad: Data? , completionHandler: @escaping (_ success: Bool, _ data: Data? , _ error: Error?) -> Void ) throws {
         
