@@ -38,6 +38,7 @@ class MSALUtils {
     }
     
     public func initMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, withIntune: Bool, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void) throws {
+        self.postParamenters = [Dictionary<String, String>]();
         self.loggingHandler = loggingHandler;
         self.completionHandler = completionHandler;
         self.parentViewController = parentViewController;
