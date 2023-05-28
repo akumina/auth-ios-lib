@@ -43,6 +43,6 @@ public class AppSettings {
     }
     
     public static func clearAll() {
-        UserDefaults.setValue(nil, forKey: "appAccount");
+        UserDefaults.setValue("", forKey: "appAccount");
     }
 }
