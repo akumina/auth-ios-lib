@@ -90,6 +90,8 @@ class MSALUtils {
         
         let parameters = MSALSilentTokenParameters(scopes: clientDetails.scopes, account: account)
         
+        self.updateLogging(text: "\(String(describing: account.username)) ->> acquireTokenSilently",error:false);
+        
         parameters.forceRefresh = true;
         
         applicationContext.acquireTokenSilent(with: parameters) { (result, error) in
@@ -130,11 +132,14 @@ class MSALUtils {
     }
     
     func acquireTokenInteractively(completion: @escaping (TokenResult)  -> (Void)) {
+    
         guard let applicationContext = self.applicationContext else { return }
         guard let webViewParameters = self.webViewParamaters else { return }
         let parameters = MSALInteractiveTokenParameters(scopes: clientDetails.scopes, webviewParameters: webViewParameters)
         parameters.loginHint = AppSettings.getAccount().mUPN
         parameters.promptType = .login
+        
+        self.updateLogging(text: "\(String(describing: AppSettings.getAccount().mUPN)) ->> acquireTokenInteractively",error:false);
         
         applicationContext.acquireToken(with: parameters) { (result, error) in
             
@@ -145,12 +150,12 @@ class MSALUtils {
             
             guard let result = result else {
                 
-                completion(TokenResult.error(error: String(describing: "Could not acquire token: No result returne")))
+                completion(TokenResult.error(error: String(describing: "\(String(describing: parameters.loginHint)) Could not acquire token: No result returne")))
                 return
             }
             
             self.accessToken = result.accessToken
-            //self.updateLogging(text: "Access token is \(self.accessToken)", error:false);
+            self.updateLogging(text: "Access token is \(self.accessToken) \(String(describing: parameters.loginHint)) ", error:false);
             completion(TokenResult.success(result: result))
             
         }
@@ -214,7 +219,7 @@ class MSALUtils {
         
         AppSettings.saveAccount(account: self.mAccount!);
         if (withIntune) {
-            IntuneMAMEnrollmentManager.instance().delegate = EnrollmentDelegateClass(viewController: parentViewController!, completionHandler: self.completionHandler)
+            IntuneMAMEnrollmentManager.instance().delegate = EnrollmentDelegateClass(viewController: parentViewController!, completionHandler: self.completionHandler,loggingHandler: self.loggingHandler)
             IntuneMAMEnrollmentManager.instance().loginAndEnrollAccount(upn);
         }else {
             self.getSharePointAccessTokenAsync();

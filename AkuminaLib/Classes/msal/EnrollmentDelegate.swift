@@ -10,7 +10,8 @@ import IntuneMAMSwift
 class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
     
     var presentingViewController: UIViewController?
-    var completionHandler:  (MSALResponse) -> Void =  {_ in MSALResponse()}
+    var completionHandler: (MSALResponse) -> Void  = {_ in }
+    var loggingHandler: (String, Bool) -> Void = {_,_ in }
     override init() {
         super.init()
         self.presentingViewController = nil
@@ -21,10 +22,11 @@ class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
      
      @param viewController - the view controller this class should use when triggered
      */
-    init(viewController : UIViewController, completionHandler: @escaping (MSALResponse) -> Void){
+    init(viewController : UIViewController, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void){
         super.init()
         self.presentingViewController = viewController
         self.completionHandler = completionHandler
+        self.loggingHandler = loggingHandler
     }
     
     /*
@@ -34,22 +36,23 @@ class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
      */
     func enrollmentRequest(with status: IntuneMAMEnrollmentStatus) {
         if status.didSucceed{
-            print("Login successful")
+            self.loggingHandler("Intune Enrollment success for user \(String(describing: AppSettings.getAccount().mUPN))", false );
+            
             MSALUtils.instance.getSharePointAccessTokenAsync();
             
         } else if IntuneMAMEnrollmentStatusCode.loginCanceled != status.statusCode {
             
             if(status.statusCode == IntuneMAMEnrollmentStatusCode.alreadyEnrolled) {
                 let msg = "Application already enrolled, so proceed to get token";
-                print(msg);
+                self.loggingHandler(msg,false);
                 MSALUtils.instance.getSharePointAccessTokenAsync();
                 return
                 
             }
             var msg = "Enrollment result for identity \(status.identity) with status code \(status.statusCode)";
-            print(msg)
+            self.loggingHandler(msg,false);
             msg = "Debug message: \(String(describing: status.errorString))";
-            print(msg)
+            self.loggingHandler(msg,false);
             completionHandler(MSALResponse(token: "", error: MSALException.HTTPError(msg: msg) ))
             return
         }

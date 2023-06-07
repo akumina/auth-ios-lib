@@ -237,8 +237,8 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "163"
-            endingLineNumber = "163"
+            startingLineNumber = "168"
+            endingLineNumber = "168"
             landmarkName = "loadCurrentAccount(completion:)"
             landmarkType = "7">
             <Locations>
@@ -316,8 +316,8 @@
             filePath = "../AkuminaLib/Classes/msal/MSALUtils.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "350"
-            endingLineNumber = "350"
+            startingLineNumber = "355"
+            endingLineNumber = "355"
             landmarkName = "saveToken(json:appAccount:)"
             landmarkType = "7">
          </BreakpointContent>
