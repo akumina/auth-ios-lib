@@ -38,6 +38,7 @@ class MSALUtils {
     }
     
     public func initMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, withIntune: Bool, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void) throws {
+        self.updateLogging(text: "Sign-In started for user \(clientDetails.userId) to MAM \(withIntune)" , error: false);
         self.postParamenters = [Dictionary<String, String>]();
         self.loggingHandler = loggingHandler;
         self.completionHandler = completionHandler;
@@ -59,6 +60,7 @@ class MSALUtils {
     }
     private func updateCurrentAccount(account: MSALAccount?) {
         self.currentAccount = account
+        self.accessToken = ""
     }
     public func callGraphAPI() throws {
         
@@ -132,7 +134,7 @@ class MSALUtils {
     }
     
     func acquireTokenInteractively(completion: @escaping (TokenResult)  -> (Void)) {
-    
+        
         guard let applicationContext = self.applicationContext else { return }
         guard let webViewParameters = self.webViewParamaters else { return }
         let parameters = MSALInteractiveTokenParameters(scopes: clientDetails.scopes, webviewParameters: webViewParameters)
@@ -167,20 +169,31 @@ class MSALUtils {
         guard let applicationContext = self.applicationContext else { return }
         var appAcc: AppAccount ;
         appAcc =   AppSettings.getAccount();
-        if( appAcc.mUPN == nil || appAcc.mUPN == "") {
+        if( appAcc.mUPN == nil || appAcc.mUPN == "" ) {
+            self.updateLogging(text: "No User found in app cache", error: false);
             self.accessToken = ""
             self.updateCurrentAccount(account: nil)
             completion!(nil)
             return
+        }else {
+            if(appAcc.mUPN == clientDetails.userId) {
+                self.updateLogging(text: "Welcome back \(String(describing: appAcc.mUPN))", error: false);
+                do {
+                    let acc : MSALAccount  = try applicationContext.account(forUsername: clientDetails.userId);
+                    completion!(acc)
+                    return
+                }catch{
+                    self.updateLogging(text: "Unable to get Account from Cache \(error)", error: true)
+                    completion!(nil)
+                }
+            }else {
+                self.updateLogging(text: "Different user old user \(String(describing: appAcc.mUPN)) new user \(clientDetails.userId)", error: false);
+                AppSettings.clearAll();
+                self.updateCurrentAccount(account: nil)
+                completion!(nil);
+            }
         }
-        do {
-            let acc : MSALAccount  = try applicationContext.account(forUsername: appAcc.mUPN!);
-            completion!(acc)
-            return
-        }catch{
-            self.updateLogging(text: "Unable to get Account from Cache \(error)", error: true)
-            completion!(nil)
-        }
+        
     }
     
     func getContentWithToken(result: MSALResult) {
@@ -253,7 +266,7 @@ class MSALUtils {
                 if let error = error {
                     let errorMsg = "Could not acquire sharepoint token silently: \(error)";
                     
-//                    UIUtils.showToast(controller: self.parentViewController!, message: errorMsg, seconds: 10)
+                    //                    UIUtils.showToast(controller: self.parentViewController!, message: errorMsg, seconds: 10)
                     self.completionHandler(MSALResponse(token: "", error: error));
                     self.updateLogging(text: errorMsg,error:true)
                     return
@@ -263,11 +276,12 @@ class MSALUtils {
                     
                     let errorMsg = "Could not acquire sharepoint token: No result returned";
                     
-//                    UIUtils.showToast(controller: self.parentViewController!, message: errorMsg, seconds: 10)
+                    //                    UIUtils.showToast(controller: self.parentViewController!, message: errorMsg, seconds: 10)
                     self.completionHandler(MSALResponse(token: "", error: MSALException.NoResultFound));
                     self.updateLogging(text: errorMsg,error:true)
                     return
                 }
+                self.updateLogging(text: "Got Sharepoint result \(result.accessToken)", error: false);
                 
                 self.getAkuminaToken(result: result);
             }
@@ -315,6 +329,8 @@ class MSALUtils {
         let postData = JSONString.data(using: .utf8)
         
         var request = URLRequest(url: clientDetails.appManagerURL);
+        
+        self.updateLogging(text: "Executing App Manager URL  \(clientDetails.appManagerURL)", error: false);
         request.httpMethod = "POST";
         request.httpBody = postData;
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -354,6 +370,7 @@ class MSALUtils {
     func saveToken(json: Dictionary<String, AnyObject>, appAccount: AppAccount) {
         let token = (json["Data"] as! String)
         var acc = AppSettings.getAccount();
+        updateLogging(text: "Got Akumina Token for user \(clientDetails.userId) Token \(token)", error: false);
         acc.oldToken = acc.accessToken;
         acc.accessToken = token;
         AppSettings.saveAccount(account: acc);
@@ -361,24 +378,24 @@ class MSALUtils {
     }
     
     func signOut(completionHandler: @escaping (MSALSignoutResponse) -> Void ) {
-            guard let applicationContext = self.applicationContext else { return }
-            guard let account = self.currentAccount else { return }
-            self.initWebViewParams();
-            let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParamaters!);
+        guard let applicationContext = self.applicationContext else { return }
+        guard let account = self.currentAccount else { return }
+        self.initWebViewParams();
+        let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParamaters!);
         applicationContext.signout(with: account, signoutParameters: signoutParameters) { success, error in
             completionHandler(MSALSignoutResponse(error: error))
         }
-//            applicationContext.signout(with: account, signoutParameters: signoutParameters, completionBlock: {(success, error) in
-//
-//                if let error = error {
-//                    self.updateLogging(text: "Couldn't sign out account with error: \(error)" ,error:true)
-//                    return
-//                }
-//
-//                self.updateLogging(text: "Sign out completed successfully", error: false)
-//                self.accessToken = ""
-//                self.updateCurrentAccount(account: nil)
-//            })
-            
-        }
+        //            applicationContext.signout(with: account, signoutParameters: signoutParameters, completionBlock: {(success, error) in
+        //
+        //                if let error = error {
+        //                    self.updateLogging(text: "Couldn't sign out account with error: \(error)" ,error:true)
+        //                    return
+        //                }
+        //
+        //                self.updateLogging(text: "Sign out completed successfully", error: false)
+        //                self.accessToken = ""
+        //                self.updateCurrentAccount(account: nil)
+        //            })
+        
+    }
 }

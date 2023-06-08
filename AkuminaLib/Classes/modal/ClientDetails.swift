@@ -16,8 +16,9 @@ public struct ClientDetails {
     var sharePointURL: String
     var appManagerURL: URL
     var tenantId: String
+    var userId: String
     public init(authority: String, clientId: String, redirectUri: String, scopes: [String],
-                sharePointScope: String,appManagerURL: String, tenantId: String) throws {
+                sharePointScope: String,appManagerURL: String, tenantId: String, userId: String) throws {
         guard let authorityURL  = URL(string:authority) else {
             throw ClientDetailsError.invalidAuthorityURL(url: authority);
         }
@@ -39,6 +40,7 @@ public struct ClientDetails {
         self.sharePointURL = sharePointScope;
         self.appManagerURL =  appManager;
         self.tenantId = tenantId
+        self.userId = userId;
     }
     
     public init() {
@@ -49,5 +51,6 @@ public struct ClientDetails {
         self.sharePointURL = "";
         self.appManagerURL = URL(string: "http://localhost")!
         self.tenantId = ""
+        self.userId = ""
     }
 }
