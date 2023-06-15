@@ -38,13 +38,13 @@ class MSALUtils {
     }
     
     public func initMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, withIntune: Bool, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void) throws {
-        self.updateLogging(text: "Sign-In started for user \(clientDetails.userId) to MAM \(withIntune)" , error: false);
+        self.clientDetails = clientDetails;
+        self.updateLogging(text: "Sign-In started for user to MAM \(withIntune)" , error: false);
         self.postParamenters = [Dictionary<String, String>]();
         self.loggingHandler = loggingHandler;
         self.completionHandler = completionHandler;
         self.parentViewController = parentViewController;
         self.withIntune = withIntune;
-        self.clientDetails = clientDetails;
         let authority = try MSALAADAuthority(url: clientDetails.authority)
         let msalConfiguration = MSALPublicClientApplicationConfig(
             clientId: clientDetails.clientId,
@@ -92,7 +92,7 @@ class MSALUtils {
         
         let parameters = MSALSilentTokenParameters(scopes: clientDetails.scopes, account: account)
         
-        self.updateLogging(text: "\(String(describing: account.username)) ->> acquireTokenSilently",error:false);
+        self.updateLogging(text: "acquireTokenSilently",error:false);
         
         parameters.forceRefresh = true;
         
@@ -139,7 +139,7 @@ class MSALUtils {
         guard let webViewParameters = self.webViewParamaters else { return }
         let parameters = MSALInteractiveTokenParameters(scopes: clientDetails.scopes, webviewParameters: webViewParameters)
         parameters.loginHint = AppSettings.getAccount().mUPN
-        parameters.promptType = .login
+        parameters.promptType = .selectAccount
         
         self.updateLogging(text: "\(String(describing: AppSettings.getAccount().mUPN)) ->> acquireTokenInteractively",error:false);
         
@@ -177,7 +177,7 @@ class MSALUtils {
             return
         }else {
             if(appAcc.mUPN == clientDetails.userId) {
-                self.updateLogging(text: "Welcome back \(String(describing: appAcc.mUPN))", error: false);
+                self.updateLogging(text: "Welcome back ", error: false);
                 do {
                     let acc : MSALAccount  = try applicationContext.account(forUsername: clientDetails.userId);
                     completion!(acc)
@@ -242,7 +242,7 @@ class MSALUtils {
     }
     
     func updateLogging(text : String, error: Bool) {
-        self.loggingHandler(text, error)
+        self.loggingHandler(text + " ->  User is \(clientDetails.userId) @ \(Date().timeIntervalSince1970 * 1000 )" , error)
         if Thread.isMainThread {
             print( text);
         } else {
@@ -251,6 +251,7 @@ class MSALUtils {
             }
         }
     }
+    
     
     func getSharePointAccessTokenAsync  () -> Void {
         
