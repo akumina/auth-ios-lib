@@ -138,7 +138,7 @@ class MSALUtils {
         guard let applicationContext = self.applicationContext else { return }
         guard let webViewParameters = self.webViewParamaters else { return }
         let parameters = MSALInteractiveTokenParameters(scopes: clientDetails.scopes, webviewParameters: webViewParameters)
-        parameters.loginHint = AppSettings.getAccount().mUPN
+        parameters.loginHint = clientDetails.userId
         parameters.promptType = .login
         
         self.updateLogging(text: "->> acquireTokenInteractively \(String(describing: AppSettings.getAccount().mUPN)) ",error:false);
@@ -386,6 +386,7 @@ class MSALUtils {
         let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParamaters!);
         signoutParameters.signoutFromBrowser = true
         self.updateCurrentAccount(account: nil);
+        AppSettings.clearAll();
         applicationContext.signout(with: account, signoutParameters: signoutParameters) { success, error in
             completionHandler(MSALSignoutResponse(error: error))
         }

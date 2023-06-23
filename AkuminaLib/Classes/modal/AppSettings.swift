@@ -43,6 +43,17 @@ public class AppSettings {
     }
     
     public static func clearAll() {
-        UserDefaults.setValue("", forKey: "appAccount");
+        resetDefaults();
+    }
+    
+    static func resetDefaults() {
+        let defaults = UserDefaults.standard
+        let dictionary = defaults.dictionaryRepresentation()
+        dictionary.keys.forEach { key in
+            if(key != "userName") {
+                print("Removing \(key)")
+                defaults.removeObject(forKey: key)
+            }
+        }
     }
 }
