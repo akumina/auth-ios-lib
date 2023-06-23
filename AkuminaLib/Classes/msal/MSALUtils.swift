@@ -139,7 +139,7 @@ class MSALUtils {
         guard let webViewParameters = self.webViewParamaters else { return }
         let parameters = MSALInteractiveTokenParameters(scopes: clientDetails.scopes, webviewParameters: webViewParameters)
         parameters.loginHint = AppSettings.getAccount().mUPN
-        parameters.promptType = .default
+        parameters.promptType = .login
         
         self.updateLogging(text: "->> acquireTokenInteractively \(String(describing: AppSettings.getAccount().mUPN)) ",error:false);
         
