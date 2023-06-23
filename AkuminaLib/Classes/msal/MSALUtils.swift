@@ -385,10 +385,16 @@ class MSALUtils {
         self.initWebViewParams();
         let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParamaters!);
         signoutParameters.signoutFromBrowser = true
-        self.updateCurrentAccount(account: nil);
-        AppSettings.clearAll();
+        
+        
         applicationContext.signout(with: account, signoutParameters: signoutParameters) { success, error in
             completionHandler(MSALSignoutResponse(error: error))
+        
+            if (self.withIntune) {
+                IntuneMAMEnrollmentManager.instance().deRegisterAndUnenrollAccount(self.clientDetails.userId, withWipe: true)
+            }
+            AppSettings.clearAll();
+            self.updateCurrentAccount(account: nil);
         }
         //            applicationContext.signout(with: account, signoutParameters: signoutParameters, completionBlock: {(success, error) in
         //
