@@ -39,7 +39,7 @@ class MSALUtils {
     
     public func initMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, withIntune: Bool, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void) throws {
         self.clientDetails = clientDetails;
-        self.updateLogging(text: "Sign-In started for user to MAM \(withIntune)" , error: false);
+        self.updateLogging(text: "Sign-In started for user \(clientDetails.userId) to MAM \(withIntune)" , error: false);
         self.postParamenters = [Dictionary<String, String>]();
         self.loggingHandler = loggingHandler;
         self.completionHandler = completionHandler;
@@ -176,7 +176,7 @@ class MSALUtils {
             completion!(nil)
             return
         }else {
-            if(appAcc.mUPN == clientDetails.userId) {
+            if(appAcc.mUPN == clientDetails.userId && appAcc.mAuthority == clientDetails.authority.absoluteString ) {
                 self.updateLogging(text: "Welcome back ", error: false);
                 do {
                     let acc : MSALAccount  = try applicationContext.account(forIdentifier: appAcc.uuid ?? clientDetails.userId);
