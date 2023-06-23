@@ -139,9 +139,9 @@ class MSALUtils {
         guard let webViewParameters = self.webViewParamaters else { return }
         let parameters = MSALInteractiveTokenParameters(scopes: clientDetails.scopes, webviewParameters: webViewParameters)
         parameters.loginHint = AppSettings.getAccount().mUPN
-        parameters.promptType = .selectAccount
+        parameters.promptType = .default
         
-        self.updateLogging(text: "\(String(describing: AppSettings.getAccount().mUPN)) ->> acquireTokenInteractively",error:false);
+        self.updateLogging(text: "->> acquireTokenInteractively \(String(describing: AppSettings.getAccount().mUPN)) ",error:false);
         
         applicationContext.acquireToken(with: parameters) { (result, error) in
             
@@ -152,7 +152,7 @@ class MSALUtils {
             
             guard let result = result else {
                 
-                completion(TokenResult.error(error: String(describing: "\(String(describing: parameters.loginHint)) Could not acquire token: No result returne")))
+                completion(TokenResult.error(error: "Could not acquire token: No result return \(String(describing: parameters.loginHint))"))
                 return
             }
             
@@ -179,7 +179,7 @@ class MSALUtils {
             if(appAcc.mUPN == clientDetails.userId) {
                 self.updateLogging(text: "Welcome back ", error: false);
                 do {
-                    let acc : MSALAccount  = try applicationContext.account(forUsername: clientDetails.userId);
+                    let acc : MSALAccount  = try applicationContext.account(forIdentifier: appAcc.uuid ?? clientDetails.userId);
                     completion!(acc)
                     return
                 }catch{
@@ -228,6 +228,7 @@ class MSALUtils {
         self.mAccount?.mAADID = aadId;
         self.mAccount?.mTenantID = tenantId;
         self.mAccount?.mAuthority=authorityURL.absoluteString;
+        self.mAccount?.uuid = result.account.identifier;
         
         
         AppSettings.saveAccount(account: self.mAccount!);
@@ -383,6 +384,8 @@ class MSALUtils {
         guard let account = self.currentAccount else { return }
         self.initWebViewParams();
         let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParamaters!);
+        signoutParameters.signoutFromBrowser = true
+        self.updateCurrentAccount(account: nil);
         applicationContext.signout(with: account, signoutParameters: signoutParameters) { success, error in
             completionHandler(MSALSignoutResponse(error: error))
         }
