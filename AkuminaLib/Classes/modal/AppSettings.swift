@@ -43,7 +43,7 @@ public class AppSettings {
     }
     
     public static func clearAll() {
-        resetDefaults();
+//        resetDefaults();
     }
     
     static func resetDefaults() {

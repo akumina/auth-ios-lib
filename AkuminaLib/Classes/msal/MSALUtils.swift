@@ -38,10 +38,13 @@ class MSALUtils {
     }
     
     public func initMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, withIntune: Bool, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void) throws {
+        let version = Bundle(for: AkuminaLib.self).infoDictionary!["CFBundleShortVersionString"]!
+        let build = Bundle(for: AkuminaLib.self).infoDictionary!["CFBundleVersion"]!
         self.clientDetails = clientDetails;
+        self.loggingHandler = loggingHandler;
+        self.updateLogging(text: "Loading Akumina Lib Version  \(version) and Build \(build)" , error: false);
         self.updateLogging(text: "Sign-In started for user \(clientDetails.userId) to MAM \(withIntune)" , error: false);
         self.postParamenters = [Dictionary<String, String>]();
-        self.loggingHandler = loggingHandler;
         self.completionHandler = completionHandler;
         self.parentViewController = parentViewController;
         self.withIntune = withIntune;
@@ -139,7 +142,7 @@ class MSALUtils {
         guard let webViewParameters = self.webViewParamaters else { return }
         let parameters = MSALInteractiveTokenParameters(scopes: clientDetails.scopes, webviewParameters: webViewParameters)
         parameters.loginHint = clientDetails.userId
-        parameters.promptType = .login
+        parameters.promptType = .promptIfNecessary
         
         self.updateLogging(text: "->> acquireTokenInteractively \(String(describing: AppSettings.getAccount().mUPN)) ",error:false);
         
@@ -188,7 +191,7 @@ class MSALUtils {
                 }
             }else {
                 self.updateLogging(text: "Different user old user \(String(describing: appAcc.mUPN)) new user \(clientDetails.userId)", error: false);
-                AppSettings.clearAll();
+//                AppSettings.clearAll();
                 self.updateCurrentAccount(account: nil)
                 completion!(nil);
             }
@@ -206,7 +209,7 @@ class MSALUtils {
         let tenantId = result.tenantProfile.tenantId!;
         let authorityURL = result.authority.url;
         
-        var  message: String  = "Authentication succeeded for user " + upn + " token =" + result.accessToken;
+        let  message: String  = "Authentication succeeded for user " + upn + " token =" + result.accessToken;
         
         let firstScope: String = clientDetails.scopes[0];
         var scope = firstScope.replacingOccurrences(of: ".default", with: "");
@@ -233,8 +236,15 @@ class MSALUtils {
         
         AppSettings.saveAccount(account: self.mAccount!);
         if (withIntune) {
-            IntuneMAMEnrollmentManager.instance().delegate = EnrollmentDelegateClass(viewController: parentViewController!, completionHandler: self.completionHandler,loggingHandler: self.loggingHandler)
-            IntuneMAMEnrollmentManager.instance().loginAndEnrollAccount(upn);
+            let delegate =  EnrollmentDelegateClass(viewController: parentViewController!, completionHandler: self.completionHandler,loggingHandler: self.loggingHandler);
+            let manager: IntuneMAMEnrollmentManager = IntuneMAMEnrollmentManager.instance();
+            
+            manager.delegate = delegate
+            
+           
+            manager.loginAndEnrollAccount(upn);
+            
+            
         }else {
             self.getSharePointAccessTokenAsync();
         }
@@ -384,29 +394,14 @@ class MSALUtils {
         guard let account = self.currentAccount else { return }
         self.initWebViewParams();
         let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParamaters!);
-        signoutParameters.signoutFromBrowser = true
-        
-        
-        applicationContext.signout(with: account, signoutParameters: signoutParameters) { success, error in
-            completionHandler(MSALSignoutResponse(error: error))
+        signoutParameters.signoutFromBrowser = false
         
             if (self.withIntune) {
-                IntuneMAMEnrollmentManager.instance().deRegisterAndUnenrollAccount(self.clientDetails.userId, withWipe: true)
+                self.updateLogging(text: "\(self.clientDetails.userId) -> deRegisterAndUnenrollAccount ", error: false)
             }
-            AppSettings.clearAll();
+            applicationContext.signout(with: account, signoutParameters: signoutParameters) { success, error in
+            completionHandler(MSALSignoutResponse(error: error))
             self.updateCurrentAccount(account: nil);
         }
-        //            applicationContext.signout(with: account, signoutParameters: signoutParameters, completionBlock: {(success, error) in
-        //
-        //                if let error = error {
-        //                    self.updateLogging(text: "Couldn't sign out account with error: \(error)" ,error:true)
-        //                    return
-        //                }
-        //
-        //                self.updateLogging(text: "Sign out completed successfully", error: false)
-        //                self.accessToken = ""
-        //                self.updateCurrentAccount(account: nil)
-        //            })
-        
     }
 }

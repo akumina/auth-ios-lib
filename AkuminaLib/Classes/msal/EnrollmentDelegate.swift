@@ -35,6 +35,9 @@ class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
      If successful, logic for enrollment is initiated
      */
     func enrollmentRequest(with status: IntuneMAMEnrollmentStatus) {
+        var msg = "Enrollment result for identity \(status.identity) with status code \(status.statusCode)";
+        self.loggingHandler(msg,false);
+        
         if status.didSucceed{
             self.loggingHandler("Intune Enrollment success for user \(String(describing: AppSettings.getAccount().mUPN))", false );
             
@@ -49,9 +52,7 @@ class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
                 return
                 
             }
-            var msg = "Enrollment result for identity \(status.identity) with status code \(status.statusCode)";
-            self.loggingHandler(msg,false);
-            msg = "Debug message: \(String(describing: status.errorString))";
+            msg = "enrollmentRequest Error msg message: \(String(describing: status.errorString))";
             self.loggingHandler(msg,false);
             completionHandler(MSALResponse(token: "", error: MSALException.HTTPError(msg: msg) ))
             return
