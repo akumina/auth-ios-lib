@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDAADV1AuthorizationCodeRequest.h"
 
 @implementation MSIDAADV1AuthorizationCodeRequest
@@ -30,6 +32,7 @@
                            scope:(NSString *)scope
                        loginHint:(NSString *)loginHint
                         resource:(NSString *)resource
+                      ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                          context:(nullable id<MSIDRequestContext>)context
 {
     self = [super initWithEndpoint:endpoint
@@ -37,6 +40,7 @@
                        redirectUri:redirectUri
                              scope:scope
                          loginHint:loginHint
+                        ssoContext:ssoContext
                            context:context];
     if (self)
     {
@@ -51,3 +55,5 @@
 }
 
 @end
+
+#endif

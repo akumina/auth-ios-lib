@@ -1,5 +1,5 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.7 (swiftlang-5.7.0.127.4 clang-1400.0.29.50)
+// swift-compiler-version: Apple Swift version 5.8.1 (swiftlang-5.8.0.124.5 clang-1403.0.22.11.100)
 // swift-module-flags: -target arm64-apple-ios13.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name IntuneMAMSwiftStub
 // swift-module-flags-ignorable: -enable-bare-slash-regex
 import AppleArchive
@@ -16,6 +16,10 @@ import _GroupActivities_UIKit
 import _StringProcessing
 import _System_Foundation
 public func cmarRealUIApplicationMain(_ argc: Swift.Int32, _ argv: Swift.UnsafeMutablePointer<Swift.UnsafeMutablePointer<Swift.Int8>?>, _ principalClassName: Swift.String?, _ delegateClassName: Swift.String?) -> Swift.Int32
+@available(iOS 14.0, *)
+extension SwiftUI.App {
+  public static func cmarRealSwiftUIMain()
+}
 @available(iOS 14.0, *)
 extension AppleArchive.ArchiveByteStream {
   public static func cmarRealFileStream(path: System.FilePath, mode: System.FileDescriptor.AccessMode, options: System.FileDescriptor.OpenOptions, permissions: System.FilePermissions) -> AppleArchive.ArchiveByteStream?
@@ -49,7 +53,7 @@ extension VisionKit.DataScannerViewController {
 @available(iOS 16.0, *)
 extension VisionKit.ImageAnalysisInteraction {
   @_Concurrency.MainActor convenience public init(cmarRealImageAnalysisInteractionInit: Swift.Bool)
-  @_Concurrency.MainActor convenience public init(cmarRealImageAnalysisInteractionInitDelegate: VisionKit.ImageAnalysisInteractionDelegate)
+  @_Concurrency.MainActor convenience public init(cmarRealImageAnalysisInteractionInitDelegate: any VisionKit.ImageAnalysisInteractionDelegate)
   @_Concurrency.MainActor final public func cmarRealPreferredInteractionTypes(_ types: VisionKit.ImageAnalysisInteraction.InteractionTypes)
   @_Concurrency.MainActor final public func cmarRealAllowLongPressForDataDetectorsInTextMode(_ allow: Swift.Bool)
 }
@@ -71,6 +75,7 @@ extension System.FileDescriptor {
 }
 extension Foundation.URL {
   public static func cmarRealURLWriteBookmarkData(_ data: Foundation.Data, to url: Foundation.URL) throws
+  public mutating func cmarRealSetResourceValues(_ values: Foundation.URLResourceValues) throws
 }
 @available(iOS 15.0, *)
 extension GroupActivities.GroupActivity {

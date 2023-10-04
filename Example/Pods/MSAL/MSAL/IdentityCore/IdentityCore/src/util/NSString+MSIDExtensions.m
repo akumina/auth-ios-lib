@@ -243,6 +243,11 @@ typedef unsigned char byte;
          {
              [encodedString appendFormat:@"=%@", encodedValue];
          }
+        
+         else if ((encodedValue && ![encodedValue isKindOfClass:[NSNull class]]) && !encodedValue.length)
+         {
+             [encodedString appendFormat:@"=%@", encodedValue];
+         }
          
      }];
     return encodedString;
@@ -250,19 +255,25 @@ typedef unsigned char byte;
 
 - (BOOL)msidIsEquivalentWithAnyAlias:(NSArray<NSString *> *)aliases
 {
+    BOOL result = NO;
     if (!aliases)
     {
-        return NO;
+        return result;
     }
-
+    
+    MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"Check if credential environment %@ is included in the list of valid environment aliases.",self);
+    
     for (NSString *alias in aliases)
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"environment alias found: %@",alias);
         if ([self caseInsensitiveCompare:alias] == NSOrderedSame)
         {
-            return YES;
+            MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"credential environment found in the list of valid environment aliases.");
+            result = YES;
         }
     }
-    return NO;
+    MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"credential environment not found in the list of valid environment aliases.");
+    return result;
 }
 
 
@@ -319,6 +330,16 @@ typedef unsigned char byte;
         return [self substringFromIndex:emailIndex.location + 1];
     }
     
+    return nil;
+}
+
+-(NSString *)msidSanitizedDomainName
+{
+    NSString *domainSuffix = [self msidDomainSuffix];
+    if (![NSString msidIsStringNilOrBlank:domainSuffix])
+    {
+        return domainSuffix.lowercaseString;
+    }
     return nil;
 }
 

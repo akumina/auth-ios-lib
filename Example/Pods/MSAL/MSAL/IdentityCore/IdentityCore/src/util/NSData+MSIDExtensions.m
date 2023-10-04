@@ -58,8 +58,15 @@
 /// </remarks>
 + (NSData *)msidDataFromBase64UrlEncodedString:(NSString *)encodedString
 {
-    NSString *base64encoded = [[encodedString stringByReplacingOccurrencesOfString:@"-" withString:@"+"]
-                               stringByReplacingOccurrencesOfString:@"_" withString:@"/"];
+    NSString *base64encoded = [[[encodedString stringByReplacingOccurrencesOfString:@"-" withString:@"+"]
+                                stringByReplacingOccurrencesOfString:@"_" withString:@"/"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    
+    // if input string has only space, then stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet] will return empty string,
+    // if input string is empty or has only space return nil
+    if (!base64encoded.length)
+    {
+        return nil;
+    }
     
     // The input string lacks the usual '=' padding at the end, so the valid end sequences
     // are:
@@ -92,5 +99,32 @@
     return data;
 }
 
+- (NSData *)msidDecryptedDataWithAlgorithm:(SecKeyAlgorithm)algorithm
+                                privateKey:(SecKeyRef)privateKey API_AVAILABLE(ios(10.0), macos(10.12))
+{
+    if ([self length] == 0)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Message to encrypt was empty");
+        return nil;
+    }
+    
+    if (!SecKeyIsAlgorithmSupported(privateKey, kSecKeyOperationTypeDecrypt, algorithm))
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Unable to use the requested crypto algorithm with the provided key.");
+        return nil;
+    }
+    
+    CFErrorRef error = nil;
+    NSData *decryptedMessage = (NSData *)CFBridgingRelease(SecKeyCreateDecryptedData(privateKey, algorithm, (__bridge CFDataRef)self, &error));
+    
+    if (error)
+    {
+        NSError *err = CFBridgingRelease(error);
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"%@", [@"Unable to decrypt data" stringByAppendingString:[NSString stringWithFormat:@"%ld", err.code]]);
+        return nil;
+    }
+    
+    return decryptedMessage;
+}
 
 @end

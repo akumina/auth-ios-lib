@@ -25,7 +25,6 @@
 #import "MSIDAuthority.h"
 #import "MSIDTelemetryAPIEvent.h"
 #import "MSIDTelemetry+Internal.h"
-#import "MSIDTelemetryAPIEvent.h"
 #import "MSIDTelemetryEventStrings.h"
 #import "MSIDErrorConverter.h"
 
@@ -63,13 +62,16 @@
 
             return nil;
         }
-
+       
         _tokenRequestProvider = tokenRequestProvider;
         _fallbackController = fallbackController;
+        
     }
 
     return self;
 }
+
+#if !EXCLUDE_FROM_MSALCPP
 
 #pragma mark - Telemetry
 
@@ -101,8 +103,10 @@
         [event setIsSuccessfulStatus:MSID_TELEMETRY_VALUE_YES];
     }
 
-    [[MSIDTelemetry sharedInstance] stopEvent:self.requestParameters.telemetryRequestId event:event];
+    CONDITIONAL_STOP_EVENT(CONDITIONAL_SHARED_INSTANCE, self.requestParameters.telemetryRequestId, event);
     [[MSIDTelemetry sharedInstance] flush:self.requestParameters.telemetryRequestId];
 }
+
+#endif
 
 @end

@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDCurrentRequestTelemetrySerializedItem.h"
 
 @interface MSIDCurrentRequestTelemetrySerializedItem()
@@ -32,6 +34,19 @@
 @end
 
 @implementation MSIDCurrentRequestTelemetrySerializedItem
+
+// Represents 100 byte limit for size of current request telemetry string sent to server
+static int telemetryStringSizeLimit = 100;
+
++ (int)telemetryStringSizeLimit
+{
+    return telemetryStringSizeLimit;
+}
+
++ (void)setTelemetryStringSizeLimit:(int)newLimit
+{
+    telemetryStringSizeLimit = newLimit;
+}
 
 - (instancetype)initWithSchemaVersion:(NSNumber *)schemaVersion defaultFields:(NSArray *)defaultFields platformFields:(NSArray *)platformFields
 {
@@ -51,7 +66,7 @@
 {
     NSString *telemetryString = [NSString stringWithFormat:@"%@|%@|%@", self.schemaVersion, [self serializeFields: self.defaultFields], [self serializeFields: self.platformFields]];
     
-    if ([telemetryString lengthOfBytesUsingEncoding:NSUTF8StringEncoding] > 4000)
+    if ((int)[telemetryString lengthOfBytesUsingEncoding:NSUTF8StringEncoding] > [MSIDCurrentRequestTelemetrySerializedItem telemetryStringSizeLimit])
     {
         return nil;
     }
@@ -74,3 +89,5 @@
 }
 
 @end
+
+#endif

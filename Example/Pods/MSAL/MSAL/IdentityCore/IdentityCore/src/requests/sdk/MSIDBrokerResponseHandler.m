@@ -81,7 +81,7 @@
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Handling broker response.");
     
     // Verify resume dictionary
-    NSDictionary *resumeState = [self verifyResumeStateDicrionary:response error:error];
+    NSDictionary *resumeState = [self verifyResumeStateDictionary:response error:error];
 
     if (!resumeState)
     {
@@ -136,12 +136,16 @@
     }
     
     MSIDAuthenticationScheme *authScheme = [self authSchemeFromResumeState:resumeState];
+    
+    // Get redirect uri from resume state
+    NSString *redirectUri = resumeState[MSID_OAUTH2_REDIRECT_URI];
 
     NSError *brokerError = nil;
     MSIDBrokerResponse *brokerResponse = [self brokerResponseFromEncryptedQueryParams:queryParamsMap
                                                                             oidcScope:oidcScope
                                                                         correlationId:correlationId
                                                                            authScheme:authScheme
+                                                                          redirectUri:redirectUri
                                                                                 error:&brokerError];
 
     if (!brokerResponse)
@@ -216,7 +220,7 @@
 
 #pragma mark - Helpers
 
-- (NSDictionary *)verifyResumeStateDicrionary:(NSURL *)response error:(NSError **)error
+- (NSDictionary *)verifyResumeStateDictionary:(NSURL *)response error:(NSError **)error
 {
     if (!response)
     {
@@ -234,6 +238,10 @@
 
     NSUUID *correlationId = [[NSUUID alloc] initWithUUIDString:[resumeDictionary objectForKey:@"correlation_id"]];
     NSString *redirectUri = [resumeDictionary objectForKey:@"redirect_uri"];
+    
+    if ([[resumeDictionary allKeys] containsObject:MSID_NESTED_AUTH_BROKER_REDIRECT_URI]) {
+        redirectUri = [resumeDictionary objectForKey:MSID_NESTED_AUTH_BROKER_REDIRECT_URI];
+    }
 
     if (!redirectUri)
     {
@@ -283,6 +291,7 @@
                                                      oidcScope:(__unused NSString *)oidcScope
                                                  correlationId:(__unused NSUUID *)correlationID
                                                     authScheme:(__unused MSIDAuthenticationScheme *)authScheme
+                                                   redirectUri:(__unused NSString *)redirectUri
                                                          error:(__unused NSError **)error
 {
     NSAssert(NO, @"Abstract method, implemented in subclasses");

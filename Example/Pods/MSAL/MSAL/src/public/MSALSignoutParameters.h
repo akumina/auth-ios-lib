@@ -45,24 +45,35 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) BOOL signoutFromBrowser;
 
+/*
+  Removes account from the keychain with either com.microsoft.adalcache shared group by default or the one provided when configuring MSALPublicClientApplication.
+
+  This is a destructive action and will remove the SSO state from all apps sharing the same cache!
+  It's intended to be used only as a way to achieve GDPR compliance and make sure all user artifacts are cleaned on user sign out.
+  It's not intended to be used as a way to reset or fix token cache.
+  Please make sure end user is shown UI and/or warning before this flag gets set to YES.
+  NO by default.
+*/
+@property (nonatomic) BOOL wipeAccount;
+
+/*
+  When flag is set, following should happen:
+    - Wipe all known universal cache locations regardless of the clientId, account etc. Should include all tokens and metadata for any cloud.
+    - Wipe all known legacy ADAL cache locations regardless of the clientId, account etc.
+    - MSALWipeCacheForAllAccountsConfig contains a list of additional locations for partner caches to be wiped (e.g. Teams, VisualStudio etc). Wipe operation should wipe out all those additional locations. This file includes "display identifier" of the location (e.g. Teams cache), and precise identifiers like kSecAttrAccount, kSecAttrService etc.
+    - If SSO extension is present, call SSO extension wipe operation. Wipe operation should only be allowed to the privileged applications like Intune CP on macOS or Authenticator on iOS.
+    - Failing any of the steps should return error back to the app including exact locations and apps that failed to be cleared.
+  NO by default.
+  This is a dangerous operation.
+*/
+@property (nonatomic) BOOL wipeCacheForAllAccounts;
+
 /**
  Initialize MSALSignoutParameters with web parameters.
  
  @param webviewParameters   User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
  */
-- (instancetype)initWithWebviewParameters:(MSALWebviewParameters *)webviewParameters NS_DESIGNATED_INITIALIZER;
-
-#pragma mark - Unavailable initializers
-
-/**
-    Use `[MSALSignoutParameters initWithWebviewParameters:]` instead
- */
-+ (instancetype)new NS_UNAVAILABLE;
-
-/**
-   Use `[MSALSignoutParameters initWithWebviewParameters:]` instead
-*/
-- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithWebviewParameters:(MSALWebviewParameters *)webviewParameters;
 
 @end
 

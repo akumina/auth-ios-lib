@@ -98,7 +98,7 @@
         
         if (!_refreshToken)
         {
-            MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"Trying to initialize refresh token when missing refresh token field in cache");
+            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Trying to initialize refresh token when missing refresh token field in cache");
             return nil;
         }
 
@@ -139,7 +139,7 @@
 - (NSString *)description
 {
     NSString *baseDescription = [super description];
-    return [baseDescription stringByAppendingFormat:@"(id token=%@, legacy user ID=%@)", [_idToken msidSecretLoggingHash], _accountIdentifier.displayableId];
+    return [baseDescription stringByAppendingFormat:@"(id token=%@, legacy user ID=%@)", [_idToken msidSecretLoggingHash], MSID_PII_LOG_EMAIL(_accountIdentifier.displayableId)];
 }
 
 @end

@@ -38,6 +38,7 @@
 #import "MSIDIntuneEnrollmentIdsCache.h"
 #import "MSIDIntuneMAMResourcesCache.h"
 #import "MSIDSSOTokenResponseHandler.h"
+#import "ASAuthorizationController+MSIDExtensions.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDBackgroundTaskManager.h"
@@ -53,6 +54,7 @@
 @property (nonatomic, readonly) MSIDIntuneEnrollmentIdsCache *enrollmentIdsCache;
 @property (nonatomic, readonly) MSIDIntuneMAMResourcesCache *mamResourcesCache;
 @property (nonatomic, readonly) MSIDSSOTokenResponseHandler *ssoTokenResponseHandler;
+@property (nonatomic) NSDate *requestSentDate;
 
 @end
 
@@ -63,12 +65,14 @@
                    tokenResponseValidator:(MSIDTokenResponseValidator *)tokenResponseValidator
                                tokenCache:(id<MSIDCacheAccessor>)tokenCache
                      accountMetadataCache:(MSIDAccountMetadataCacheAccessor *)accountMetadataCache
+                       extendedTokenCache:(id<MSIDExtendedTokenCacheDataSource>)extendedTokenCache
 {
     self = [super initWithRequestParameters:parameters
                                oauthFactory:oauthFactory
                      tokenResponseValidator:tokenResponseValidator
                                  tokenCache:tokenCache
-                       accountMetadataCache:accountMetadataCache];
+                       accountMetadataCache:accountMetadataCache
+                         extendedTokenCache:extendedTokenCache];
 
     if (self)
     {
@@ -81,23 +85,24 @@
 #if TARGET_OS_IPHONE
             [[MSIDBackgroundTaskManager sharedInstance] stopOperationWithType:MSIDBackgroundTaskTypeInteractiveRequest];
 #endif
+            __typeof__(self) strongSelf = weakSelf;
             
-#if TARGET_OS_OSX
-            weakSelf.ssoTokenResponseHandler.externalCacheSeeder = weakSelf.externalCacheSeeder;
+#if TARGET_OS_OSX && !EXCLUDE_FROM_MSALCPP
+            strongSelf.ssoTokenResponseHandler.externalCacheSeeder = strongSelf.externalCacheSeeder;
 #endif
-            [weakSelf.ssoTokenResponseHandler handleOperationResponse:operationResponse
-                                                    requestParameters:weakSelf.requestParameters
-                                               tokenResponseValidator:weakSelf.tokenResponseValidator
-                                                         oauthFactory:weakSelf.oauthFactory
-                                                           tokenCache:weakSelf.tokenCache
-                                                 accountMetadataCache:weakSelf.accountMetadataCache
-                                                      validateAccount:weakSelf.requestParameters.shouldValidateResultAccount
-                                                                error:error
-                                                      completionBlock:^(MSIDTokenResult *result, NSError *error)
+            [strongSelf.ssoTokenResponseHandler handleOperationResponse:operationResponse
+                                                      requestParameters:strongSelf.requestParameters
+                                                 tokenResponseValidator:strongSelf.tokenResponseValidator
+                                                           oauthFactory:strongSelf.oauthFactory
+                                                             tokenCache:strongSelf.tokenCache
+                                                   accountMetadataCache:strongSelf.accountMetadataCache
+                                                        validateAccount:strongSelf.requestParameters.shouldValidateResultAccount
+                                                                  error:error
+                                                        completionBlock:^(MSIDTokenResult *result, NSError *localError)
              {
-                MSIDInteractiveRequestCompletionBlock completionBlock = weakSelf.requestCompletionBlock;
+                MSIDInteractiveRequestCompletionBlock completionBlock = strongSelf.requestCompletionBlock;
                 weakSelf.requestCompletionBlock = nil;
-                if (completionBlock) completionBlock(result, error, nil);
+                if (completionBlock) completionBlock(result, localError, nil);
             }];
         };
         
@@ -141,19 +146,22 @@
         NSDictionary *mamResources = [self.mamResourcesCache resourcesJsonDictionaryWithContext:self.requestParameters
                                                                                           error:nil];
         
+        self.requestSentDate = [NSDate date];
         __auto_type operationRequest = [MSIDBrokerOperationInteractiveTokenRequest tokenRequestWithParameters:self.requestParameters
                                                                                                  providerType:self.providerType
                                                                                                 enrollmentIds:enrollmentIds
-                                                                                                 mamResources:mamResources];
+                                                                                                 mamResources:mamResources
+                                                                                              requestSentDate:self.requestSentDate];
     
         ASAuthorizationSingleSignOnRequest *ssoRequest = [self.ssoProvider createRequest];
         ssoRequest.requestedOperation = [operationRequest.class operation];
+        [ASAuthorizationSingleSignOnProvider setRequiresUI:YES forRequest:ssoRequest];
         
         NSDictionary *jsonDictionary = [operationRequest jsonDictionary];
         
         if (!jsonDictionary)
         {
-            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidInternalParameter, @"Failed to serialize SSO request dictionary for interactive token request", nil, nil, nil, self.requestParameters.correlationId, nil, YES);
+            error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidInternalParameter, @"Failed to serialize SSO request dictionary for interactive token request", nil, nil, nil, self.requestParameters.correlationId, nil, YES);
             completionBlock(nil, error, nil);
             return;
         }
@@ -168,7 +176,7 @@
         self.authorizationController = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[ssoRequest]];
         self.authorizationController.delegate = self.extensionDelegate;
         self.authorizationController.presentationContextProvider = self;
-        [self.authorizationController performRequests];
+        [self.authorizationController msidPerformRequests];
         
         self.requestCompletionBlock = completionBlock;
      }];
@@ -193,7 +201,8 @@
         return anchor;
     }
     
-    return self.requestParameters.parentViewController.view.window;
+    __typeof__(self.requestParameters.parentViewController) parentViewController = self.requestParameters.parentViewController;
+    return parentViewController ? parentViewController.view.window : self.requestParameters.presentationAnchorWindow;
 }
 
 #pragma mark - Dealloc

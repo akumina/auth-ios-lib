@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import "MSALWebviewParameters.h"
+#import "MSIDWebviewUIController.h"
 
 @implementation MSALWebviewParameters
 
@@ -43,13 +44,7 @@
 
 - (instancetype)initWithParentViewController:(MSALViewController *)parentViewController
 {
-    self = [super init];
-    if (self)
-    {
-        _parentViewController = parentViewController;
-    }
-    
-    return self;
+    return [self initWithAuthPresentationViewController:parentViewController];
 }
 
 - (instancetype)initWithAuthPresentationViewController:(MSALViewController *)parentViewController
@@ -67,15 +62,13 @@
 
 - (id)copyWithZone:(__unused NSZone *)zone
 {
-    MSALWebviewParameters *item;
-    item = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:_parentViewController];
-    item.parentViewController = _parentViewController;
+    MSALWebviewParameters *item = [[MSALWebviewParameters alloc] initWithAuthPresentationViewController:_parentViewController];
 
 #if TARGET_OS_IPHONE
     item.presentationStyle = _presentationStyle;
 #endif
     
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         item.prefersEphemeralWebBrowserSession = _prefersEphemeralWebBrowserSession;
     }
@@ -84,6 +77,11 @@
     item.customWebview = _customWebview;
     
     return item;
+}
+
++ (WKWebViewConfiguration *)defaultWKWebviewConfiguration
+{
+    return [MSIDWebviewUIController defaultWKWebviewConfiguration];
 }
 
 @end

@@ -36,6 +36,8 @@
                            body:(NSData *)httpBody
                bundleIdentifier:(NSString *)bundleIdentifier
                requestValidator:(id<MSIDBrowserRequestValidating>)requestValidator
+           useSSOCookieFallback:(BOOL)useSSOCookieFallback
+                     ssoContext:(MSIDExternalSSOContext *)ssoContext
                           error:(NSError **)error
 {
     self = [super init];
@@ -54,17 +56,20 @@
         
         _requestURL = requestURL;
         
+        [self printRequestURLInfo:requestURL];
+        
         if (![requestValidator shouldHandleURL:_requestURL])
         {
             if (error)
             {
-                NSString *errorMessage = [NSString stringWithFormat:@"Failed to create browser operation request, %@ is not authorize request", _PII_NULLIFY([requestURL absoluteString])];
+                NSString *errorMessage = [NSString stringWithFormat:@"Failed to create browser operation request, %@ is not a valid request", _PII_NULLIFY([requestURL absoluteString])];
                 *error = MSIDCreateError(MSIDErrorDomain,MSIDErrorInvalidInternalParameter,errorMessage,nil, nil, nil, nil, nil, YES);
             }
                    
             return nil;
         }
         
+        _useSSOCookieFallback = useSSOCookieFallback;
         _headers = headers;
         _httpBody = httpBody;
         _bundleIdentifier = bundleIdentifier;
@@ -83,9 +88,46 @@
         authority.metadata.tokenEndpoint = tokenEndpoint;
         
         _correlationId = [NSUUID UUID];
+        _ssoContext = ssoContext;
     }
     
     return self;
+}
+
++ (NSDictionary *)logProtocolNames
+{
+    static NSDictionary *logProtocolNames = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        logProtocolNames = @{@"/authorize" : @"OAuth2 Authorize",
+                             @"/token": @"OAuth2 Token",
+                             @"/logout": @"OAuth2 Logout",
+                             @"/saml2": @"SAML2"
+        };
+    });
+    
+    return logProtocolNames;
+}
+
++ (NSString *)protocolLogNameForRequestURL:(NSURL *)requestURL
+{
+    NSString *requestURLString = requestURL.absoluteString;
+    NSDictionary *logProtocolNames = [self logProtocolNames];
+    
+    for (NSString *keyword in logProtocolNames.allKeys)
+    {
+        if ([requestURLString rangeOfString:keyword options:NSCaseInsensitiveSearch].location != NSNotFound)
+        {
+            return logProtocolNames[keyword];
+        }
+    }
+    
+    return @"N/A";
+}
+
+- (void)printRequestURLInfo:(NSURL *)requestURL
+{
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"[Browser SSO] Request URL host %@, protocol %@", requestURL.host, [self.class protocolLogNameForRequestURL:requestURL]);
 }
 
 #pragma mark - MSIDBaseBrokerOperationRequest

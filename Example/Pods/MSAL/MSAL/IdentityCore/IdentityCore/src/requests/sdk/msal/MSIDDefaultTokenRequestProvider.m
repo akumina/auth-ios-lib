@@ -57,8 +57,9 @@
                                                                             oauthFactory:self.oauthFactory
                                                                   tokenResponseValidator:self.tokenResponseValidator
                                                                               tokenCache:self.tokenCache
-                                                                    accountMetadataCache:self.accountMetadataCache];
-#if TARGET_OS_OSX
+                                                                    accountMetadataCache:self.accountMetadataCache
+                                                                      extendedTokenCache:self.tokenCache.accountCredentialCache.dataSource];
+#if TARGET_OS_OSX && !EXCLUDE_FROM_MSALCPP
     request.externalCacheSeeder = self.externalCacheSeeder;
 #endif
     
@@ -75,7 +76,7 @@
                                                                                 tokenCache:self.tokenCache
                                                                       accountMetadataCache:self.accountMetadataCache];
     
-#if TARGET_OS_OSX
+#if TARGET_OS_OSX && !EXCLUDE_FROM_MSALCPP
     request.externalCacheSeeder = self.externalCacheSeeder;
 #endif
     
@@ -100,13 +101,14 @@
 
 - (MSIDInteractiveTokenRequest *)interactiveSSOExtensionTokenRequestWithParameters:(__unused MSIDInteractiveTokenRequestParameters *)parameters
 {
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         __auto_type request = [[MSIDSSOExtensionInteractiveTokenRequest alloc] initWithRequestParameters:parameters
                                                                                             oauthFactory:self.oauthFactory
                                                                                   tokenResponseValidator:self.tokenResponseValidator
                                                                                               tokenCache:self.tokenCache
-                                                                                    accountMetadataCache:self.accountMetadataCache];
+                                                                                    accountMetadataCache:self.accountMetadataCache
+                                                                                      extendedTokenCache:self.tokenCache.accountCredentialCache.dataSource];
         return request;
     }
     
@@ -116,14 +118,15 @@
 - (MSIDSilentTokenRequest *)silentSSOExtensionTokenRequestWithParameters:(__unused MSIDRequestParameters *)parameters
                                                             forceRefresh:(__unused BOOL)forceRefresh
 {
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         __auto_type request = [[MSIDSSOExtensionSilentTokenRequest alloc] initWithRequestParameters:parameters
                                                                                        forceRefresh:forceRefresh
                                                                                        oauthFactory:self.oauthFactory
                                                                              tokenResponseValidator:self.tokenResponseValidator
                                                                                          tokenCache:self.tokenCache
-                                                                               accountMetadataCache:self.accountMetadataCache];
+                                                                               accountMetadataCache:self.accountMetadataCache
+                                                                                 extendedTokenCache:self.tokenCache.accountCredentialCache.dataSource];
         return request;
     }
     

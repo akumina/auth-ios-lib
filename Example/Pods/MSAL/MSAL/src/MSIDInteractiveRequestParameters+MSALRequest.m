@@ -34,37 +34,33 @@
 @implementation MSIDInteractiveRequestParameters (MSALRequest)
 
 - (BOOL)fillWithWebViewParameters:(MSALWebviewParameters *)webParameters
-                          account:(MSALAccount *)account
    useWebviewTypeFromGlobalConfig:(BOOL)useWebviewTypeFromGlobalConfig
                     customWebView:(WKWebView *)customWebView
                             error:(NSError **)error
 {
-    self.accountIdentifier = account.lookupAccountIdentifier;
+    __typeof__(webParameters.parentViewController) parentViewController = webParameters.parentViewController;
     
-    #if TARGET_OS_IPHONE
-    if (@available(iOS 13.0, *))
+#if TARGET_OS_IPHONE
+    if (parentViewController == nil)
     {
-        if (webParameters.parentViewController == nil)
-        {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS 13.", nil, nil, nil, nil, nil, YES);
-            if (error) *error = msidError;
-            return NO;
-        }
-        
-        if (webParameters.parentViewController.view.window == nil)
-        {
-            NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil, YES);
-            if (error) *error = msidError;
-            return NO;
-        }
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController is a required parameter on iOS.", nil, nil, nil, nil, nil, YES);
+        if (error) *error = msidError;
+        return NO;
+    }
+    
+    if (parentViewController.view.window == nil)
+    {
+        NSError *msidError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, @"parentViewController has no window! Provide a valid controller with view and window.", nil, nil, nil, nil, nil, YES);
+        if (error) *error = msidError;
+        return NO;
     }
     
     self.presentationType = webParameters.presentationStyle;
 #endif
         
-    self.parentViewController = webParameters.parentViewController;
+    self.parentViewController = parentViewController;
         
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         self.prefersEphemeralWebBrowserSession = webParameters.prefersEphemeralWebBrowserSession;
     }
@@ -88,6 +84,11 @@
     self.telemetryWebviewType = MSALStringForMSALWebviewType(webviewType);
     self.customWebview = webParameters.customWebview ?: customWebView;
     return YES;
+}
+
+- (void)setAccountIdentifierFromMSALAccount:(MSALAccount *)account
+{
+    self.accountIdentifier = account.lookupAccountIdentifier;
 }
 
 @end

@@ -26,12 +26,32 @@
 
 #import <Foundation/Foundation.h>
 
+@class MSIDWPJMetadata;
+
 @interface MSIDWorkPlaceJoinUtilBase()
 
 + (nullable NSString *)getWPJStringDataForIdentifier:(nonnull NSString *)identifier
                                          accessGroup:(nullable NSString *)accessGroup
                                              context:(nullable id<MSIDRequestContext>)context
                                                error:(NSError*__nullable*__nullable)error;
+
++ (NSString *_Nullable)getWPJStringDataFromV2ForTenantId:(NSString *_Nullable)tenantId
+                                              identifier:(nonnull NSString *)identifier
+                                                     key:(nullable NSString *)key
+                                             accessGroup:(nullable NSString *)accessGroup
+                                                 context:(id<MSIDRequestContext>_Nullable)context
+                                                   error:(NSError*__nullable*__nullable)error;
+
++ (nullable NSString *)getPrimaryEccTenantWithSharedAccessGroup:(NSString *_Nullable)sharedAccessGroup
+                                                        context:(id <MSIDRequestContext> _Nullable)context
+                                                          error:(NSError *_Nullable *_Nullable)error;
+
+
++ (nullable MSIDWPJMetadata *)readWPJMetadataWithSharedAccessGroup:(NSString *_Nullable)sharedAccessGroup
+                                                  tenantIdentifier:(NSString *_Nullable)tenantIdentifier
+                                                        domainName:(NSString *_Nullable)domainName
+                                                           context:(id <MSIDRequestContext> _Nullable)context
+                                                             error:(NSError *_Nullable *_Nullable)error;
 
 @end
 

@@ -33,10 +33,13 @@ API_AVAILABLE(ios(13.0), macos(10.15))
 
 @property (nonatomic, readonly) BOOL shouldSignoutFromBrowser;
 @property (nonatomic, readonly) BOOL clearSSOExtensionCookies;
+@property (nonatomic, readonly) BOOL shouldWipeAccount;
 
 - (nullable instancetype)initWithRequestParameters:(MSIDInteractiveRequestParameters *)parameters
                           shouldSignoutFromBrowser:(BOOL)shouldSignoutFromBrowser
+                                 shouldWipeAccount:(BOOL)shouldWipeAccount
                           clearSSOExtensionCookies:(BOOL)clearSSOExtensionCookies
+                     shouldWipeCacheForAllAccounts:(BOOL)shouldWipeCacheForAllAccounts
                                       oauthFactory:(MSIDOauth2Factory *)oauthFactory;
 
 @end

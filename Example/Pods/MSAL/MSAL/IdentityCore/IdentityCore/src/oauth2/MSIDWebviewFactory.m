@@ -48,7 +48,8 @@
 #pragma mark - Webview creation
 
 - (NSObject<MSIDWebviewInteracting> *)webViewWithConfiguration:(MSIDBaseWebRequestConfiguration *)configuration
-                                             requestParameters:(MSIDInteractiveRequestParameters *)requestParameters
+                                             requestParameters:(MSIDInteractiveRequestParameters *)requestParameters 
+                          externalDecidePolicyForBrowserAction:(MSIDExternalDecidePolicyForBrowserActionBlock)externalDecidePolicyForBrowserAction
                                                        context:(id<MSIDRequestContext>)context
 {
         MSIDWebviewType webviewType = [MSIDSystemWebViewControllerFactory availableWebViewTypeWithPreferredType:requestParameters.webviewType];
@@ -60,7 +61,8 @@
         {
             case MSIDWebviewTypeWKWebView:
                 return [self embeddedWebviewFromConfiguration:configuration
-                                                customWebview:requestParameters.customWebview
+                                                customWebview:requestParameters.customWebview 
+                         externalDecidePolicyForBrowserAction:externalDecidePolicyForBrowserAction
                                                       context:context];
                 
 #if !MSID_EXCLUDE_SYSTEMWV
@@ -87,14 +89,18 @@
 }
 
 - (NSObject<MSIDWebviewInteracting> *)embeddedWebviewFromConfiguration:(MSIDBaseWebRequestConfiguration *)configuration
-                                                         customWebview:(WKWebView *)webview
+                                                         customWebview:(WKWebView *)webview 
+                                  externalDecidePolicyForBrowserAction:(MSIDExternalDecidePolicyForBrowserActionBlock)externalDecidePolicyForBrowserAction
                                                                context:(id<MSIDRequestContext>)context
 {
     if (![NSThread isMainThread])
     {
         __block NSObject<MSIDWebviewInteracting> *session;
         dispatch_sync(dispatch_get_main_queue(), ^{
-            session = [self embeddedWebviewFromConfiguration:configuration customWebview:webview context:context];
+            session = [self embeddedWebviewFromConfiguration:configuration
+                                               customWebview:webview
+                        externalDecidePolicyForBrowserAction:externalDecidePolicyForBrowserAction
+                                                     context:context];
         });
         
         return session;
@@ -112,6 +118,8 @@
     embeddedWebviewController.parentController = configuration.parentController;
     embeddedWebviewController.presentationType = configuration.presentationType;
 #endif
+
+    embeddedWebviewController.externalDecidePolicyForBrowserAction = externalDecidePolicyForBrowserAction;
 
     return embeddedWebviewController;
 }
@@ -169,9 +177,10 @@
     result[MSID_OAUTH2_LOGIN_HINT] = parameters.accountIdentifier.displayableId ?: parameters.loginHint;
     
     // Extra query params
-    if (parameters.allAuthorizeRequestExtraParameters)
+    __auto_type allAuthorizeRequestExtraParameters = [parameters allAuthorizeRequestExtraParametersWithMetadata:YES];
+    if (allAuthorizeRequestExtraParameters)
     {
-        [result addEntriesFromDictionary:parameters.allAuthorizeRequestExtraParameters];
+        [result addEntriesFromDictionary:allAuthorizeRequestExtraParameters];
     }
     
     // PKCE
@@ -253,12 +262,20 @@
     NSString *oauthState = [self generateStateValue];
     NSDictionary *authorizeQuery = [self authorizationParametersFromRequestParameters:parameters pkce:pkce requestState:oauthState];
     NSURL *startURL = [self startURLWithEndpoint:authorizeEndpoint authority:parameters.authority query:authorizeQuery context:parameters];
-    
+    NSString *endRedirectUri = parameters.redirectUri;
+
+    // Nested auth protocol
+    if ([parameters isNestedAuthProtocol])
+    {
+        endRedirectUri = parameters.nestedAuthBrokerRedirectUri;
+    }
+
     MSIDAuthorizeWebRequestConfiguration *configuration = [[MSIDAuthorizeWebRequestConfiguration alloc] initWithStartURL:startURL
-                                                                                  endRedirectUri:parameters.redirectUri
-                                                                                            pkce:pkce
-                                                                                           state:oauthState
-                                                                              ignoreInvalidState:NO];
+                                                                                                          endRedirectUri:endRedirectUri
+                                                                                                                    pkce:pkce
+                                                                                                                   state:oauthState
+                                                                                                      ignoreInvalidState:NO
+                                                                                                              ssoContext:parameters.ssoContext];
     configuration.customHeaders = parameters.customWebviewHeaders;
     configuration.parentController = parameters.parentViewController;
     configuration.prefersEphemeralWebBrowserSession = parameters.prefersEphemeralWebBrowserSession;

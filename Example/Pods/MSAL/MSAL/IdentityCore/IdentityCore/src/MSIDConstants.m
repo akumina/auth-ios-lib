@@ -31,6 +31,7 @@ NSString *const MSID_OS_VER_KEY                    = @"x-client-OS";
 NSString *const MSID_DEVICE_MODEL_KEY              = @"x-client-DM";
 NSString *const MSID_APP_NAME_KEY                  = @"x-app-name";
 NSString *const MSID_APP_VER_KEY                   = @"x-app-ver";
+NSString *const MSID_CCS_HINT_KEY                  = @"X-AnchorMailbox";
 
 NSString *const MSID_DEFAULT_FAMILY_ID             = @"1";
 NSString *const MSID_ADAL_SDK_NAME                 = @"adal-objc";
@@ -54,5 +55,16 @@ NSString *const MSID_CLIENT_SDK_TYPE_MSAL         = @"sdk_msal";
 NSString *const MSID_CLIENT_SDK_TYPE_ADAL         = @"sdk_adal";
 
 NSString *const MSID_POP_TOKEN_PRIVATE_KEY = @"com.microsoft.token.private.key";
-NSString *const MSID_POP_TOKEN_PUBLIC_KEY = @"com.microsoft.token.public.key";
 NSString *const MSID_POP_TOKEN_KEY_LABEL = @"com.microsoft.token.key";
+NSString *const MSID_THROTTLING_METADATA_KEYCHAIN = @"com.microsoft.identity.throttling.metadata";
+NSString *const MSID_THROTTLING_METADATA_KEYCHAIN_VERSION = @"Ver1";
+
+NSString *const MSID_SHARED_MODE_CURRENT_ACCOUNT_CHANGED_NOTIFICATION_KEY = @"SHARED_MODE_CURRENT_ACCOUNT_CHANGED";
+
+NSString *const MSID_CLIENT_SKU_MSAL_IOS           = @"MSAL.iOS";
+NSString *const MSID_CLIENT_SKU_MSAL_OSX           = @"MSAL.OSX";
+NSString *const MSID_CLIENT_SKU_CPP_IOS            = @"MSAL.xplat.iOS";
+NSString *const MSID_CLIENT_SKU_CPP_OSX            = @"MSAL.xplat.macOS";
+NSString *const MSID_CLIENT_SKU_ADAL_IOS           = @"iOS";
+
+#define METHODANDLINE   [NSString stringWithFormat:@"%s [Line %d]", __PRETTY_FUNCTION__, __LINE__]

@@ -21,23 +21,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDTokenRequest.h"
+#import "MSIDThumbprintCalculatable.h"
+
 @class MSIDAuthenticationScheme;
 
-@interface MSIDRefreshTokenGrantRequest : MSIDTokenRequest
+@interface MSIDRefreshTokenGrantRequest : MSIDTokenRequest <MSIDThumbprintCalculatable>
 
 - (instancetype _Nullable)initWithEndpoint:(nonnull NSURL *)endpoint
                                 authScheme:(nonnull MSIDAuthenticationScheme *)authScheme
                                   clientId:(nonnull NSString *)clientId
                                      scope:(nullable NSString *)scope
                               refreshToken:(nonnull NSString *)refreshToken
+                               redirectUri:(nullable NSString *)redirectUri
                            extraParameters:(nullable NSDictionary *)extraParameters
+                                ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                                    context:(nullable id<MSIDRequestContext>)context NS_DESIGNATED_INITIALIZER;
 
 - (instancetype _Nullable)initWithEndpoint:(nonnull NSURL *)endpoint
                                 authScheme:(nonnull MSIDAuthenticationScheme *)authScheme
                                   clientId:(nonnull NSString *)clientId
                                      scope:(nullable NSString *)scope
+                                ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                                    context:(nullable id<MSIDRequestContext>)context NS_UNAVAILABLE;
 
 @end
+
+#endif

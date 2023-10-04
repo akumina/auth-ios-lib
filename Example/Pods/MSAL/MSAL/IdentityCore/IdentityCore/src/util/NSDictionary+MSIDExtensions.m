@@ -53,16 +53,17 @@
     for (NSString *query in queries)
     {
         NSArray *queryElements = [query componentsSeparatedByString:@"="];
-        if (queryElements.count > 2)
-        {
-            MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"Query parameter must be a form key=value: %@", query);
-            continue;
-        }
         
         NSString *key = isFormEncoded ? [queryElements[0] msidTrimmedString].msidWWWFormURLDecode : [queryElements[0] msidTrimmedString].msidURLDecode;
         if ([NSString msidIsStringNilOrBlank:key])
         {
-            MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"Query parameter must have a key");
+            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Query parameter must have a key");
+            continue;
+        }
+        
+        if (queryElements.count > 2)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Query parameter contains more than one '=' for key: %@", key);
             continue;
         }
         
@@ -87,7 +88,6 @@
 {
     return [NSString msidWWWFormURLEncodedStringFromDictionary:self];
 }
-
 
 - (NSDictionary *)msidDictionaryByRemovingFields:(NSArray *)fieldsToRemove
 {
@@ -153,10 +153,35 @@
     return YES;
 }
 
++ (NSDictionary *)msidDictionaryFromJSONString:(NSString *)jsonString
+{
+    NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    
+    if (!jsonData)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to deserialize: jsonData is nil.");
+        return nil;
+    }
+
+    NSError *error = nil;
+    NSDictionary *dictionary = [NSJSONSerialization JSONObjectWithData:jsonData
+                                                               options:NSJSONReadingMutableContainers
+                                                                 error:&error];
+
+    
+    if (error)
+    {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelWarning, nil, @"Failed to deserialize data with error %@", MSID_PII_LOG_MASKABLE(error));
+        return nil;
+    }
+    
+    return dictionary;
+}
+
 - (NSString *)msidJSONSerializeWithContext:(id<MSIDRequestContext>)context
 {
     NSError *serializationError = nil;
-    NSData *serializedData = [NSJSONSerialization dataWithJSONObject:self options:0 error:&serializationError];
+    NSData *serializedData = [NSJSONSerialization dataWithJSONObject:self options:NSJSONWritingSortedKeys error:&serializationError];
 
     if (!serializedData)
     {
@@ -267,7 +292,8 @@
     NSArray *keys = [self allKeys];
     for (id key in keys)
     {
-        id value = [self valueForKey:key];
+        
+        id value = [self objectForKey:key];
         id copy = nil;
         if ([value respondsToSelector:@selector(mutableDeepCopy)])
         {

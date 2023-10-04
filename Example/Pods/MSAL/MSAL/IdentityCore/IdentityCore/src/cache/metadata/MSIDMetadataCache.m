@@ -50,7 +50,7 @@
         _memoryCache = [NSMutableDictionary new];
         _dataSource = dataSource;
         NSString *queueName = [NSString stringWithFormat:@"com.microsoft.msidmetadatacache-%@", [NSUUID UUID].UUIDString];
-        _synchronizationQueue = dispatch_queue_create([queueName cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
+        _synchronizationQueue = dispatch_queue_create([queueName cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_SERIAL);
         _jsonSerializer = [MSIDCacheItemJsonSerializer new];
     }
     
@@ -148,7 +148,7 @@
     }
     
     dispatch_barrier_async(_synchronizationQueue, ^{
-        _memoryCache[key] = item;
+        self->_memoryCache[key] = item;
     });
     
     // return a copy because we don't want external change on the cache status

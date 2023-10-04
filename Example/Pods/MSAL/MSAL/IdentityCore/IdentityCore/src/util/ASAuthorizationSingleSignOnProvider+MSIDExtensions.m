@@ -27,6 +27,7 @@
 #import "MSIDBrokerOperationRequest.h"
 #import "MSIDRequestParameters.h"
 #import "NSDictionary+MSIDQueryItems.h"
+#import "ASAuthorizationController+MSIDExtensions.h"
 
 @implementation ASAuthorizationSingleSignOnProvider (MSIDExtensions)
 
@@ -38,21 +39,24 @@
 
 - (ASAuthorizationSingleSignOnRequest *)createSSORequestWithOperationRequest:(MSIDBrokerOperationRequest *)operationRequest
                                                            requestParameters:(MSIDRequestParameters *)requestParameters
+                                                                  requiresUI:(BOOL)requiresUI
                                                                        error:(NSError **)error
 {
     [MSIDBrokerOperationRequest fillRequest:operationRequest
                         keychainAccessGroup:requestParameters.keychainAccessGroup
                              clientMetadata:requestParameters.appRequestMetadata
+         clientBrokerKeyCapabilityNotSupported: requestParameters.clientBrokerKeyCapabilityNotSupported
                                     context:requestParameters];
     
     ASAuthorizationSingleSignOnRequest *ssoRequest = [self createRequest];
     ssoRequest.requestedOperation = [operationRequest.class operation];
+    [self.class setRequiresUI:requiresUI forRequest:ssoRequest];
     
     NSDictionary *jsonDictionary = [operationRequest jsonDictionary];
     
     if (!jsonDictionary)
     {
-        NSError *ssoError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidInternalParameter, @"Failed to serialize SSO request dictionary for get accounts request", nil, nil, nil, requestParameters.correlationId, nil, YES);
+        NSError *ssoError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidInternalParameter, [NSString stringWithFormat:@"Failed to serialize SSO request dictionary for %@", [[operationRequest class] operation]], nil, nil, nil, requestParameters.correlationId, nil, YES);
         if (error) *error = ssoError;
         return nil;
     }
@@ -60,6 +64,16 @@
     NSArray<NSURLQueryItem *> *queryItems = [jsonDictionary msidQueryItems];
     ssoRequest.authorizationOptions = queryItems;
     return ssoRequest;
+}
+
++ (void)setRequiresUI:(BOOL)requiresUI forRequest:(ASAuthorizationSingleSignOnRequest *)ssoRequest
+{    
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 150000 || __MAC_OS_X_VERSION_MAX_ALLOWED >= 120000
+    if (@available(iOS 15.0, macOS 12.0, *))
+    {
+        ssoRequest.userInterfaceEnabled = requiresUI;
+    }
+#endif
 }
 
 @end

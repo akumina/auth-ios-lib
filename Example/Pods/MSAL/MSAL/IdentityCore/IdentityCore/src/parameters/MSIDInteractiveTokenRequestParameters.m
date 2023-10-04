@@ -22,6 +22,7 @@
 // THE SOFTWARE.
 
 #import "MSIDInteractiveTokenRequestParameters.h"
+#import "MSIDRequestParameters+Internal.h"
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDClaimsRequest.h"
 
@@ -63,6 +64,15 @@
     return self;
 }
 
+- (void)setLoginHint:(NSString *)loginHint
+{
+    if ([_loginHint isEqualToString:loginHint]) return;
+    
+    _loginHint = loginHint;
+    
+    [self updateAppRequestMetadata:nil];
+}
+
 - (NSOrderedSet *)allAuthorizeRequestScopes
 {
     NSMutableOrderedSet *requestScopes = [[self.allTokenRequestScopes msidScopeSet] mutableCopy];
@@ -77,7 +87,12 @@
 
 - (NSDictionary *)allAuthorizeRequestExtraParameters
 {
-    NSMutableDictionary *authorizeParams = [[NSMutableDictionary alloc] initWithDictionary:self.appRequestMetadata];
+    return [self allAuthorizeRequestExtraParametersWithMetadata:YES];
+}
+
+- (NSDictionary *)allAuthorizeRequestExtraParametersWithMetadata:(BOOL)includeMetadata
+{
+    NSMutableDictionary *authorizeParams = includeMetadata ? [[NSMutableDictionary alloc] initWithDictionary:self.appRequestMetadata] : [NSMutableDictionary new];
     
     if (self.extraAuthorizeURLQueryParameters && self.extraAuthorizeURLQueryParameters.count > 0)
     {
@@ -101,13 +116,28 @@
         return NO;
     }
     
-    if (self.claimsRequest.hasClaims && self.allAuthorizeRequestExtraParameters[MSID_OAUTH2_CLAIMS])
+    __auto_type allAuthorizeRequestExtraParameters = [self allAuthorizeRequestExtraParametersWithMetadata:NO];
+    if (self.claimsRequest.hasClaims && allAuthorizeRequestExtraParameters[MSID_OAUTH2_CLAIMS])
     {
         MSIDFillAndLogError(error, MSIDErrorInvalidDeveloperParameter, @"Duplicate claims parameter is found in extraQueryParameters. Please remove it.", nil);
         result = NO;
     }
 
     return result;
+}
+
+- (void)updateAppRequestMetadata:(NSString *)homeAccountId
+{
+    [super updateAppRequestMetadata:homeAccountId];
+    
+    NSString *loginHint = self.loginHint;
+    
+    if (self.appRequestMetadata[MSID_CCS_HINT_KEY] == nil)
+    {
+        NSMutableDictionary *appRequestMetadata = [self.appRequestMetadata mutableCopy];
+        appRequestMetadata[MSID_CCS_HINT_KEY] = [self ccsHintHeaderWithUpn:loginHint];
+        self.appRequestMetadata = appRequestMetadata;
+    }
 }
 
 @end

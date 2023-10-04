@@ -22,6 +22,7 @@
 #import "MSALAuthenticationSchemeProtocol.h"
 #import "MSALAuthority.h"
 #import "MSALB2CAuthority.h"
+#import "MSALCIAMAuthority.h"
 #import "MSALClaimsRequest.h"
 #import "MSALDefinitions.h"
 #import "MSALDeviceInformation.h"
@@ -45,6 +46,7 @@
 #import "MSALTenantProfile.h"
 #import "MSALTokenParameters.h"
 #import "MSALWebviewParameters.h"
+#import "MSALWPJMetaData.h"
 #import "MSALLegacySharedAccountsProvider.h"
 #import "MSALHTTPConfig.h"
 #import "MSALLoggerConfig.h"
@@ -54,6 +56,7 @@
 #import "MSALCacheConfig.h"
 #import "MSALExternalAccountProviding.h"
 #import "MSALSerializedADALCacheProvider.h"
+#import "MSALWipeCacheForAllAccountsConfig.h"
 #import "MSALSliceConfig.h"
 
 FOUNDATION_EXPORT double MSALVersionNumber;

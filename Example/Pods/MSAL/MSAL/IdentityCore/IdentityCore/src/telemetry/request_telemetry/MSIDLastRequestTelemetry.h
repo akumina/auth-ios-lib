@@ -21,26 +21,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import <Foundation/Foundation.h>
 #import "MSIDTelemetryStringSerializable.h"
 
-@interface MSIDRequestTelemetryErrorInfo : NSObject
+@interface MSIDRequestTelemetryErrorInfo : NSObject <NSSecureCoding>
 
 @property (nonatomic) NSInteger apiId;
-@property (nonatomic, nonnull) NSUUID *correlationId;
+@property (nonatomic, nullable) NSUUID *correlationId;
 @property (nonatomic, nonnull) NSString *error;
+
+@end
+
+@interface MSIDRequestPerformanceInfo : NSObject <NSSecureCoding>
+
+@property (nonatomic, nullable) NSMutableArray<NSNumber *> *totalNumbers;
+@property (nonatomic, nullable) NSMutableArray<NSNumber *> *ipcRequestNumbers;
+@property (nonatomic, nullable) NSMutableArray<NSNumber *> *ipcResponseNumbers;
 
 @end
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern NSString * _Nonnull const MSID_PERF_TELEMETRY_SILENT_TYPE;
+extern NSString * _Nonnull const MSID_PERF_TELEMETRY_SIGNOUT_TYPE;
+extern NSString * _Nonnull const MSID_PERF_TELEMETRY_GETACCOUNTS_TYPE;
+extern NSString * _Nonnull const MSID_PERF_TELEMETRY_GETDEVICEINFO_TYPE;
+
 @class MSIDCurrentRequestTelemetrySerializedItem;
 
-@interface MSIDLastRequestTelemetry : NSObject <MSIDTelemetryStringSerializable>
+@interface MSIDLastRequestTelemetry : NSObject <MSIDTelemetryStringSerializable, NSSecureCoding>
 
 @property (nonatomic, readonly) NSInteger schemaVersion;
 @property (nonatomic, readonly) NSInteger silentSuccessfulCount;
 @property (nonatomic, nullable, readonly) NSArray<MSIDRequestTelemetryErrorInfo *> *errorsInfo;
+@property (nonatomic, nullable, readonly) NSArray<NSString *> *platformFields;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -53,6 +69,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)increaseSilentSuccessfulCount;
 
+- (void)trackSSOExtensionPerformanceWithType:(NSString *)type
+                             totalPerfNumber:(NSTimeInterval)totalPerfNumber
+                        ipcRequestPerfNumber:(NSTimeInterval)ipcRequestPerfNumber
+                       ipcResponsePerfNumber:(NSTimeInterval)ipcResponsePerfNumber;
+
 @end
 
 NS_ASSUME_NONNULL_END
+
+#endif

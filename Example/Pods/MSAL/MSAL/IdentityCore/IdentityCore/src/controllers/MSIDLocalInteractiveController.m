@@ -22,7 +22,7 @@
 // THE SOFTWARE.
 
 #import "MSIDLocalInteractiveController+Internal.h"
-#import "MSIDInteractiveTokenRequest.h"
+#import "MSIDInteractiveTokenRequest+Internal.h"
 #import "MSIDInteractiveTokenRequestParameters.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDTelemetry+Internal.h"
@@ -35,6 +35,7 @@
 #import "MSIDBrokerInteractiveController.h"
 #endif
 #import "MSIDWebWPJResponse.h"
+#import "MSIDThrottlingService.h"
 
 @interface MSIDLocalInteractiveController()
 
@@ -70,14 +71,34 @@
 {
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, self.requestParameters, @"Beginning interactive flow.");
     
+    MSIDInteractiveTokenRequest *request = [self.tokenRequestProvider interactiveTokenRequestWithParameters:self.interactiveRequestParamaters];
+
     MSIDRequestCompletionBlock completionBlockWrapper = ^(MSIDTokenResult * _Nullable result, NSError * _Nullable error)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, self.requestParameters, @"Interactive flow finished. Result %@, error: %ld error domain: %@", _PII_NULLIFY(result), (long)error.code, error.domain);
+        NSString *ssoNonce = [error.userInfo valueForKey:MSID_SSO_NONCE_QUERY_PARAM_KEY];
+        if ([NSString msidIsStringNilOrBlank:ssoNonce])
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, self.requestParameters, @"Interactive flow finished. Result %@, error: %ld error domain: %@", _PII_NULLIFY(result), (long)error.code, error.domain);
+        }
+        if (!error)
+        {
+            /**
+             Throttling service: when an interactive token succeed, we update the last refresh time of the throttling service
+             */
+            [MSIDThrottlingService updateLastRefreshTimeDatasource:request.extendedTokenCache
+                                                               context:self.interactiveRequestParamaters
+                                                                 error:nil];
+        }
+        
+        if (!completionBlock)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, self.requestParameters, @"Passed nil completionBlock. End local interactive acquire token.");
+            return;
+        }
+        
         completionBlock(result, error);
     };
-    
-    __auto_type request = [self.tokenRequestProvider interactiveTokenRequestWithParameters:self.interactiveRequestParamaters];
-    
+
     [self acquireTokenWithRequest:request completionBlock:completionBlockWrapper];
 }
 
@@ -101,15 +122,17 @@
         additionalInfo[MSIDHomeAccountIdkey] = response.clientInfo.accountIdentifier;
         
         NSError *registrationError = MSIDCreateError(MSIDErrorDomain, MSIDErrorWorkplaceJoinRequired, @"Workplace join is required", nil, nil, nil, self.requestParameters.correlationId, additionalInfo, NO);
+#if !EXCLUDE_FROM_MSALCPP
         MSIDTelemetryAPIEvent *telemetryEvent = [self telemetryAPIEvent];
         [telemetryEvent setLoginHint:response.upn];
         [self stopTelemetryEvent:telemetryEvent error:registrationError];
+#endif
         completionBlock(nil, registrationError);
         return;
     }
 
     NSError *appInstallError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"App install link is missing. Incorrect URL returned from server", nil, nil, nil, self.requestParameters.correlationId, nil, YES);
-    [self stopTelemetryEvent:[self telemetryAPIEvent] error:appInstallError];
+    CONDITIONAL_STOP_TELEMETRY_EVENT([self telemetryAPIEvent], appInstallError);
     completionBlock(nil, appInstallError);
 }
 
@@ -119,7 +142,7 @@
     if ([NSString msidIsStringNilOrBlank:response.appInstallLink])
     {
         NSError *appInstallError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"App install link is missing. Incorrect URL returned from server", nil, nil, nil, self.requestParameters.correlationId, nil, YES);
-        [self stopTelemetryEvent:[self telemetryAPIEvent] error:appInstallError];
+        CONDITIONAL_STOP_TELEMETRY_EVENT([self telemetryAPIEvent], appInstallError);
         completion(nil, appInstallError);
         return;
     }
@@ -132,7 +155,7 @@
 
     if (!brokerController)
     {
-        [self stopTelemetryEvent:[self telemetryAPIEvent] error:brokerError];
+        CONDITIONAL_STOP_TELEMETRY_EVENT([self telemetryAPIEvent], brokerError);
         completion(nil, brokerError);
         return;
     }
@@ -140,11 +163,12 @@
     [brokerController acquireToken:completion];
 #else
     NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Trying to install broker on macOS, where it's not currently supported", nil, nil, nil, self.requestParameters.correlationId, nil, YES);
-    [self stopTelemetryEvent:[self telemetryAPIEvent] error:error];
+    CONDITIONAL_STOP_TELEMETRY_EVENT([self telemetryAPIEvent], error);
     completion(nil, error);
 #endif
 }
 
+#if !EXCLUDE_FROM_MSALCPP
 - (MSIDTelemetryAPIEvent *)telemetryAPIEvent
 {
     MSIDTelemetryAPIEvent *event = [super telemetryAPIEvent];
@@ -159,6 +183,7 @@
 
     return event;
 }
+#endif
 
 #pragma mark - Protected
 
@@ -171,7 +196,7 @@
         return;
     }
 
-    [[MSIDTelemetry sharedInstance] startEvent:self.interactiveRequestParamaters.telemetryRequestId eventName:MSID_TELEMETRY_EVENT_API_EVENT];
+    CONDITIONAL_START_EVENT(CONDITIONAL_SHARED_INSTANCE, self.interactiveRequestParamaters.telemetryRequestId, MSID_TELEMETRY_EVENT_API_EVENT);
 
     self.currentRequest = request;
     
@@ -183,10 +208,11 @@
             [self handleWebMSAuthResponse:msauthResponse completion:completionBlock];
             return;
         }
-
+#if !EXCLUDE_FROM_MSALCPP
         MSIDTelemetryAPIEvent *telemetryEvent = [self telemetryAPIEvent];
         [telemetryEvent setUserInformation:result.account];
         [self stopTelemetryEvent:telemetryEvent error:error];
+#endif
         self.currentRequest = nil;
         
         completionBlock(result, error);

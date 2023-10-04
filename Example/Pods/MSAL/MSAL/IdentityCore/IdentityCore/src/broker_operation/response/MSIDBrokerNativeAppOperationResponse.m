@@ -35,11 +35,16 @@
 #import "MSIDJsonSerializableTypes.h"
 #import "MSIDJsonSerializableFactory.h"
 #import "MSIDJsonSerializer.h"
+#import "NSDate+MSIDExtensions.h"
+#if !EXCLUDE_FROM_MSALCPP
+#import "MSIDLastRequestTelemetry.h"
+#endif
 
-NSString *const MSID_BROKER_OPERATION_JSON_KEY = @"operation";
 NSString *const MSID_BROKER_OPERATION_RESULT_JSON_KEY = @"success";
 NSString *const MSID_BROKER_OPERATION_RESPONSE_TYPE_JSON_KEY = @"operation_response_type";
 NSString *const MSID_BROKER_APP_VERSION_JSON_KEY = @"client_app_version";
+NSString *const MSID_BROKER_RESPONSE_GENERATION_TIMESTAMP = @"response_gen_timestamp";
+NSString *const MSID_BROKER_REQUEST_RECEIVED_TIMESTAMP = @"request_received_timestamp";
 
 @implementation MSIDBrokerNativeAppOperationResponse
 
@@ -67,9 +72,14 @@ NSString *const MSID_BROKER_APP_VERSION_JSON_KEY = @"client_app_version";
 
 - (NSNumber *)httpStatusCode
 {
-    if (!_httpStatusCode) _httpStatusCode = @200;
+    if (_httpStatusCode == nil) _httpStatusCode = self.class.defaultHttpStatusCode;
     
     return _httpStatusCode;
+}
+
++ (NSNumber *)defaultHttpStatusCode
+{
+    return @200;
 }
 
 - (NSString *)httpVersion
@@ -83,17 +93,16 @@ NSString *const MSID_BROKER_APP_VERSION_JSON_KEY = @"client_app_version";
 
 - (instancetype)initWithJSONDictionary:(NSDictionary *)json error:(NSError **)error
 {
-    self = [super init];
+    self = [super initWithJSONDictionary:json error:error];
     
     if (self)
     {
-        if (![json msidAssertType:NSString.class ofKey:MSID_BROKER_OPERATION_JSON_KEY required:YES error:error]) return nil;
-        self.operation = json[MSID_BROKER_OPERATION_JSON_KEY];
-        
         if (![json msidAssertTypeIsOneOf:@[NSString.class, NSNumber.class] ofKey:MSID_BROKER_OPERATION_RESULT_JSON_KEY required:YES error:error]) return nil;
         _success = [json[MSID_BROKER_OPERATION_RESULT_JSON_KEY] boolValue];
         _clientAppVersion = [json msidStringObjectForKey:MSID_BROKER_APP_VERSION_JSON_KEY];
         _deviceInfo = [[MSIDDeviceInfo alloc] initWithJSONDictionary:json error:error];
+        _responseGenerationTimeStamp =  [NSDate msidDateFromTimeStamp:json[MSID_BROKER_RESPONSE_GENERATION_TIMESTAMP]];
+        _requestReceivedTimeStamp = [NSDate msidDateFromTimeStamp:json[MSID_BROKER_REQUEST_RECEIVED_TIMESTAMP]];
     }
     
     return self;
@@ -101,23 +110,44 @@ NSString *const MSID_BROKER_APP_VERSION_JSON_KEY = @"client_app_version";
 
 - (NSDictionary *)jsonDictionary
 {
-    NSMutableDictionary *json = [NSMutableDictionary new];
-    if (!self.operation)
-    {
-        MSID_LOG_WITH_CORR(MSIDLogLevelError, nil, @"Failed to create json for %@ class, operation is nil.", self.class);
-        return nil;
-    }
+    NSMutableDictionary *json = [[super jsonDictionary] mutableCopy];
     
-    json[MSID_BROKER_OPERATION_JSON_KEY] = self.operation;
     json[MSID_BROKER_OPERATION_RESULT_JSON_KEY] = [@(self.success) stringValue];
     json[MSID_BROKER_OPERATION_RESPONSE_TYPE_JSON_KEY] = self.class.responseType;
     json[MSID_BROKER_APP_VERSION_JSON_KEY] = self.clientAppVersion;
+    json[MSID_BROKER_RESPONSE_GENERATION_TIMESTAMP] = [self.responseGenerationTimeStamp msidDateToFractionalTimestamp:10];
+    json[MSID_BROKER_REQUEST_RECEIVED_TIMESTAMP] = [self.requestReceivedTimeStamp msidDateToFractionalTimestamp:10];
     
     NSDictionary *deviceInfoJson = [self.deviceInfo jsonDictionary];
     if (deviceInfoJson) [json addEntriesFromDictionary:deviceInfoJson];
     
     return json;
 }
+
+#if !EXCLUDE_FROM_MSALCPP
+
+- (void)trackPerfTelemetryWithLastRequest:(MSIDLastRequestTelemetry *)telemetry
+                         requestStartDate:(NSDate *)requestStartDate
+                            telemetryType:(NSString *)telemetryType
+{
+    if (!requestStartDate)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"trackPerfTelemetryWithLastRequest called with nil request start date");
+        return;
+    }
+    
+    NSDate *responseDate = [NSDate date];
+    NSTimeInterval totalTime = [responseDate timeIntervalSinceDate:requestStartDate];
+    NSTimeInterval ipcRequestTime = self.requestReceivedTimeStamp ? [self.requestReceivedTimeStamp timeIntervalSinceDate:requestStartDate] : 0;
+    NSTimeInterval ipcResponseTime = self.responseGenerationTimeStamp ? [responseDate timeIntervalSinceDate:self.responseGenerationTimeStamp] : 0;
+    
+    [telemetry trackSSOExtensionPerformanceWithType:telemetryType
+                                    totalPerfNumber:totalTime
+                               ipcRequestPerfNumber:ipcRequestTime
+                              ipcResponsePerfNumber:ipcResponseTime];
+}
+
+#endif
 
 @end
 

@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDExternalAADCacheSeeder.h"
 #import "MSIDAADV2Oauth2Factory.h"
 #import "MSIDRefreshTokenGrantRequest.h"
@@ -144,26 +146,26 @@
 
     [self.telemetry startEvent:requestParameters.telemetryRequestId eventName:MSID_TELEMETRY_EVENT_HTTP_V1_IDTOKEN_REQUEST];
     
-    [tokenRequest sendWithBlock:^(MSIDTokenResponse *tokenResponse, NSError *error)
+    [tokenRequest sendWithBlock:^(MSIDTokenResponse *tokenResponse, NSError *requestError)
      {
          __auto_type event = [[MSIDGetV1IdTokenHttpEvent alloc] initWithName:MSID_TELEMETRY_EVENT_HTTP_V1_IDTOKEN_REQUEST
                                                                                      context:requestParameters];
          [self.telemetry stopEvent:requestParameters.telemetryRequestId event:event];
          
-         if (error)
+         if (requestError)
          {
-             MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"Failed to acquire V1 Id Token token via Refresh token, error: %@", MSID_PII_LOG_MASKABLE(error));
+             MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"Failed to acquire V1 Id Token token via Refresh token, error: %@", MSID_PII_LOG_MASKABLE(requestError));
              
              completionBlockWrapper(false);
              return;
          }
          
-         MSIDIdToken *legacyIdToken = [factory idTokenFromResponse:tokenResponse
+         MSIDIdToken *v1IdToken = [factory idTokenFromResponse:tokenResponse
                                                      configuration:requestParameters.msidConfiguration];
          
-         if (!legacyIdToken)
+         if (!v1IdToken)
          {
-             MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"Failed to parse V1 Id Token, error: %@", MSID_PII_LOG_MASKABLE(error));
+             MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"Failed to parse V1 Id Token, error: %@", MSID_PII_LOG_MASKABLE(requestError));
              
              completionBlockWrapper(false);
          }
@@ -171,7 +173,7 @@
          MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"Saving V1 id token in default cache.");
          
          NSError *localError;
-         BOOL result = [self.defaultAccessor saveToken:legacyIdToken context:requestParameters error:&localError];
+         BOOL result = [self.defaultAccessor saveToken:v1IdToken context:requestParameters error:&localError];
          if (result)
          {
              MSID_LOG_WITH_CTX(MSIDLogLevelInfo, requestParameters, @"Saved V1 id token in default cache.");
@@ -181,7 +183,7 @@
              MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"Failed to save V1 id token in default cache, error: %@", MSID_PII_LOG_MASKABLE(error));
          }
          
-         [self seedExternalCacheWithIdToken:legacyIdToken
+         [self seedExternalCacheWithIdToken:v1IdToken
                               tokenResponse:originalTokenResponse
                                     factory:factory
                               configuration:requestParameters.msidConfiguration
@@ -258,3 +260,5 @@
 }
 
 @end
+
+#endif

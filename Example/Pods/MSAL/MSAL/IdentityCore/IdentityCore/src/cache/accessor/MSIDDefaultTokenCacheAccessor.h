@@ -23,6 +23,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSIDCacheAccessor.h"
+#import "MSIDAccountCredentialCache.h"
 
 @class MSIDAccountIdentifier;
 @class MSIDConfiguration;
@@ -37,6 +38,8 @@
 @protocol MSIDExtendedTokenCacheDataSource;
 
 @interface MSIDDefaultTokenCacheAccessor : NSObject <MSIDCacheAccessor>
+
+@property (nonatomic, readonly) MSIDAccountCredentialCache *accountCredentialCache;
 
 - (instancetype)initWithDataSource:(id<MSIDExtendedTokenCacheDataSource>)dataSource
                otherCacheAccessors:(NSArray<id<MSIDCacheAccessor>> *)otherAccessors;
@@ -89,6 +92,9 @@
                clearAccounts:(BOOL)clearAccounts
                      context:(id<MSIDRequestContext>)context
                        error:(NSError **)error;
+
+- (BOOL)clearCacheForAllAccountsWithContext:(id<MSIDRequestContext>)context
+                                      error:(NSError **)error;
 
 - (NSArray<MSIDAccount *> *)accountsWithAuthority:(MSIDAuthority *)authority
                                          clientId:(NSString *)clientId

@@ -28,12 +28,15 @@
 #import "MSIDError.h"
 #import "MSIDWorkplaceJoinChallenge.h"
 #import "MSIDWorkPlaceJoinUtilBase+Internal.h"
+#import "MSIDExternalSSOContext.h"
 
 @implementation MSIDWorkPlaceJoinUtil
 
-+ (MSIDAssymetricKeyPairWithCert *)getWPJKeysWithContext:(id<MSIDRequestContext>)context
++ (MSIDWPJKeyPairWithCert *)wpjKeyPairWithSSOContext:(MSIDExternalSSOContext *)ssoContext
+                                            tenantId:(NSString *)tenantId
+                                             context:(id<MSIDRequestContext>)context
 {
-    return [self getRegistrationInformation:context workplacejoinChallenge:nil];
+    return nil;
 }
 
 + (MSIDRegistrationInformation *)getRegistrationInformation:(id<MSIDRequestContext>)context
@@ -55,13 +58,14 @@
     SecKeyRef privateKey = NULL;
     OSStatus status = noErr;
     NSString *certificateIssuer = nil;
+    NSDictionary *keyDict = nil;
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelVerbose, context, @"Attempting to get registration information - %@ shared access Group.", MSID_PII_LOG_MASKABLE(sharedAccessGroup));
     
-    identity = [self copyWPJIdentity:context sharedAccessGroup:sharedAccessGroup certificateIssuer:&certificateIssuer];
+    identity = [self copyWPJIdentity:context sharedAccessGroup:sharedAccessGroup certificateIssuer:&certificateIssuer privateKeyDict:&keyDict];
     if (!identity || CFGetTypeID(identity) != SecIdentityGetTypeID())
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, context, @"Failed to retrieve WPJ identity.");
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, context, @"Failed to retrieve WPJ identity. Identity is nil: %@", @(identity == nil));
         CFReleaseNull(identity);
         return nil;
     }
@@ -78,11 +82,7 @@
     
     MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, context, @"WPJ private key reference retrieved with result %ld", (long)status);
     
-    // Get the public key
-    MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, context, @"Retrieving WPJ public key reference.");
-    SecKeyRef publicKey = SecKeyCopyPublicKey(privateKey);
-    
-    if (!(certificate && publicKey && privateKey && certificateIssuer))
+    if (!(certificate && privateKey && certificateIssuer))
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelError, context, @"WPJ identity retrieved from keychain is invalid.");
     }
@@ -90,15 +90,17 @@
     {
         info = [[MSIDRegistrationInformation alloc] initWithIdentity:identity
                                                           privateKey:privateKey
-                                                           publicKey:publicKey
                                                          certificate:certificate
                                                    certificateIssuer:certificateIssuer];
+        if (!info)
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelError, context, @"Registration information failed to be created");
+        }
     }
     
     CFReleaseNull(identity);
     CFReleaseNull(certificate);
     CFReleaseNull(privateKey);
-    CFReleaseNull(publicKey);
     
     return info;
 }
@@ -106,8 +108,11 @@
 + (SecIdentityRef)copyWPJIdentity:(__unused id<MSIDRequestContext>)context
                 sharedAccessGroup:(NSString *)accessGroup
                 certificateIssuer:(NSString **)issuer
+                   privateKeyDict:(NSDictionary **)keyDict
 
 {
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelVerbose, context, @"Attempting to get registration information - %@ shared access Group", accessGroup);
+    
     NSMutableDictionary *identityDict = [[NSMutableDictionary alloc] init];
     [identityDict setObject:(__bridge id)kSecClassIdentity forKey:(__bridge id)kSecClass];
     [identityDict setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnRef];
@@ -120,6 +125,7 @@
     
     if (status != errSecSuccess)
     {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, context, @"Attempting to get registration information failed - %@ shared access Group - status %d", accessGroup, (int)status);
         return NULL;
     }
     
@@ -131,6 +137,11 @@
         *issuer = [[NSString alloc] initWithData:certIssuer encoding:NSASCIIStringEncoding];
     }
     
+    if (keyDict)
+    {
+        *keyDict = resultDict;
+    }
+    
     SecIdentityRef identityRef = (__bridge_retained SecIdentityRef)[resultDict objectForKey:(__bridge NSString*)kSecValueRef];
     return identityRef;
 }
@@ -139,6 +150,15 @@
                                              context:(nullable id<MSIDRequestContext>)context
                                                error:(NSError*__nullable*__nullable)error
 {
+    return [self getWPJStringDataFromV2ForTenantId:nil identifier:identifier key:nil context:context error:error];
+}
+
++ (nullable NSString *)getWPJStringDataFromV2ForTenantId:(NSString *)tenantId
+                                              identifier:(nonnull NSString *)identifier
+                                                     key:(nullable NSString *)key
+                                                 context:(nullable id<MSIDRequestContext>)context
+                                                   error:(NSError*__nullable*__nullable)error
+{
     NSString *teamId = [[MSIDKeychainUtil sharedInstance] teamId];
 
     if (!teamId)
@@ -146,9 +166,18 @@
         MSID_LOG_WITH_CTX(MSIDLogLevelError, context, @"Encountered an error when reading teamID from keychain.");
         return nil;
     }
-    NSString *sharedAccessGroup = [NSString stringWithFormat:@"%@.com.microsoft.workplacejoin", teamId];
+    
+    if (tenantId)
+    {
+        NSString *sharedAccessGroup = [NSString stringWithFormat:@"%@.com.microsoft.workplacejoin.v2", teamId];
+        return [self getWPJStringDataFromV2ForTenantId:tenantId identifier:identifier key:key accessGroup:sharedAccessGroup context:context error:error];
+    }
+    else
+    {
+        NSString *sharedAccessGroup = [NSString stringWithFormat:@"%@.com.microsoft.workplacejoin", teamId];
+        return [self getWPJStringDataForIdentifier:identifier accessGroup:sharedAccessGroup context:context error:error];
+    }
 
-    return [self getWPJStringDataForIdentifier:identifier accessGroup:sharedAccessGroup context:context error:error];
 }
 
 @end

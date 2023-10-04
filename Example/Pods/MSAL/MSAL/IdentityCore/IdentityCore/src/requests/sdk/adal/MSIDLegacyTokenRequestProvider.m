@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDLegacyTokenRequestProvider.h"
 #import "MSIDInteractiveTokenRequest.h"
 #import "MSIDLegacyTokenResponseValidator.h"
@@ -61,7 +63,8 @@
                                                              oauthFactory:self.oauthFactory
                                                    tokenResponseValidator:[MSIDLegacyTokenResponseValidator new]
                                                                tokenCache:self.tokenCache
-                                                    accountMetadataCache:nil];
+                                                     accountMetadataCache:nil
+                                                       extendedTokenCache:nil];
 }
 
 - (MSIDSilentTokenRequest *)silentTokenRequestWithParameters:(MSIDRequestParameters *)parameters
@@ -101,3 +104,5 @@
 }
 
 @end
+
+#endif

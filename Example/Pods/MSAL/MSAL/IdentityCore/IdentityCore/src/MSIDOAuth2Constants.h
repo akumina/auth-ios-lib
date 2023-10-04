@@ -37,6 +37,8 @@ extern NSString *const MSID_OAUTH2_ERROR;
 extern NSString *const MSID_OAUTH2_ERROR_DESCRIPTION;
 extern NSString *const MSID_OAUTH2_ERROR_SUBCODE;
 extern NSString *const MSID_OAUTH2_EXPIRES_IN;
+extern NSString *const MSID_OAUTH2_REFRESH_IN;
+extern NSString *const MSID_OAUTH2_REFRESH_ON;
 extern NSString *const MSID_OAUTH2_GRANT_TYPE;
 extern NSString *const MSID_OAUTH2_REDIRECT_URI;
 extern NSString *const MSID_OAUTH2_REFRESH_TOKEN;
@@ -64,6 +66,7 @@ extern NSString *const MSID_OAUTH2_PROMPT;
 extern NSString *const MSID_OAUTH2_PROMPT_NONE;
 extern NSString *const MSID_OAUTH2_SIGNOUT_REDIRECT_URI;
 extern NSString *const MSID_OAUTH2_REQUEST_CONFIRMATION;
+extern NSString *const MSID_OAUTH2_REQUEST_ENDPOINT;
 
 extern NSString *const MSID_OAUTH2_EXPIRES_ON;
 extern NSString *const MSID_OAUTH2_EXT_EXPIRES_IN;
@@ -75,6 +78,10 @@ extern NSString *const MSID_ENROLLMENT_ID;
 extern NSString *const MSID_OAUTH2_CODE_CHALLENGE;
 extern NSString *const MSID_OAUTH2_CODE_CHALLENGE_METHOD;
 extern NSString *const MSID_OAUTH2_CODE_VERIFIER;
+
+// Nested auth protocol
+extern NSString *const MSID_NESTED_AUTH_BROKER_CLIENT_ID;
+extern NSString *const MSID_NESTED_AUTH_BROKER_REDIRECT_URI;
 
 // AAD user identifiers
 extern NSString *const MSID_OAUTH2_CLIENT_INFO;
@@ -106,9 +113,12 @@ extern NSString *const MSID_CLIENT_INFO_CACHE_KEY;
 extern NSString *const MSID_ID_TOKEN_CACHE_KEY;
 extern NSString *const MSID_ADDITIONAL_INFO_CACHE_KEY;
 extern NSString *const MSID_EXPIRES_ON_CACHE_KEY;
+extern NSString *const MSID_REFRESH_ON_CACHE_KEY;
 extern NSString *const MSID_OAUTH_TOKEN_TYPE_CACHE_KEY;
 extern NSString *const MSID_CACHED_AT_CACHE_KEY;
+extern NSString *const MSID_LAST_RECOVERY_ATTEMPT_CACHE_KEY;
 extern NSString *const MSID_EXTENDED_EXPIRES_ON_CACHE_KEY;
+extern NSString *const MSID_EXPIRES_IN_CACHE_KEY;
 extern NSString *const MSID_SPE_INFO_CACHE_KEY;
 extern NSString *const MSID_RESOURCE_RT_CACHE_KEY;
 extern NSString *const MSID_LOCAL_ACCOUNT_ID_CACHE_KEY;
@@ -125,8 +135,10 @@ extern NSString *const MSID_LAST_MOD_TIME_CACHE_KEY;
 extern NSString *const MSID_LAST_MOD_APP_CACHE_KEY;
 extern NSString *const MSID_APPLICATION_IDENTIFIER_CACHE_KEY;
 extern NSString *const MSID_DEVICE_ID_CACHE_KEY;
+extern NSString *const MSID_PRT_EXTERNAL_KEY_TYPE_CACHE_KEY;
 extern NSString *const MSID_PRT_PROTOCOL_VERSION_CACHE_KEY;
 extern NSString *const MSID_KID_CACHE_KEY;
+extern NSString *const MSID_REQUESTED_CLAIMS_CACHE_KEY;
 
 extern NSString *const MSID_ACCESS_TOKEN_CACHE_TYPE;
 extern NSString *const MSID_ACCESS_TOKEN_WITH_AUTH_SCHEME_CACHE_TYPE;
@@ -145,9 +157,12 @@ extern NSString *const MSID_PRINCIPAL_HOME_ACCOUNT_ID_CACHE_KEY;
 extern NSString *const MSID_PRINCIPAL_DISPLAYABLE_ID_CACHE_KEY;
 extern NSString *const MSID_PRINCIPAL_ACCOUNT_ENVIRONMENT_CACHE_KEY;
 extern NSString *const MSID_APP_METADATA_AUTHORITY_MAP_TYPE;
-
+extern NSString *const MSID_REFRESH_TOKEN_CREDENTIAL;
 extern NSString *const MSID_OPENID_CONFIGURATION_SUFFIX;
 extern NSString *const MSID_PREFERRED_USERNAME_MISSING;
 
 extern NSString *const MSIDServerErrorClientMismatch;
 extern NSString *const MSIDServerErrorBadToken;
+
+extern NSString *const MSID_CCS_REQUEST_ID_KEY;
+extern NSString *const MSID_CCS_REQUEST_ID_RESPONSE;

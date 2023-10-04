@@ -29,16 +29,18 @@
 #import "MSIDBaseWebRequestConfiguration.h"
 
 @class MSIDPkce;
+@class MSIDExternalSSOContext;
 
 @interface MSIDAuthorizeWebRequestConfiguration : MSIDBaseWebRequestConfiguration
 
 // PKCE Support
-@property (readonly) MSIDPkce *pkce;
+@property (atomic, readonly) MSIDPkce *pkce;
 
 - (instancetype)initWithStartURL:(NSURL *)startURL
                   endRedirectUri:(NSString *)endRedirectUri
                             pkce:(MSIDPkce *)pkce
                            state:(NSString *)state
-              ignoreInvalidState:(BOOL)ignoreInvalidState;
+              ignoreInvalidState:(BOOL)ignoreInvalidState
+                      ssoContext:(MSIDExternalSSOContext *)ssoContext;
 
 @end

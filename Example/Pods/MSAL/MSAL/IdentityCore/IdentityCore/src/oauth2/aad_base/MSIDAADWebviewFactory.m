@@ -38,6 +38,10 @@
 #import "NSURL+MSIDAADUtils.h"
 #import "MSIDInteractiveTokenRequestParameters.h"
 
+#if !EXCLUDE_FROM_MSALCPP
+#import "MSIDJITTroubleshootingResponse.h"
+#endif
+
 @implementation MSIDAADWebviewFactory
 
 - (NSMutableDictionary<NSString *, NSString *> *)authorizationParametersFromRequestParameters:(MSIDInteractiveTokenRequestParameters *)parameters
@@ -83,16 +87,27 @@
 
 - (NSObject<MSIDWebviewInteracting> *)embeddedWebviewFromConfiguration:(MSIDBaseWebRequestConfiguration *)configuration
                                                          customWebview:(WKWebView *)webview
+                                  externalDecidePolicyForBrowserAction:(MSIDExternalDecidePolicyForBrowserActionBlock)externalDecidePolicyForBrowserAction
                                                                context:(id<MSIDRequestContext>)context
 {
     if (![NSThread isMainThread])
     {
         __block NSObject<MSIDWebviewInteracting> *session;
         dispatch_sync(dispatch_get_main_queue(), ^{
-            session = [self embeddedWebviewFromConfiguration:configuration customWebview:webview context:context];
+            session = [self embeddedWebviewFromConfiguration:configuration
+                                               customWebview:webview
+                        externalDecidePolicyForBrowserAction:externalDecidePolicyForBrowserAction
+                                                     context:context];
         });
         
         return session;
+    }
+    
+    MSIDWebViewPlatformParams *platformParams = nil;
+    
+    if (configuration.ssoContext)
+    {
+        platformParams = [[MSIDWebViewPlatformParams alloc] initWithExternalSSOContext:configuration.ssoContext];
     }
     
      MSIDAADOAuthEmbeddedWebviewController *embeddedWebviewController
@@ -100,13 +115,15 @@
                                                                   endURL:[NSURL URLWithString:configuration.endRedirectUrl]
                                                                  webview:webview
                                                            customHeaders:configuration.customHeaders
-                                                          platfromParams:nil
+                                                          platfromParams:platformParams
                                                                  context:context];
     
 #if TARGET_OS_IPHONE
     embeddedWebviewController.parentController = configuration.parentController;
     embeddedWebviewController.presentationType = configuration.presentationType;
 #endif
+    
+    embeddedWebviewController.externalDecidePolicyForBrowserAction = externalDecidePolicyForBrowserAction;
 
     return embeddedWebviewController;
 }
@@ -123,24 +140,52 @@
 #if AD_BROKER
     MSIDCBAWebAADAuthResponse *cbaResponse = [[MSIDCBAWebAADAuthResponse alloc] initWithURL:url context:context error:nil];
     if (cbaResponse) return cbaResponse;
+    
+    if ([url.absoluteString containsString:[NSString stringWithFormat:@"%@=", MSID_SSO_NONCE_QUERY_PARAM_KEY]])
+    {
+        NSString *ssoNonce = [[url msidQueryParameters] valueForKey:MSID_SSO_NONCE_QUERY_PARAM_KEY];
+        if (![NSString msidIsStringNilOrBlank:ssoNonce] && error)
+        {
+            NSDictionary *userInfo = @{MSID_SSO_NONCE_QUERY_PARAM_KEY : ssoNonce};
+            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorAuthorizationFailed, @"Nonce in JWT headers is likely expired, received SSO nonce redirect response.", nil, nil, nil, context.correlationId, userInfo, NO);
+            return nil;
+        }
+    }
+    
+#if !EXCLUDE_FROM_MSALCPP
+    // Try to create JIT troubleshooting response
+    MSIDJITTroubleshootingResponse *jitResponse = [[MSIDJITTroubleshootingResponse alloc] initWithURL:url context:context error:nil];
+    if (jitResponse)
+    {
+        // Get error from response's status
+        NSError *jitError = [jitResponse getErrorFromResponseWithContext:context];
+        if (jitError && error)
+        {
+            *error = jitError;
+        }
+        
+        return nil;
+    }
+#endif
+    
 #endif
     
     // Try to create a WPJ response
     MSIDWebWPJResponse *wpjResponse = [[MSIDWebWPJResponse alloc] initWithURL:url context:context error:nil];
     if (wpjResponse) return wpjResponse;
     
-    // Try to create a browser reponse
+    // Try to create a browser response
     MSIDWebOpenBrowserResponse *browserResponse = [[MSIDWebOpenBrowserResponse alloc] initWithURL:url
                                                                                           context:context
                                                                                             error:nil];
     if (browserResponse) return browserResponse;
     
-    // Try to acreate AAD Auth response
+    // Try to create AAD Auth response
     MSIDWebAADAuthCodeResponse *response = [[MSIDWebAADAuthCodeResponse alloc] initWithURL:url
-                                                                      requestState:requestState
-                                                                ignoreInvalidState:ignoreInvalidState
-                                                                           context:context
-                                                                             error:error];
+                                                                              requestState:requestState
+                                                                        ignoreInvalidState:ignoreInvalidState
+                                                                                   context:context
+                                                                                     error:error];
     
     return response;
 }

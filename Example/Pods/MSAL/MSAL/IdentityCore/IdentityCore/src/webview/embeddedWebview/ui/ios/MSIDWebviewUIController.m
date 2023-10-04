@@ -46,14 +46,17 @@ static WKWebViewConfiguration *s_webConfig;
 {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        s_webConfig = [WKWebViewConfiguration new];
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000
-        if (@available(iOS 13.0, *))
-        {
-            s_webConfig.defaultWebpagePreferences.preferredContentMode = WKContentModeMobile;
-        }
-#endif
+        s_webConfig = [MSIDWebviewUIController defaultWKWebviewConfiguration];
     });
+}
+
++ (WKWebViewConfiguration *)defaultWKWebviewConfiguration
+{
+    WKWebViewConfiguration *webConfig = [WKWebViewConfiguration new];
+    webConfig.applicationNameForUserAgent = kMSIDPKeyAuthKeyWordForUserAgent;
+    webConfig.defaultWebpagePreferences.preferredContentMode = WKContentModeMobile;
+
+    return webConfig;
 }
 
 - (id)initWithContext:(id<MSIDRequestContext>)context
@@ -141,33 +144,29 @@ static WKWebViewConfiguration *s_webConfig;
     UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:self];
     [navController setModalPresentationStyle:_presentationType];
     
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000
-    if (@available(iOS 13.0, *)) {
-        [navController setModalInPresentation:YES];
-    }
-#endif
+    [navController setModalInPresentation:YES];
     
     [MSIDMainThreadUtil executeOnMainThreadIfNeeded:^{
-        [_parentController presentViewController:navController animated:YES completion:nil];
+        [self.parentController presentViewController:navController animated:YES completion:nil];
     }];
 }
 
 - (void)dismissWebview:(void (^)(void))completion
 {
-    [[MSIDBackgroundTaskManager sharedInstance] stopOperationWithType:MSIDBackgroundTaskTypeInteractiveRequest];
+    __typeof__(self.parentController) parentController = self.parentController;
     
     //if webview is created by us, dismiss and then complete and return;
     //otherwise just complete and return.
-    if (_parentController && self.presentInParentController)
+    if (parentController && self.presentInParentController)
     {
-        [_parentController dismissViewControllerAnimated:YES completion:completion];
+        [parentController dismissViewControllerAnimated:YES completion:completion];
     }
     else
     {
         completion();
     }
     
-    _parentController = nil;
+    self.parentController = nil;
 }
 
 - (void)showLoadingIndicator
@@ -184,13 +183,11 @@ static WKWebViewConfiguration *s_webConfig;
 
 - (BOOL)obtainParentController
 {
-    if (self.parentController) return YES;
+    __typeof__(self.parentController) parentController = self.parentController;
     
-    if (@available(iOS 13.0, *)) return NO;
+    if (parentController) return YES;
     
-    self.parentController = [UIApplication msidCurrentViewController:self.parentController];
-    
-    return self.parentController != nil;
+    return NO;
 }
 
 - (void)setupCancelButton
@@ -204,20 +201,7 @@ static WKWebViewConfiguration *s_webConfig;
 - (UIActivityIndicatorView *)prepareLoadingIndicator:(UIView *)rootView
 {
     UIActivityIndicatorView *loadingIndicator;
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000
-    if (@available(iOS 13.0, *))
-    {
-        loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
-    }
-#if !TARGET_OS_MACCATALYST
-    else
-    {
-        loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-    }
-#endif
-#else
-    loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-#endif
+    loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
 
     [loadingIndicator setColor:[UIColor blackColor]];
     [loadingIndicator setCenter:rootView.center];

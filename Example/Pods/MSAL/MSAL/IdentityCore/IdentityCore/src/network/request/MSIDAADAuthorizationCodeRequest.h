@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import <Foundation/Foundation.h>
 #import "MSIDHttpRequest.h"
 
@@ -36,9 +38,12 @@
                                 redirectUri:(nonnull NSString *)redirectUri
                                       scope:(nullable NSString *)scope
                                   loginHint:(nullable NSString *)loginHint
+                                 ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                                     context:(nullable id<MSIDRequestContext>)context NS_DESIGNATED_INITIALIZER;
 
 - (instancetype _Nullable )init NS_UNAVAILABLE;
 + (instancetype _Nullable )new NS_UNAVAILABLE;
 
 @end
+
+#endif

@@ -25,13 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-#import "MSALAuthenticationSchemePop.h"
+#import "MSALAuthenticationSchemePop+Internal.h"
 #import "MSIDAuthenticationSchemePop.h"
 #import "MSALHttpMethod.h"
 #import "MSIDDevicePopManager.h"
 #import "MSALAuthScheme.h"
 #import "MSIDAccessToken.h"
 #import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDAssymetricKeyPair.h"
 
 static NSString *keyDelimiter = @" ";
 
@@ -64,6 +65,13 @@ static NSString *keyDelimiter = @" ";
     return self;
 }
 
+- (NSString *)authenticationScheme
+{
+    return MSALParameterStringForAuthScheme(self.scheme);
+}
+
+#pragma mark - MSALAuthenticationSchemeProtocolInternal
+
 - (MSIDAuthenticationScheme *)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params
 {
     return [[MSIDAuthenticationSchemePop alloc] initWithSchemeParameters:params];
@@ -72,7 +80,7 @@ static NSString *keyDelimiter = @" ";
 - (NSDictionary *)getSchemeParameters:(MSIDDevicePopManager *)popManager
 {
     NSMutableDictionary *schemeParams = [NSMutableDictionary new];
-    NSString *requestConf = popManager.requestConfirmation;
+    NSString *requestConf = popManager.keyPair.jsonWebKey;
     if (requestConf)
     {
         [schemeParams setObject:MSALParameterStringForAuthScheme(self.scheme) forKey:MSID_OAUTH2_TOKEN_TYPE];
@@ -115,11 +123,6 @@ static NSString *keyDelimiter = @" ";
     }
     
     return signedAccessToken;
-}
-
-- (NSString *)authenticationScheme
-{
-    return MSALParameterStringForAuthScheme(self.scheme);
 }
 
 - (NSString *)getAuthorizationHeader:(NSString *)accessToken

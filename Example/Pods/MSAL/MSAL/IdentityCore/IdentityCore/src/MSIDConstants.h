@@ -26,6 +26,8 @@
 @class MSIDTokenResult;
 @class MSIDAccount;
 @class MSIDDeviceInfo;
+@class MSIDPrtHeader;
+@class MSIDDeviceHeader;
 
 typedef NS_ENUM(NSInteger, MSIDWebviewType)
 {
@@ -65,9 +67,10 @@ typedef NS_ENUM(NSInteger, MSIDUIBehaviorType)
 
 typedef NS_ENUM(NSInteger, MSIDPromptType)
 {
-    MSIDPromptTypePromptIfNecessary = 0, // No prompt specified, will use cookies is present, prompt otherwise
+    MSIDPromptTypePromptIfNecessary = 0, // No prompt specified, will use cookies if present, prompt otherwise
     MSIDPromptTypeLogin, // prompt == "login", will force user to enter credentials
     MSIDPromptTypeConsent, // prompt == "consent", will force user to grant permissions
+    MSIDPromptTypeCreate,  // prompt == "create", will show create account UI. https://openid.net/specs/openid-connect-prompt-create-1_0.html
     MSIDPromptTypeSelectAccount, // prompt == "select_account", will show an account picker UI
     MSIDPromptTypeRefreshSession, // prompt=refresh_session
     MSIDPromptTypeNever, // prompt=none, ensures user is never prompted
@@ -80,17 +83,29 @@ typedef NS_ENUM(NSInteger, MSIDAuthScheme)
     MSIDAuthSchemePop,
 };
 
+typedef NS_ENUM(NSInteger, MSIDHeaderType)
+{
+    MSIDHeaderTypeAll = 0,
+    MSIDHeaderTypePrt,
+    MSIDHeaderTypeDeviceRegistration
+};
+
+
 typedef void (^MSIDRequestCompletionBlock)(MSIDTokenResult * _Nullable result, NSError * _Nullable error);
 typedef void (^MSIDSignoutRequestCompletionBlock)(BOOL success, NSError * _Nullable error);
 typedef void (^MSIDGetAccountsRequestCompletionBlock)(NSArray<MSIDAccount *> * _Nullable accounts, BOOL returnBrokerAccountsOnly, NSError * _Nullable error);
 typedef void (^MSIDGetDeviceInfoRequestCompletionBlock)(MSIDDeviceInfo * _Nullable deviceInfo, NSError * _Nullable error);
+typedef void (^MSIDGetSsoCookiesRequestCompletionBlock)(NSArray<MSIDPrtHeader *> * _Nullable prtHeaders, NSArray<MSIDDeviceHeader *> * _Nullable deviceHeaders, NSError * _Nullable error);
+typedef void (^MSIDSsoExtensionWrapperErrorBlock)(NSError * _Nullable error);
 
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
 @compatibility_alias MSIDViewController UIViewController;
+@compatibility_alias MSIDWindow UIWindow;
 #else
 #import <AppKit/AppKit.h>
 @compatibility_alias MSIDViewController NSViewController;
+@compatibility_alias MSIDWindow NSWindow;
 #endif
 
 extern NSString * _Nonnull const MSID_PLATFORM_KEY;//The SDK platform. iOS or OSX
@@ -101,6 +116,7 @@ extern NSString * _Nonnull const MSID_OS_VER_KEY;//iOS/OSX version
 extern NSString * _Nonnull const MSID_DEVICE_MODEL_KEY;//E.g. iPhone 5S
 extern NSString * _Nonnull const MSID_APP_NAME_KEY;
 extern NSString * _Nonnull const MSID_APP_VER_KEY;
+extern NSString * _Nonnull const MSID_CCS_HINT_KEY;
 
 extern NSString * _Nonnull const MSID_DEFAULT_FAMILY_ID;
 extern NSString * _Nonnull const MSID_ADAL_SDK_NAME;
@@ -123,5 +139,17 @@ extern NSString * _Nonnull const MSID_CLIENT_SDK_TYPE_MSAL;
 extern NSString * _Nonnull const MSID_CLIENT_SDK_TYPE_ADAL;
 
 extern NSString * _Nonnull const MSID_POP_TOKEN_PRIVATE_KEY;
-extern NSString * _Nonnull const MSID_POP_TOKEN_PUBLIC_KEY;
 extern NSString * _Nonnull const MSID_POP_TOKEN_KEY_LABEL;
+
+extern NSString * _Nonnull const MSID_THROTTLING_METADATA_KEYCHAIN;
+extern NSString * _Nonnull const MSID_THROTTLING_METADATA_KEYCHAIN_VERSION;
+
+extern NSString * _Nonnull const MSID_SHARED_MODE_CURRENT_ACCOUNT_CHANGED_NOTIFICATION_KEY;
+
+extern NSString * _Nonnull const MSID_CLIENT_SKU_MSAL_IOS;
+extern NSString * _Nonnull const MSID_CLIENT_SKU_MSAL_OSX;
+extern NSString * _Nonnull const MSID_CLIENT_SKU_CPP_IOS;
+extern NSString * _Nonnull const MSID_CLIENT_SKU_CPP_OSX;
+extern NSString * _Nonnull const MSID_CLIENT_SKU_ADAL_IOS;
+
+#define METHODANDLINE   [NSString stringWithFormat:@"%s [Line %d]", __PRETTY_FUNCTION__, __LINE__]

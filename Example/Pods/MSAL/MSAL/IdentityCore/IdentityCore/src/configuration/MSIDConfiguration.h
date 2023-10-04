@@ -30,20 +30,26 @@ extern NSString * const MSID_REDIRECT_URI_JSON_KEY;
 extern NSString * const MSID_CLIENT_ID_JSON_KEY;
 extern NSString * const MSID_SCOPE_JSON_KEY;
 extern NSString * const MSID_TOKEN_TYPE_JSON_KEY;
+extern NSString * const MSID_NESTED_AUTH_BROKER_CLIENT_ID_JSON_KEY;
+extern NSString * const MSID_NESTED_AUTH_BROKER_REDIRECT_URI_JSON_KEY;
 
 @interface MSIDConfiguration : NSObject <NSCopying, MSIDJsonSerializable>
 
 // Commonly used or needed properties
-@property (readwrite) MSIDAuthority *authority;
-@property (readwrite) NSString *redirectUri;
-@property (readwrite) NSString *clientId;
-@property (readonly) NSString *target;
-@property (readwrite) MSIDAuthenticationScheme *authScheme;
+@property (atomic, readwrite) MSIDAuthority *authority;
+@property (atomic, readwrite) NSString *redirectUri;
+@property (atomic, readwrite) NSString *clientId;
+@property (atomic, readonly) NSString *target;
+@property (atomic, readwrite) MSIDAuthenticationScheme *authScheme;
 
-@property (readwrite) NSString *applicationIdentifier;
+// Nested auth protocol
+@property (atomic, readwrite) NSString *nestedAuthBrokerClientId;
+@property (atomic, readwrite) NSString *nestedAuthBrokerRedirectUri;
 
-@property (readonly) NSString *resource;
-@property (readonly) NSOrderedSet<NSString *> *scopes;
+@property (atomic, readwrite) NSString *applicationIdentifier;
+
+@property (atomic, readonly) NSString *resource;
+@property (atomic, readonly) NSOrderedSet<NSString *> *scopes;
 
 - (instancetype)initWithAuthority:(MSIDAuthority *)authority
                       redirectUri:(NSString *)redirectUri
@@ -55,5 +61,22 @@ extern NSString * const MSID_TOKEN_TYPE_JSON_KEY;
                          clientId:(NSString *)clientId
                          resource:(NSString *)resource
                            scopes:(NSOrderedSet<NSString *> *)scopes;
+
+- (instancetype)initWithAuthority:(MSIDAuthority *)authority
+                      redirectUri:(NSString *)redirectUri
+                         clientId:(NSString *)clientId
+                           target:(NSString *)target
+         nestedAuthBrokerClientId:(NSString *)nestedAuthBrokerClientId
+      nestedAuthBrokerRedirectUri:(NSString *)nestedAuthBrokerRedirectUri;
+
+- (instancetype)initWithAuthority:(MSIDAuthority *)authority
+                      redirectUri:(NSString *)redirectUri
+                         clientId:(NSString *)clientId
+                         resource:(NSString *)resource
+                           scopes:(NSOrderedSet<NSString *> *)scopes
+         nestedAuthBrokerClientId:(NSString *)nestedAuthBrokerClientId
+      nestedAuthBrokerRedirectUri:(NSString *)nestedAuthBrokerRedirectUri;
+
+- (BOOL)isNestedAuthProtocol;
 
 @end

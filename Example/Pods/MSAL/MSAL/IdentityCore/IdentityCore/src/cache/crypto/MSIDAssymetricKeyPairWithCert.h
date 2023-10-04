@@ -41,10 +41,12 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initWithPrivateKey:(SecKeyRef)privateKey
                                   publicKey:(SecKeyRef)publicKey
                                 certificate:(SecCertificateRef)certificate
-                          certificateIssuer:(NSString *)issuer;
+                          certificateIssuer:(nullable NSString *)issuer
+                             privateKeyDict:(NSDictionary *)keyDict;
 
 - (nullable instancetype)initWithPrivateKey:(SecKeyRef)privateKey
-                                  publicKey:(SecKeyRef)publicKey NS_UNAVAILABLE;
+                                  publicKey:(SecKeyRef)publicKey
+                             privateKeyDict:(NSDictionary *)keyDict NS_UNAVAILABLE;
 
 @end
 

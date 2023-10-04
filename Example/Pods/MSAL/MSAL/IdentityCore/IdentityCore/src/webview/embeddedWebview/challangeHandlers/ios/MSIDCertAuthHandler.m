@@ -39,12 +39,20 @@ static NSString *s_redirectScheme = nil;
 static MSIDSystemWebviewController *s_systemWebViewController = nil;
 static BOOL s_useAuthSession = NO;
 static BOOL s_useLastRequestURL = NO;
+static BOOL s_disableCertBasedAuth = NO;
 
 #endif
 
 @implementation MSIDCertAuthHandler
 
 #if TARGET_OS_IPHONE && !MSID_EXCLUDE_SYSTEMWV
+
++ (void)disableCertBasedAuth
+{
+    // This is a private API only to ensure nobody with access to internal headers takes dependency on it
+    // This should be executed in automation tests only
+    s_disableCertBasedAuth = YES;
+}
 
 + (void)setRedirectUriPrefix:(NSString *)prefix
                    forScheme:(NSString *)scheme
@@ -74,7 +82,6 @@ static BOOL s_useLastRequestURL = NO;
     
     if (s_certAuthInProgress)
     {
-        s_certAuthInProgress = NO;
         return [s_systemWebViewController handleURLResponse:endUrl];
     }
     
@@ -83,7 +90,10 @@ static BOOL s_useLastRequestURL = NO;
 
 #endif
 
-+ (void)resetHandler { }
++ (void)resetHandler
+{
+    s_certAuthInProgress = NO;
+}
 
 + (BOOL)handleChallenge:(NSURLAuthenticationChallenge *)challenge
                 webview:(WKWebView *)webview
@@ -94,12 +104,28 @@ static BOOL s_useLastRequestURL = NO;
       completionHandler:(ChallengeCompletionHandler)completionHandler
 {
 #if !MSID_EXCLUDE_SYSTEMWV
+    
+    if (s_disableCertBasedAuth)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelError, context, @"Cert based auth is explicitly disabled. Ignoring challenge.");
+        return NO;
+    }
+    
     MSIDWebviewSession *currentSession = [MSIDWebviewAuthorization currentSession];
     
     if (!currentSession)
     {
         MSID_LOG_WITH_CTX(MSIDLogLevelError, context, @"There is no current session open to continue with the cert auth challenge.");
         return NO;
+    }
+    
+    if (s_certAuthInProgress)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, context, @"Certificate authentication challenge already in progress, ignoring duplicate cert auth challenge.");
+        
+        // Cancel the Cert Auth Challenge happened in the webview, as we have already handled it in SFSafariViewController
+        completionHandler(NSURLSessionAuthChallengeCancelAuthenticationChallenge, NULL);
+        return YES;
     }
     
     MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, context, @"Received CertAuthChallengehost from : %@", MSID_PII_LOG_TRACKABLE(challenge.protectionSpace.host));
@@ -110,28 +136,27 @@ static BOOL s_useLastRequestURL = NO;
     NSDictionary *queryItemsDict = [NSDictionary msidDictionaryFromQueryItems:queryItems];
     NSString *redirectURI = queryItemsDict[MSID_OAUTH2_REDIRECT_URI];
 
-    if (s_redirectScheme)
+    NSMutableDictionary *newQueryItems = [NSMutableDictionary new];
+    newQueryItems[MSID_BROKER_IS_PERFORMING_CBA] = @"true";
+    
+    for (NSURLQueryItem *item in queryItems)
     {
-        NSMutableDictionary *newQueryItems = [NSMutableDictionary new];
-        NSString *redirectSchemePrefix = [NSString stringWithFormat:@"%@://", s_redirectScheme];
-        
-        for (NSURLQueryItem *item in queryItems)
+        if ([item.name isEqualToString:MSID_OAUTH2_REDIRECT_URI] && !s_useAuthSession && s_redirectScheme != nil)
         {
-            if ([item.name isEqualToString:MSID_OAUTH2_REDIRECT_URI]
-                && ![item.value.lowercaseString hasPrefix:redirectSchemePrefix.lowercaseString]
-                && !s_useAuthSession)
+            NSString *redirectSchemePrefix = [NSString stringWithFormat:@"%@://", s_redirectScheme];
+            if (![item.value.lowercaseString hasPrefix:redirectSchemePrefix.lowercaseString])
             {
                 newQueryItems[MSID_OAUTH2_REDIRECT_URI] = [s_redirectPrefix stringByAppendingString:item.value.msidURLEncode];
-            }
-            else
-            {
-                newQueryItems[item.name] = item.value;
+                continue;
             }
         }
-        requestURLComponents.percentEncodedQuery = [newQueryItems msidURLEncode];
-        requestURL = requestURLComponents.URL;
-        redirectURI = newQueryItems[MSID_OAUTH2_REDIRECT_URI];
+        
+        newQueryItems[item.name] = item.value;
     }
+    
+    requestURLComponents.percentEncodedQuery = [newQueryItems msidURLEncode];
+    requestURL = requestURLComponents.URL;
+    redirectURI = newQueryItems[MSID_OAUTH2_REDIRECT_URI];
     
     s_systemWebViewController = nil;
     s_certAuthInProgress = YES;
@@ -159,8 +184,8 @@ static BOOL s_useLastRequestURL = NO;
         
         [s_systemWebViewController startWithCompletionHandler:^(NSURL *callbackURL, NSError *error) {
             
-            MSIDWebviewSession *currentSession = [MSIDWebviewAuthorization currentSession];
-            MSIDOAuth2EmbeddedWebviewController *embeddedViewController = (MSIDOAuth2EmbeddedWebviewController  *)currentSession.webviewController;
+            MSIDWebviewSession *session = [MSIDWebviewAuthorization currentSession];
+            MSIDOAuth2EmbeddedWebviewController *embeddedViewController = (MSIDOAuth2EmbeddedWebviewController  *)session.webviewController;
             
             [MSIDMainThreadUtil executeOnMainThreadIfNeeded:^{
                 
@@ -170,8 +195,8 @@ static BOOL s_useLastRequestURL = NO;
                 }
                 else
                 {
-                    NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected Cert Auth response received.", nil, nil, nil, nil, nil, YES);
-                    [embeddedViewController endWebAuthWithURL:nil error:error];
+                    NSError* unexpectedError = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Unexpected Cert Auth response received.", nil, nil, nil, nil, nil, YES);
+                    [embeddedViewController endWebAuthWithURL:nil error:unexpectedError];
                 }
             }];
         }];

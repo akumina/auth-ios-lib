@@ -173,7 +173,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"MSIDAccount environment: %@ storage environment %@ realm: %@ username: %@ homeAccountId: %@ accountType: %@ localAccountId: %@", self.environment, self.storageEnvironment,  self.realm, self.username, self.accountIdentifier.homeAccountId, [MSIDAccountTypeHelpers accountTypeAsString:self.accountType], self.localAccountId];
+    return [NSString stringWithFormat:@"MSIDAccount environment: %@ storage environment %@ realm: %@ username: %@ homeAccountId: %@ accountType: %@ localAccountId: %@", self.environment, self.storageEnvironment,  self.realm, MSID_PII_LOG_EMAIL(self.username), MSID_PII_LOG_TRACKABLE(self.accountIdentifier.homeAccountId), [MSIDAccountTypeHelpers accountTypeAsString:self.accountType], MSID_PII_LOG_TRACKABLE(self.localAccountId)];
 }
 
 #pragma mark - MSIDJsonSerializable
@@ -210,6 +210,7 @@
         return nil;
     }
     self.idTokenClaims = [[MSIDIdTokenClaims alloc] initWithJSONDictionary:json[@"id_token_claims"] error:nil];
+    self.isSSOAccount = [json msidBoolObjectForKey:@"is_sso_account"];
     
     return self;
 }
@@ -230,6 +231,7 @@
     json[@"client_info"] = self.clientInfo.rawClientInfo;
     json[@"alternative_account_id"] = self.alternativeAccountId;
     json[@"id_token_claims"] = self.idTokenClaims.jsonDictionary;
+    json[@"is_sso_account"] = @(self.isSSOAccount);
     [json addEntriesFromDictionary:[self.accountIdentifier jsonDictionary]];
     
     return json;

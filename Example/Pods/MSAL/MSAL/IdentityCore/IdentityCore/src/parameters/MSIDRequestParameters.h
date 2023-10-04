@@ -33,7 +33,10 @@
 @class MSIDConfiguration;
 @class MSIDClaimsRequest;
 @class MSIDAuthenticationScheme;
+#if !EXCLUDE_FROM_MSALCPP
 @class MSIDCurrentRequestTelemetry;
+#endif
+@class MSIDExternalSSOContext;
 
 @interface MSIDRequestParameters : NSObject <NSCopying, MSIDRequestContext>
 
@@ -57,9 +60,17 @@
 @property (nonatomic) NSUInteger tokenExpirationBuffer;
 @property (nonatomic) BOOL extendedLifetimeEnabled;
 @property (nonatomic) BOOL instanceAware;
+@property (nonatomic) BOOL allowUsingLocalCachedRtWhenSsoExtFailed;
+@property (nonatomic) BOOL clientBrokerKeyCapabilityNotSupported;
 @property (nonatomic) NSString *intuneApplicationIdentifier;
 @property (nonatomic) MSIDRequestType requestType;
+#if !EXCLUDE_FROM_MSALCPP
 @property (nonatomic) MSIDCurrentRequestTelemetry *currentRequestTelemetry;
+#endif
+
+#pragma mark Nested auth protocol properties
+@property (nonatomic) NSString *nestedAuthBrokerClientId;
+@property (nonatomic) NSString *nestedAuthBrokerRedirectUri;
 
 #pragma mark MSIDRequestContext properties
 @property (nonatomic) NSUUID *correlationId;
@@ -81,6 +92,9 @@
 #pragma mark - Cache
 @property (nonatomic) NSString *keychainAccessGroup;
 
+#pragma mark - SSO context
+@property (nonatomic) MSIDExternalSSOContext *ssoContext;
+
 - (NSURL *)tokenEndpoint;
 
 #pragma mark Methods
@@ -88,6 +102,12 @@
 - (NSString *)allTokenRequestScopes;
 
 - (BOOL)validateParametersWithError:(NSError **)error;
+
+- (void)updateAppRequestMetadata:(NSString *)homeAccountId;
+
+- (BOOL)isNestedAuthProtocol;
+
+- (void)reverseNestedAuthParametersIfNeeded;
 
 #pragma mark - Init
 - (instancetype)initWithAuthority:(MSIDAuthority *)authority

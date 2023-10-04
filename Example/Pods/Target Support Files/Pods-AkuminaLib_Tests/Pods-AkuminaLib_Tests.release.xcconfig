@@ -1,10 +1,8 @@
 CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO
-EXCLUDED_ARCHS[sdk=iphonesimulator*] = arm64
-FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/AkuminaLib" "${PODS_CONFIGURATION_BUILD_DIR}/MSAL" "${PODS_CONFIGURATION_BUILD_DIR}/Rollbar" "${PODS_CONFIGURATION_BUILD_DIR}/Schedule" "${PODS_ROOT}/../../ms-intune-app-sdk-ios" "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib"
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/AkuminaAuthiOSLib" "${PODS_CONFIGURATION_BUILD_DIR}/MSAL" "${PODS_ROOT}/../../ms-intune-app-sdk-ios" "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaAuthiOSLib"
 GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
-HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/AkuminaLib/AkuminaLib.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/MSAL/MSAL.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/Rollbar/Rollbar.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/Schedule/Schedule.framework/Headers"
-ONLY_ACTIVE_ARCH = YES
-OTHER_LDFLAGS = $(inherited) -l"c++" -l"z" -framework "AkuminaLib" -framework "Foundation" -framework "IntuneMAMSwift" -framework "IntuneMAMSwiftStub" -framework "MSAL" -framework "MessageUI" -framework "Rollbar" -framework "Schedule" -framework "SystemConfiguration" -framework "UIKit"
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}/AkuminaAuthiOSLib/AkuminaAuthiOSLib.framework/Headers" "${PODS_CONFIGURATION_BUILD_DIR}/MSAL/MSAL.framework/Headers"
+OTHER_LDFLAGS = $(inherited) -framework "AkuminaAuthiOSLib" -framework "IntuneMAMSwift" -framework "IntuneMAMSwiftStub" -framework "MSAL"
 PODS_BUILD_DIR = ${BUILD_DIR}
 PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
 PODS_PODFILE_DIR_PATH = ${SRCROOT}/.

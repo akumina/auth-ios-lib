@@ -26,10 +26,7 @@
 //------------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-
-@class MSIDDevicePopManager;
-@class MSIDAccessToken;
-@class MSIDAuthenticationScheme;
+#import "MSALDefinitions.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -38,16 +35,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) MSALAuthScheme scheme;
 
 @property (nonatomic, readonly) NSString *authenticationScheme;
-
-- (MSIDAuthenticationScheme *)createMSIDAuthenticationSchemeWithParams:(nullable NSDictionary *)params;
-
-- (nullable NSDictionary *)getSchemeParameters:(nonnull MSIDDevicePopManager *)popManager;
-
-- (nullable NSString *)getAuthorizationHeader:(nonnull NSString *)accessToken;
-
-- (nullable NSString *)getClientAccessToken:(MSIDAccessToken *)accessToken
-                                 popManager:(nullable MSIDDevicePopManager *)popManager
-                                      error:(NSError **)error;
 
 @end
 

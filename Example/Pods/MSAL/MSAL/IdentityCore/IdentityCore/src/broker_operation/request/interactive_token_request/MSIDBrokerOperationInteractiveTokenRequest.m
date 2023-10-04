@@ -34,7 +34,7 @@
 
 + (void)load
 {
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         [MSIDJsonSerializableFactory registerClass:self forClassType:self.operation];
     }
@@ -44,9 +44,11 @@
                               providerType:(MSIDProviderType)providerType
                              enrollmentIds:(NSDictionary *)enrollmentIds
                               mamResources:(NSDictionary *)mamResources
+                           requestSentDate:(NSDate *)requestSentDate
 {
     __auto_type request = [MSIDBrokerOperationInteractiveTokenRequest new];
-    [self fillRequest:request withParameters:parameters providerType:providerType enrollmentIds:enrollmentIds mamResources:mamResources];
+    [self fillRequest:request
+       withParameters:parameters providerType:providerType enrollmentIds:enrollmentIds mamResources:mamResources requestSentDate:requestSentDate];
     
     request.accountIdentifier = parameters.accountIdentifier;
     if (!request.accountIdentifier && parameters.loginHint)
@@ -54,7 +56,7 @@
         request.accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:parameters.loginHint homeAccountId:nil];
     }
     request.promptType = parameters.promptType;
-    request.extraQueryParameters = parameters.extraAuthorizeURLQueryParameters;
+    request.extraQueryParameters = [parameters allAuthorizeRequestExtraParametersWithMetadata:NO];
     request.extraScopesToConsent = parameters.extraScopesToConsent;
     
     return request;
@@ -64,7 +66,7 @@
 
 + (NSString *)operation
 {
-    if (@available(iOS 13.0, macOS 10.15, *))
+    if (@available(macOS 10.15, *))
     {
         return ASAuthorizationOperationLogin;
     }

@@ -31,10 +31,18 @@
 @class MSIDOauth2Factory;
 @class MSIDInteractiveRequestParameters;
 
+typedef NS_ENUM(NSInteger, MSIDSilentControllerLocalRtUsageType)
+{
+    MSIDSilentControllerForceSkippingLocalRt = 0,
+    MSIDSilentControllerForceUsingLocalRt = 1,
+    MSIDSilentControllerUndefinedLocalRtUsage = 2
+};
+
 @interface MSIDRequestControllerFactory : NSObject
 
 + (nullable id<MSIDRequestControlling>)silentControllerForParameters:(nonnull MSIDRequestParameters *)parameters
                                                         forceRefresh:(BOOL)forceRefresh
+                                                         skipLocalRt:(MSIDSilentControllerLocalRtUsageType)skipLocalRt
                                                 tokenRequestProvider:(nonnull id<MSIDTokenRequestProviding>)tokenRequestProvider
                                                                error:(NSError * _Nullable * _Nullable)error;
 
@@ -45,6 +53,8 @@
 + (nullable MSIDSignoutController *)signoutControllerForParameters:(nonnull MSIDInteractiveRequestParameters *)parameters
                                                       oauthFactory:(nonnull MSIDOauth2Factory *)oauthFactory
                                           shouldSignoutFromBrowser:(BOOL)shouldSignoutFromBrowser
+                                                 shouldWipeAccount:(BOOL)shouldWipeAccount
+                                     shouldWipeCacheForAllAccounts:(BOOL)shouldWipeCacheForAllAccounts
                                                              error:(NSError * _Nullable * _Nullable)error;
 
 @end

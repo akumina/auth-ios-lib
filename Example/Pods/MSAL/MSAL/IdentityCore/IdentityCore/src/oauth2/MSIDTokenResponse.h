@@ -44,7 +44,10 @@
  */
 @property (nonatomic) NSInteger expiresOn;
 @property (nonatomic, nullable) NSString *accessToken;
+// In AT Pop scenario, we need to pass back the tokenType and kid(req_conf)
 @property (nonatomic, nullable) NSString *tokenType;
+@property (nonatomic, nullable) NSString *requestConf;
+
 @property (nonatomic, nullable) NSString *refreshToken;
 @property (nonatomic, nullable) NSString *scope;
 @property (nonatomic, nullable) NSString *state;
@@ -76,6 +79,9 @@
 @property (nonatomic, readonly) MSIDAccountType accountType;
 
 @property (nonatomic, class, readonly) MSIDProviderType providerType;
+
+// CCS Request ID if the request is served by CCS
+@property (nonatomic, nullable) NSString *ccsRequestId;
 
 - (nullable instancetype)initWithJSONDictionary:(nonnull NSDictionary *)json
                                    refreshToken:(nullable MSIDBaseToken<MSIDRefreshableToken> *)token

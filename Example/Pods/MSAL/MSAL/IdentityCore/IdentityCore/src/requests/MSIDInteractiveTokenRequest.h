@@ -24,6 +24,7 @@
 #import <Foundation/Foundation.h>
 #import "MSIDInteractiveAuthorizationCodeRequest.h"
 #import "MSIDInteractiveRequestControlling.h"
+#import "MSIDExtendedTokenCacheDataSource.h"
 
 @protocol MSIDCacheAccessor;
 @class MSIDTokenResponseValidator;
@@ -32,7 +33,7 @@
 @class MSIDWebWPJResponse;
 @class MSIDInteractiveTokenRequestParameters;
 @class MSIDOauth2Factory;
-#if TARGET_OS_OSX
+#if TARGET_OS_OSX && !EXCLUDE_FROM_MSALCPP
 @class MSIDExternalAADCacheSeeder;
 #endif
 
@@ -40,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSIDInteractiveTokenRequest : MSIDInteractiveAuthorizationCodeRequest <MSIDInteractiveRequestControlling>
 
-#if TARGET_OS_OSX
+#if TARGET_OS_OSX && !EXCLUDE_FROM_MSALCPP
 @property (nonatomic, nullable) MSIDExternalAADCacheSeeder *externalCacheSeeder;
 #endif
 
@@ -48,7 +49,8 @@ NS_ASSUME_NONNULL_BEGIN
                                       oauthFactory:(MSIDOauth2Factory *)oauthFactory
                             tokenResponseValidator:(MSIDTokenResponseValidator *)tokenResponseValidator
                                         tokenCache:(id<MSIDCacheAccessor>)tokenCache
-                              accountMetadataCache:(nullable MSIDAccountMetadataCacheAccessor *)accountMetadataCache;
+                              accountMetadataCache:(nullable MSIDAccountMetadataCacheAccessor *)accountMetadataCache
+                                extendedTokenCache:(nullable id<MSIDExtendedTokenCacheDataSource>)extendedTokenCache;
 
 @end
 

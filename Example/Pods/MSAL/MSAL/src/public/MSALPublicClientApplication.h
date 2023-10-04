@@ -73,14 +73,14 @@
     It contains all values to be used in the instance and is a superset of all properties
     known to this class.
  */
-@property (readonly, nonnull) MSALPublicClientApplicationConfig *configuration;
+@property (atomic, readonly, nonnull) MSALPublicClientApplicationConfig *configuration;
 
 /**
     When set to YES (default), MSAL will compare the application's authority against well-known URLs
     templates representing well-formed authorities. It is useful when the authority is obtained at
     run time to prevent MSAL from displaying authentication prompts from malicious pages.
  */
-@property BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("Use knowAuthorities in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)");
+@property (atomic) BOOL validateAuthority DEPRECATED_MSG_ATTRIBUTE("Use knowAuthorities in MSALPublicClientApplicationConfig instead (create your config and pass it to -initWithConfiguration:error:)");
 
 /**
  The webview type to be used for authorization.
@@ -91,7 +91,7 @@
  Passed in webview to display web content when webviewSelection is set to MSALWebviewTypeWKWebView.
  For iOS, this will be ignored if MSALWebviewTypeSystemDefault is chosen.
  */
-@property (nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure custom web view in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
+@property (atomic, nullable) WKWebView *customWebview DEPRECATED_MSG_ATTRIBUTE("Use webviewParameters to configure custom web view in MSALInteractiveTokenParameters instead (create parameters object and pass it to -acquireTokenWithParameters:completionBlock:)");
 
 #pragma mark - Initializing MSALPublicClientApplication
 
@@ -288,7 +288,7 @@
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
-                            gauranteed to be included in the access token returned.
+                            guaranteed to be included in the access token returned.
     @param  completionBlock The completion block that will be called when the authentication
                             flow completes, or encounters an error.
  */
@@ -303,7 +303,7 @@
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
-                            gauranteed to be included in the access token returned.
+                            guaranteed to be included in the access token returned.
     @param  loginHint       A loginHint (usually an email) to pass to the service at the
                             beginning of the interactive authentication flow. The account returned
                             in the completion block is not guaranteed to match the loginHint.
@@ -322,7 +322,7 @@
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
-                            gauranteed to be included in the access token returned.
+                            guaranteed to be included in the access token returned.
     @param  account         An account object retrieved from the application object that the
                             interactive authentication flow will be locked down to.
     @param  completionBlock The completion block that will be called when the authentication
@@ -370,7 +370,7 @@
  
     @param  scopes          Permissions you want included in the access token received
                             in the result in the completionBlock. Not all scopes are
-                            gauranteed to be included in the access token returned.
+                            guaranteed to be included in the access token returned.
     @param  account         An account object retrieved from the application object that the
                             interactive authentication flow will be locked down to.
     @param  completionBlock The completion block that will be called when the authentication
@@ -385,7 +385,7 @@
  
     @param  scopes                  Permissions you want included in the access token received
                                     in the result in the completionBlock. Not all scopes are
-                                    gauranteed to be included in the access token returned.
+                                    guaranteed to be included in the access token returned.
     @param  account                 An account object retrieved from the application object that the
                                     interactive authentication flow will be locked down to.
     @param  authority               Authority indicating a directory that MSAL can use to obtain tokens.
@@ -468,8 +468,22 @@
                            completionBlock:(nonnull MSALDeviceInformationCompletionBlock)completionBlock;
 
 /**
+   Reads WPJ metadata  (UPN, tenant ID, deviCe ID) from the authentication broker if present on the device for a specific tenantId
+*/
+- (void)getWPJMetaDataDeviceWithParameters:(nullable MSALParameters *)parameters
+                               forTenantId:(nullable NSString *)tenantId
+                           completionBlock:(nonnull MSALWPJMetaDataCompletionBlock)completionBlock;
+
+/**
    A boolean indicates if a compatible broker is present in device for AAD requests.
 */
 @property (readonly) BOOL isCompatibleAADBrokerAvailable;
 
+/**
+   A String indicates the version of current MSAL SDK
+*/
+@property (nullable, class, readonly) NSString *sdkVersion;
+
 @end
+
+

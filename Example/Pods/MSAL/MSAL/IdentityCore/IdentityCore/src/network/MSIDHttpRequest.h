@@ -27,10 +27,13 @@
 @protocol MSIDRequestSerialization;
 @protocol MSIDResponseSerialization;
 @protocol MSIDRequestContext;
+#if !EXCLUDE_FROM_MSALCPP
 @protocol MSIDHttpRequestTelemetryHandling;
+#endif
 @protocol MSIDHttpRequestErrorHandling;
 @protocol MSIDHttpRequestServerTelemetryHandling;
 @class MSIDURLSessionManager;
+@class MSIDExternalSSOContext;
 
 @interface MSIDHttpRequest : NSObject <MSIDHttpRequestProtocol>
 {
@@ -40,7 +43,9 @@
     NSDictionary *_headers;
     id<MSIDRequestSerialization> _requestSerializer;
     id<MSIDResponseSerialization> _responseSerializer;
+#if !EXCLUDE_FROM_MSALCPP
     id<MSIDHttpRequestTelemetryHandling> _telemetry;
+#endif
     id<MSIDHttpRequestErrorHandling> _errorHandler;
     id<MSIDRequestContext> _context;
     id<MSIDHttpRequestServerTelemetryHandling> _serverTelemetry;
@@ -62,13 +67,17 @@
 
 @property (nonatomic, nonnull) id<MSIDResponseSerialization> errorResponseSerializer;
 
+#if !EXCLUDE_FROM_MSALCPP
 @property (nonatomic, nullable) id<MSIDHttpRequestTelemetryHandling> telemetry;
+#endif
 
 @property (nonatomic, nullable) id<MSIDHttpRequestServerTelemetryHandling> serverTelemetry;
 
 @property (nonatomic, nullable) id<MSIDHttpRequestErrorHandling> errorHandler;
 
 @property (nonatomic, nullable) id<MSIDRequestContext> context;
+
+@property (nonatomic, nullable) MSIDExternalSSOContext *externalSSOContext;
 
 @property (nonatomic) NSInteger retryCounter;
 @property (nonatomic) NSTimeInterval retryInterval;

@@ -25,6 +25,10 @@
 #import "MSIDSSOExtensionInteractiveTokenRequestController.h"
 #import "MSIDLocalInteractiveController+Internal.h"
 #import "ASAuthorizationSingleSignOnProvider+MSIDExtensions.h"
+#import "MSIDThrottlingService.h"
+#import "MSIDInteractiveTokenRequestParameters.h"
+#import "MSIDDefaultTokenCacheAccessor.h"
+#import "MSIDInteractiveTokenRequest+Internal.h"
 
 @implementation MSIDSSOExtensionInteractiveTokenRequestController
 
@@ -50,23 +54,30 @@
 {
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, self.requestParameters, @"Beginning interactive broker extension flow.");
     
-    __typeof__(self) __weak weakSelf = self;
+    MSIDInteractiveTokenRequest *request = [self.tokenRequestProvider interactiveSSOExtensionTokenRequestWithParameters:self.interactiveRequestParamaters];
+
     MSIDRequestCompletionBlock completionBlockWrapper = ^(MSIDTokenResult *result, NSError *error)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, weakSelf.requestParameters, @"Interactive broker extension flow finished. Result %@, error: %ld error domain: %@", _PII_NULLIFY(result), (long)error.code, error.domain);
-        
-        if (error && [weakSelf shouldFallback:error])
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, self.requestParameters, @"Interactive broker extension flow finished. Result %@, error: %ld error domain: %@", _PII_NULLIFY(result), (long)error.code, error.domain);
+        if (!error)
         {
-            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, weakSelf.requestParameters, @"Falling back to local controller.");
+            /**
+             Throttling service: when an interactive token succeed, we update the last refresh time of the throttling service
+             */
+            [MSIDThrottlingService updateLastRefreshTimeDatasource:request.extendedTokenCache context:self.interactiveRequestParamaters error:nil];
+           
+        }
+        else if ([self shouldFallback:error])
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelInfo, self.requestParameters, @"Falling back to local controller.");
             
-            [weakSelf.fallbackController acquireToken:completionBlock];
+            [self.fallbackController acquireToken:completionBlock];
             return;
         }
         
         completionBlock(result, error);
     };
     
-    __auto_type request = [self.tokenRequestProvider interactiveSSOExtensionTokenRequestWithParameters:self.interactiveRequestParamaters];
 
     [self acquireTokenWithRequest:request completionBlock:completionBlockWrapper];
 }
@@ -88,7 +99,8 @@
         return NO;
     }
     
-    if (![error.domain isEqualToString:ASAuthorizationErrorDomain]) return NO;
+    // If it is MSIDErrorDomain and Sso Extension returns unexpected error, we should fall back to local controler and unblock user
+    if (![error.domain isEqualToString:ASAuthorizationErrorDomain] && ![error.domain isEqualToString:MSIDErrorDomain]) return NO;
     
     BOOL shouldFallback = NO;
     switch (error.code)
@@ -96,6 +108,7 @@
         case ASAuthorizationErrorNotHandled:
         case ASAuthorizationErrorUnknown:
         case ASAuthorizationErrorFailed:
+        case MSIDErrorSSOExtensionUnexpectedError:
             shouldFallback = YES;
     }
     

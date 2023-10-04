@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDTelemetryBaseEvent.h"
 #import "NSDate+MSIDExtensions.h"
 #import "NSMutableDictionary+MSIDExtensions.h"
@@ -185,12 +187,16 @@
         
         s_defaultParameters = [NSMutableDictionary new];
         
+#if !TARGET_OS_IPHONE
         NSString *deviceId = [MSIDDeviceId deviceTelemetryId];
-        NSString *applicationName = [MSIDDeviceId applicationName];
-        NSString *applicationVersion = [MSIDDeviceId applicationVersion];
         
         [s_defaultParameters msidSetObjectIfNotNil:deviceId
                                             forKey:MSID_TELEMETRY_KEY_DEVICE_ID];
+#endif
+        
+        NSString *applicationName = [MSIDDeviceId applicationName];
+        NSString *applicationVersion = [MSIDDeviceId applicationVersion];
+        
         [s_defaultParameters msidSetObjectIfNotNil:applicationName
                                             forKey:MSID_TELEMETRY_KEY_APPLICATION_NAME];
         [s_defaultParameters msidSetObjectIfNotNil:applicationVersion
@@ -209,3 +215,5 @@
 }
 
 @end
+
+#endif

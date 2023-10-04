@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import <Foundation/Foundation.h>
 #import "MSIDLastRequestTelemetry.h"
 
@@ -28,9 +30,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MSIDCurrentRequestTelemetrySerializedItem : NSObject
 
+@property (class, nonatomic) int telemetryStringSizeLimit;
+
 - (instancetype)initWithSchemaVersion:(NSNumber *)schemaVersion defaultFields:(NSArray * _Nullable)defaultFields platformFields:(NSArray * _Nullable)platformFields;
-- (NSString *)serialize;
+- (nullable NSString *)serialize;
 
 @end
 
 NS_ASSUME_NONNULL_END
+
+#endif

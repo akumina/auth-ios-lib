@@ -28,33 +28,19 @@
 #import "MSIDAssymetricKeyGeneratorFactory.h"
 #import "MSIDAssymetricKeyLookupAttributes.h"
 #import "MSIDAssymetricKeyPair.h"
-
-static NSString *s_jwkTemplate = nil;
-static NSString *s_kidTemplate = nil;
+#import "MSIDJwtAlgorithm.h"
+#import "MSIDKeyOperationUtil.h"
 
 @interface MSIDDevicePopManager()
 
 @property (nonatomic) MSIDCacheConfig *cacheConfig;
 @property (nonatomic) id<MSIDAssymetricKeyGenerating> keyGeneratorFactory;
-@property (nonatomic) NSString *requestConfirmation;
-@property (nonatomic) NSString *kid;
 @property (nonatomic) MSIDAssymetricKeyLookupAttributes *keyPairAttributes;
 @property (nonatomic) MSIDAssymetricKeyPair *keyPair;
-@property (nonatomic) NSString *keyExponent;
-@property (nonatomic) NSString *keyModulus;
 
 @end
 
 @implementation MSIDDevicePopManager
-
-+ (void)initialize
-{
-    if (self == [MSIDDevicePopManager self])
-    {
-        s_jwkTemplate = @"{\"e\":\"%@\",\"kty\":\"RSA\",\"n\":\"%@\"}";
-        s_kidTemplate = @"{\"kid\":\"%@\"}";
-    }
-}
 
 - (instancetype)initWithCacheConfig:(MSIDCacheConfig *)cacheConfig
                   keyPairAttributes:(MSIDAssymetricKeyLookupAttributes *)keyPairAttributes
@@ -85,67 +71,39 @@ static NSString *s_kidTemplate = nil;
     return _keyPair;
 }
 
-/// <summary>
-/// Example JWK Thumbprint Computation
-/// </summary>
-/// <remarks>
-/// This SDK will use RFC7638
-/// See https://tools.ietf.org/html/rfc7638 Section3.1
-/// </remarks>
-- (NSString *)requestConfirmation
+- (NSDictionary *)buildPayloadDict:(NSString *)accessToken
+                              host:(NSString *)host
+                        httpMethod:(NSString *)httpMethod
+                             nonce:(NSString *)nonce
+                              path:(NSString *)path
+                     publicKeyDict:(NSDictionary *)publicKeyDict
 {
-    if (!_requestConfirmation)
+    NSMutableDictionary *payload = [NSMutableDictionary new];
+    
+    [payload setObject:accessToken forKey:@"at"];
+    NSDictionary *cnf = @{@"cnf": @{
+                                  @"jwk":publicKeyDict
+    }};
+    [payload addEntriesFromDictionary:cnf];
+    
+    [payload setObject:[NSNumber numberWithLong:(long)[[NSDate date] timeIntervalSince1970]] forKey:@"ts"];
+    [payload setObject:host forKey:@"u"];
+    if (![NSString msidIsStringNilOrBlank:httpMethod])
     {
-        NSString *kid = [NSString stringWithFormat:s_kidTemplate, self.kid];
-        if (!_kid)
-        {
-            MSID_LOG_WITH_CTX(MSIDLogLevelError,nil, @"Failed to create req_cnf from kid");
-            return nil;
-        }
-        
-        NSData *kidData = [kid dataUsingEncoding:NSUTF8StringEncoding];
-        _requestConfirmation = [kidData msidBase64UrlEncodedString];
+        [payload setObject:httpMethod forKey:@"m"];
     }
     
-    return _requestConfirmation;
-}
-
-- (NSString *)kid
-{
-    if (!_kid)
+    if (![NSString msidIsStringNilOrBlank:path])
     {
-        _kid = [self generateKidFromModulus:self.keyModulus exponent:self.keyExponent];
+        [payload setObject:path forKey:@"p"];
     }
     
-    return _kid;
-}
-
-- (NSString *)keyExponent
-{
-    if (!_keyExponent)
+    if (![NSString msidIsStringNilOrBlank:nonce])
     {
-        _keyExponent = self.keyPair.keyExponent;
+        [payload setObject:nonce forKey:@"nonce"];
     }
     
-    return _keyExponent;
-}
-
-- (NSString *)keyModulus
-{
-    if (!_keyModulus)
-    {
-        _keyModulus = self.keyPair.keyModulus;
-    }
-    
-    return _keyModulus;
-}
-
-- (NSString *)generateKidFromModulus:(NSString *)exponent exponent:(NSString *)modulus
-{
-    NSString *jwk = [NSString stringWithFormat:s_jwkTemplate, exponent, modulus];
-    NSData *jwkData = [jwk dataUsingEncoding:NSUTF8StringEncoding];
-    NSData *hashedData = [jwkData msidSHA256];
-    return [hashedData msidBase64UrlEncodedString];
+    return payload;
 }
 
 - (NSString *)createSignedAccessToken:(NSString *)accessToken
@@ -154,7 +112,8 @@ static NSString *s_kidTemplate = nil;
                                 nonce:(NSString *)nonce
                                 error:(NSError *__autoreleasing * _Nullable)error
 {
-    NSString *kid = self.kid;
+    NSString *kid = self.keyPair.kid;
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"%@", [NSString stringWithFormat:@"MSIDDevicePopManager: createSignedAccessToken with httpMethod: %@ requestUrl: %@ nonce: %@", httpMethod, requestUrl, nonce]);
     
     if ([NSString msidIsStringNilOrBlank:kid])
     {
@@ -179,19 +138,20 @@ static NSString *s_kidTemplate = nil;
     NSString *path = url.path;
     if ([NSString msidIsStringNilOrBlank:path])
     {
-        [self logAndFillError:[NSString stringWithFormat:@"Failed to create signed access token, invalid request url : %@.",requestUrl] error:error];
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"MSIDDevicePopManager: createSignedAccessToken path is empty");
+    }
+    
+    if ([NSString msidIsStringNilOrBlank:self.keyPair.stkJwk])
+    {
+        [self logAndFillError:@"Failed to create signed access token, unable to generate public key." error:error];
         return nil;
     }
     
-    if ([NSString msidIsStringNilOrBlank:self.keyModulus])
+    NSData *publicKeyData = [self.keyPair.stkJwk dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *publicKeyDict = [NSJSONSerialization JSONObjectWithData:publicKeyData options:0 error:error];
+    if (!publicKeyDict)
     {
-        [self logAndFillError:@"Failed to create signed access token, unable to read public key modulus." error:error];
-        return nil;
-    }
-    
-    if ([NSString msidIsStringNilOrBlank:self.keyExponent])
-    {
-        [self logAndFillError:@"Failed to create signed access token, unable to read public key exponent." error:error];
+        [self logAndFillError:@"Failed to create signed access token, unable to serialize public key." error:error];
         return nil;
     }
     
@@ -203,44 +163,35 @@ static NSString *s_kidTemplate = nil;
     
     if ([NSString msidIsStringNilOrBlank:httpMethod])
     {
-        [self logAndFillError:@"Failed to create signed access token, httpMethod is invalid." error:error];
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"MSIDDevicePopManager: createSignedAccessToken httpMethod is empty");
+    }
+    
+    if ([NSString msidIsStringNilOrBlank:nonce])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"MSIDDevicePopManager: createSignedAccessToken nonce is empty");
+    }
+
+    MSIDJwtAlgorithm alg = [[MSIDKeyOperationUtil sharedInstance] getJwtAlgorithmForKey:self.keyPair.privateKeyRef context:nil error:error];
+    if ([NSString msidIsStringNilOrBlank:alg])
+    {
+        [self logAndFillError:@"Key signing algorithm not supported." error:error];
         return nil;
     }
 
-    if ([NSString msidIsStringNilOrBlank:nonce])
-    {
-        [self logAndFillError:@"Failed to create signed access token, nonce is invalid." error:error];
-        return nil;
-    }
-    
     NSDictionary *header = @{
-                             @"alg" : @"RS256",
-                             @"typ" : @"JWT",
-                             @"kid" : kid
-                             };
+        @"alg" : alg,
+        @"typ" : @"JWT",
+        @"kid" : kid
+    };
     
-    NSDictionary *payload = @{
-                              @"at" : accessToken,
-                              @"cnf": @{
-                                      @"jwk":@{
-                                          @"kty" : @"RSA",
-                                          @"n" : self.keyModulus,
-                                          @"e" : self.keyExponent
-                                      }
-                              },
-                              @"ts" : [NSString stringWithFormat:@"%lu", (long)[[NSDate date] timeIntervalSince1970]],
-                              @"m" : httpMethod,
-                              @"u" : host,
-                              @"p" : path,
-                              @"nonce" : nonce,
-                              };
+    NSDictionary *payload = [self buildPayloadDict:accessToken host:host httpMethod:httpMethod nonce:nonce path:path publicKeyDict:publicKeyDict];
     
     SecKeyRef privateKeyRef = self.keyPair.privateKeyRef;
     NSString *signedJwtHeader = [MSIDJWTHelper createSignedJWTforHeader:header payload:payload signingKey:privateKeyRef];
     return signedJwtHeader;
 }
 
-- (void)logAndFillError:(NSString *)description error:(NSError **)error
+- (BOOL)logAndFillError:(NSString *)description error:(NSError **)error
 {
     MSID_LOG_WITH_CTX(MSIDLogLevelError, nil, @"%@", description);
     
@@ -248,6 +199,9 @@ static NSString *s_kidTemplate = nil;
     {
         *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, description, nil, nil, nil, nil, nil, NO);
     }
+    
+    return YES;
 }
 
 @end
+

@@ -21,17 +21,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#define CONDITIONAL_SET_REFRESH_TYPE(x, y) CONDITIONAL_COMPILE_MSAL_CPP((x) = (y))
+
 #import <Foundation/Foundation.h>
+#import "MSIDTelemetryConditionalCompile.h"
 #import "MSIDTelemetryStringSerializable.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
+/*
+ •    TokenCacheRefreshTypeNoCacheLookupInvolved = 0, request goes to ESTS for interactive call for which there is no cache look-up involved (N/A for S2S).
+ •    TokenCacheRefreshTypeForceRefresh = 1, request goes to ESTS because caller requested to forcefully refresh the cache.
+ •    TokenCacheRefreshTypeNoCachedAT = 2, request goes to ESTS because cache entry for the requested token does NOT exist.
+ •    TokenCacheRefreshTypeExpiredAT = 3, request goes to ESTS because cache entry for the requested token does exist but token has expired.
+ •    TokenCacheRefreshTypeProactiveTokenRefresh = 4, request goes to ESTS because refresh_in was used and existing non-expired token needs to be refreshed proactively.
+ •    TokenCacheRefreshTypeCachingMechanismNotImplemented = 5, request goes to ESTS because client (for Non-MSAL client specifically for now) has not implemented any caching mechanism.
+ •    BLANK, if client is not aware of the LLT policy and its telemetry update and doesn’t update their code to send us this telemetry signal yet.
+ */
+
+typedef NS_ENUM(NSInteger, TokenCacheRefreshType)
+{
+    TokenCacheRefreshTypeNoCacheLookupInvolved,
+    TokenCacheRefreshTypeForceRefresh,
+    TokenCacheRefreshTypeNoCachedAT,
+    TokenCacheRefreshTypeExpiredAT,
+    TokenCacheRefreshTypeProactiveTokenRefresh,
+    TokenCacheRefreshTypeCachingMechanismNotImplemented,
+};
+
+#if !EXCLUDE_FROM_MSALCPP
+
 @interface MSIDCurrentRequestTelemetry : NSObject <MSIDTelemetryStringSerializable>
+
+- (nullable instancetype)initWithAppId:(NSInteger)appId
+                 tokenCacheRefreshType:(TokenCacheRefreshType)tokenCacheRefreshType
+                        platformFields:(nullable NSMutableArray *)platformFields;
 
 @property (nonatomic) NSInteger schemaVersion;
 @property (nonatomic) NSInteger apiId;
-@property (nonatomic) BOOL forceRefresh;
+@property (nonatomic) TokenCacheRefreshType tokenCacheRefreshType;
+@property (nonatomic, nullable) NSMutableArray<NSString *> *platformFields;
 
 @end
+
+#endif
 
 NS_ASSUME_NONNULL_END

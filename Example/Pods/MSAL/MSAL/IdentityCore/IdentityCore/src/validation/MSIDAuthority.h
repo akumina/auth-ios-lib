@@ -43,15 +43,15 @@ typedef void(^MSIDOpenIdConfigurationInfoBlock)(MSIDOpenIdProviderMetadata * _Nu
 
 @property (class, readonly, nonnull) MSIDCache *openIdConfigurationCache;
 
-@property (readonly, nonnull) NSURL *url;
+@property (atomic, readonly, nonnull) NSURL *url;
 
-@property (readonly, nonnull) NSString *environment;
+@property (atomic, readonly, nonnull) NSString *environment;
 
-@property (readonly, nonnull) NSString *realm;
+@property (atomic, readonly, nonnull) NSString *realm;
 
-@property (readonly, nullable) NSURL *openIdConfigurationEndpoint;
+@property (atomic, readonly, nullable) NSURL *openIdConfigurationEndpoint;
 
-@property (readonly, nullable) MSIDOpenIdProviderMetadata *metadata;
+@property (atomic, readonly, nullable) MSIDOpenIdProviderMetadata *metadata;
 
 @property (nonatomic) BOOL isDeveloperKnown;
 
@@ -84,6 +84,8 @@ typedef void(^MSIDOpenIdConfigurationInfoBlock)(MSIDOpenIdProviderMetadata * _Nu
 
 - (BOOL)isKnown;
 
+- (BOOL)excludeFromAuthorityValidation;
+
 - (BOOL)supportsBrokeredAuthentication;
 
 // Only certain authorities support passing clientID as an allowed scope
@@ -92,11 +94,17 @@ typedef void(^MSIDOpenIdConfigurationInfoBlock)(MSIDOpenIdProviderMetadata * _Nu
 // Only certain authorities support MAM CA scenarios
 - (BOOL)supportsMAMScenarios;
 
+// Check if token endpoint is consistent with the authoirty
+// E.g., currently AAD Authority checks if the host is the same, which requires resolving authority beforehand
+- (BOOL)checkTokenEndpointForRTRefresh:(nullable NSURL *)tokenEndpoint;
+
 /* It is used in telemetry */
 - (nonnull NSString *)telemetryAuthorityType;
 
 - (void)loadOpenIdMetadataWithContext:(nullable id<MSIDRequestContext>)context
                       completionBlock:(nonnull MSIDOpenIdConfigurationInfoBlock)completionBlock;
+
+- (BOOL)isSameEnvironmentAsAuthority:(nonnull MSIDAuthority *)authority;
 
 + (BOOL)isAuthorityFormatValid:(nonnull NSURL *)url
                        context:(nullable id<MSIDRequestContext>)context

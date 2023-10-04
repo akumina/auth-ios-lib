@@ -43,6 +43,11 @@
      we'd like to throw an error and specify which scopes were granted and which ones not
      */
     
+    if ([NSString msidIsStringNilOrBlank:tokenResult.accessToken.accessToken])
+    {
+        return YES;
+    }
+
     NSOrderedSet *grantedScopes = tokenResult.accessToken.scopes;
     NSOrderedSet *normalizedGrantedScopes = grantedScopes.normalizedScopeSet;
 
@@ -85,6 +90,15 @@
         && ![accountIdentifier.uid isEqualToString:tokenResult.account.accountIdentifier.uid])
     {
         MSID_LOG_WITH_CORR_PII(MSIDLogLevelError, correlationID, @"Different account was returned from the server. Original account %@, returned account %@", MSID_PII_LOG_TRACKABLE(accountIdentifier.uid), MSID_PII_LOG_TRACKABLE(tokenResult.account.accountIdentifier.uid));
+        
+        // Probably the account was deleted and re-created with the same upn and request contained old cached user's object id
+        if (tokenResult.account.accountIdentifier.utid != nil &&
+            [tokenResult.account.accountIdentifier.utid isEqualToString:accountIdentifier.utid] &&
+            [tokenResult.account.accountIdentifier.displayableId isEqualToString:accountIdentifier.displayableId])
+        {
+            MSID_LOG_WITH_CORR(MSIDLogLevelInfo, correlationID, @"For the same tenant, different account uids were returned from server but have the same UPN. Probably the account was deleted and recreated with same UPN");
+            return YES;
+        }
         
         if (error)
         {

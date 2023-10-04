@@ -21,10 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDAADTokenRequestServerTelemetry.h"
 #import "MSIDCurrentRequestTelemetry.h"
 #import "MSIDLastRequestTelemetry.h"
 #import "NSError+MSIDServerTelemetryError.h"
+#import "MSIDRequestTelemetryConstants.h"
 
 @interface MSIDAADTokenRequestServerTelemetry()
 
@@ -49,6 +52,15 @@
 {
     NSString *errorString = [error msidServerTelemetryErrorString];
     
+    [self handleError:error
+          errorString:errorString
+              context:context];
+}
+
+- (void)handleError:(NSError *)error
+        errorString:(NSString *)errorString
+            context:(id<MSIDRequestContext>)context
+{
     [self.lastRequestTelemetry updateWithApiId:self.currentRequestTelemetry.apiId
                                    errorString:errorString
                                        context:context];
@@ -62,10 +74,12 @@
     NSString *lastRequestTelemetryString = [self.lastRequestTelemetry telemetryString];
     
     NSMutableURLRequest *mutableUrlRequest = [request.urlRequest mutableCopy];
-    [mutableUrlRequest setValue:currentRequestTelemetryString forHTTPHeaderField:@"x-client-current-telemetry"];
-    [mutableUrlRequest setValue:lastRequestTelemetryString forHTTPHeaderField:@"x-client-last-telemetry"];
+    [mutableUrlRequest setValue:currentRequestTelemetryString forHTTPHeaderField:MSID_CURRENT_TELEMETRY_HEADER_NAME];
+    [mutableUrlRequest setValue:lastRequestTelemetryString forHTTPHeaderField:MSID_LAST_TELEMETRY_HEADER_NAME];
     
     request.urlRequest = mutableUrlRequest;
 }
 
 @end
+
+#endif

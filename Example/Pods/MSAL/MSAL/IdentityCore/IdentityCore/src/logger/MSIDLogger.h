@@ -23,6 +23,8 @@
 
 #import <Foundation/Foundation.h>
 
+@protocol MSIDLoggerConnecting;
+
 /*! Levels of logging. Defines the priority of the logged message */
 typedef NS_ENUM(NSInteger, MSIDLogLevel)
 {
@@ -32,6 +34,19 @@ typedef NS_ENUM(NSInteger, MSIDLogLevel)
     MSIDLogLevelInfo,
     MSIDLogLevelVerbose,
     MSIDLogLevelLast = MSIDLogLevelVerbose,
+};
+
+/*! Levels of log masking */
+typedef NS_ENUM(NSInteger, MSIDLogMaskingLevel)
+{
+    /** Common core will not return any messages with any user or organizational information. This includes EUII and EUPI. */
+    MSIDLogMaskingSettingsMaskAllPII,
+    
+    /** Common core logs will still include OII (organization identifiable information), and EUPI (end user pseudonymous identifiers), but MSAL will try to exclude and/or mask any EUII (end user identifiable information) like UPN, username, email from its logs. */
+    MSIDLogMaskingSettingsMaskEUIIOnly,
+    
+    /** Common core logs will still include OII (organization identifiable information),  EUPI (end user pseudonymous identifiers), and EUII (end user identifiable information) like UPN, username, email from its logs. MSAL will still hide all secrets like tokens from its logs */
+    MSIDLogMaskingSettingsMaskSecretsOnly
 };
 
 /*!
@@ -51,23 +66,26 @@ typedef void (^MSIDLogCallback)(MSIDLogLevel level, NSString *message, BOOL cont
 
 + (MSIDLogger *)sharedLogger;
 
+/*! Allows to ovveride logger behaviour. */
+@property (nonatomic, weak) id<MSIDLoggerConnecting> loggerConnector;
+
 /*!
  The minimum log level for messages to be passed onto the log callback.
  */
-@property (readwrite) MSIDLogLevel level;
+@property (nonatomic, readwrite) MSIDLogLevel level;
 
 /*!
- Set to YES to allow messages possibly containing Personally Identifiable Information (PII) to be
- sent to the logging callback.
+    Provides a mechanism for a more granular log masking.
+    All PII will be masked by default.
  */
-@property (readwrite) BOOL PiiLoggingEnabled;
+@property (nonatomic, readwrite) MSIDLogMaskingLevel logMaskingLevel;
 
-@property (readwrite) BOOL NSLoggingEnabled;
+@property (nonatomic, readwrite) BOOL nsLoggingEnabled;
 
 /*!
  Set to YES to add <file>:<line> info to log messages.
  */
-@property (readwrite) BOOL SourceLineLoggingEnabled;
+@property (nonatomic, readwrite) BOOL sourceLineLoggingEnabled;
 
 /*!
  Sets the callback block to send MSID log messages to.

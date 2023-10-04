@@ -25,6 +25,7 @@
 #import "MSIDLogger+Internal.h"
 #import "MSIDVersion.h"
 #import "MSIDDeviceId.h"
+#import "MSIDLoggerConnecting.h"
 #import <pthread.h>
 
 static long s_maxQueueSize = 1000;
@@ -50,8 +51,8 @@ static long s_maxQueueSize = 1000;
     // and we'll probably not have enough diagnostic information, however verbose
     // will most likely be too noisy for most usage.
     _level = MSIDLogLevelInfo;
-    _PiiLoggingEnabled = NO;
-    _SourceLineLoggingEnabled = NO;
+    _logMaskingLevel = MSIDLogMaskingSettingsMaskAllPII;
+    _sourceLineLoggingEnabled = NO;
     
     NSString *queueName = [NSString stringWithFormat:@"com.microsoft.msidlogger-%@", [NSUUID UUID].UUIDString];
     _loggerQueue = dispatch_queue_create([queueName cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_SERIAL);
@@ -76,13 +77,45 @@ static long s_maxQueueSize = 1000;
 {
     if (_callback != nil)
     {
-        @throw @"MSID logging callback can only be set once per process and should never changed once set.";
+        @throw MSIDException(MSIDGenericException, @"MSID logging callback can only be set once per process and should never changed once set.", nil);
     }
  
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         _callback = callback;
     });
+}
+
+- (MSIDLogLevel)level
+{
+    __typeof__(self.loggerConnector) loggerConnector = self.loggerConnector;
+    if (loggerConnector) return loggerConnector.level;
+    
+    return _level;
+}
+
+- (BOOL)nsLoggingEnabled
+{
+    __typeof__(self.loggerConnector) loggerConnector = self.loggerConnector;
+    if (loggerConnector) return loggerConnector.nsLoggingEnabled;
+    
+    return _nsLoggingEnabled;
+}
+
+- (MSIDLogMaskingLevel)logMaskingLevel
+{
+    __typeof__(self.loggerConnector) loggerConnector = self.loggerConnector;
+    if (loggerConnector) return loggerConnector.logMaskingLevel;
+    
+    return _logMaskingLevel;
+}
+
+- (BOOL)sourceLineLoggingEnabled
+{
+    __typeof__(self.loggerConnector) loggerConnector = self.loggerConnector;
+    if (loggerConnector) return loggerConnector.sourceLineLoggingEnabled;
+    
+    return _sourceLineLoggingEnabled;
 }
 
 @end
@@ -108,8 +141,17 @@ static NSDateFormatter *s_dateFormatter = nil;
               format:(NSString *)format, ...
 {
     if (!format) return;
-    if (level > self.level) return;
-    if (!self.callback && !self.NSLoggingEnabled) return;
+    
+    BOOL shouldLog = level <= self.level;
+    __typeof__(self.loggerConnector) loggerConnector = self.loggerConnector;
+    if (loggerConnector)
+    {
+        shouldLog = [loggerConnector shouldLog:level];
+    }
+    
+    if (!shouldLog) return;
+    
+    if (!self.callback && !self.nsLoggingEnabled && !loggerConnector) return;
 
     va_list args;
     va_start(args, format);
@@ -119,72 +161,96 @@ static NSDateFormatter *s_dateFormatter = nil;
     __uint64_t tid;
     pthread_threadid_np(NULL, &tid);
     
-    // Prevent queue from growing infinitely large.
-    dispatch_semaphore_wait(self.queueSemaphore, DISPATCH_TIME_FOREVER);
-    
-    dispatch_async(self.loggerQueue, ^{
-        @autoreleasepool
+    void (^logBlock)(void) = ^
+    {
+        NSString *logComponent = [context logComponent];
+        NSString *componentStr = logComponent ? [NSString stringWithFormat:@" [%@]", logComponent] : @"";
+        
+        NSString *correlationIdStr = @"";
+        
+        if (correlationId)
         {
-            NSString *logComponent = [context logComponent];
-            NSString *componentStr = logComponent ? [NSString stringWithFormat:@" [%@]", logComponent] : @"";
-            
-            NSString *correlationIdStr = @"";
-            
-            if (correlationId)
+            if ([correlationId isKindOfClass:[NSUUID class]])
             {
-                if ([correlationId isKindOfClass:[NSUUID class]])
-                {
-                    correlationIdStr = [NSString stringWithFormat:@" - %@", correlationId.UUIDString];
-                }
-                else
-                {
-                    NSAssert(NO, @"Correlation ID not of NSUUID class");
-                    correlationIdStr = @"[Invalid non-NSUUID correlationID]";
-                }
+                correlationIdStr = [NSString stringWithFormat:@" - %@", correlationId.UUIDString];
             }
-            else if (context)
+            else
             {
-                correlationIdStr = [NSString stringWithFormat:@" - %@", [context correlationId]];
+                NSAssert(NO, @"Correlation ID not of NSUUID class");
+                correlationIdStr = @"[Invalid non-NSUUID correlationID]";
             }
+        }
+        else if (context)
+        {
+            correlationIdStr = [NSString stringWithFormat:@" - %@", [context correlationId]];
+        }
+        
+        NSString *dateStr = [s_dateFormatter stringFromDate:[NSDate date]];
+        
+        NSString *sdkName = [MSIDVersion sdkName];
+        NSString *sdkVersion = [MSIDVersion sdkVersion];
+        
+        NSString *sourceInfo = @"";
+        if (self.sourceLineLoggingEnabled && filename.length)
+        {
+            sourceInfo = [NSString stringWithFormat:@" %@:%lu: %@", filename.lastPathComponent, (unsigned long)lineNumber, function];
+        }
+        
+        __auto_type threadName = [[NSThread currentThread] isMainThread] ? @" (main thread)" : nil;
+        if (!threadName) {
+            threadName = [NSThread currentThread].name ?: @"";
+        }
+        
+        __auto_type threadInfo = [[NSString alloc] initWithFormat:@"TID=%llu%@", tid, threadName];
+        
+        if (self.nsLoggingEnabled)
+        {
+            NSString *logLevelStr = [self stringForLogLevel:self.level];
             
-            NSString *dateStr = [s_dateFormatter stringFromDate:[NSDate date]];
+            NSString *log = [NSString stringWithFormat:@"%@ %@ %@ %@ [%@%@]%@ %@:%@ %@", threadInfo, sdkName, sdkVersion, [MSIDDeviceId deviceOSId], dateStr, correlationIdStr, componentStr, logLevelStr, sourceInfo, message];
             
-            NSString *sdkName = [MSIDVersion sdkName];
-            NSString *sdkVersion = [MSIDVersion sdkVersion];
+            NSLog(@"%@", log);
+        }
+        
+        if (self.callback || loggerConnector)
+        {
+            NSString *log = [NSString stringWithFormat:@"%@ %@ %@ %@ [%@%@]%@%@ %@", threadInfo, sdkName, sdkVersion, [MSIDDeviceId deviceOSId], dateStr, correlationIdStr, componentStr, sourceInfo, message];
             
-            NSString *sourceInfo = @"";
-            if (self.SourceLineLoggingEnabled && filename.length)
+            BOOL piiAllowed = self.logMaskingLevel != MSIDLogMaskingSettingsMaskAllPII;
+            BOOL lineContainsPII = piiAllowed ? containsPII : NO;
+            
+            if (loggerConnector)
             {
-                sourceInfo = [NSString stringWithFormat:@" %@:%lu: %@", filename.lastPathComponent, (unsigned long)lineNumber, function];
+                [loggerConnector onLogWithLevel:level lineNumber:lineNumber function:function message:log];
             }
-            
-            __auto_type threadName = [[NSThread currentThread] isMainThread] ? @" (main thread)" : nil;
-            if (!threadName) {
-                threadName = [NSThread currentThread].name ?: @"";
-            }
-            
-            __auto_type threadInfo = [[NSString alloc] initWithFormat:@"TID=%llu%@", tid, threadName];
-            
-            if (self.NSLoggingEnabled)
+            else if (self.callback)
             {
-                NSString *logLevelStr = [self stringForLogLevel:_level];
-                
-                NSString *log = [NSString stringWithFormat:@"%@ %@ %@ %@ [%@%@]%@ %@:%@ %@", threadInfo, sdkName, sdkVersion, [MSIDDeviceId deviceOSId], dateStr, correlationIdStr, componentStr, logLevelStr, sourceInfo, message];
-                
-                NSLog(@"%@", log);
-            }
-            
-            if (self.callback)
-            {
-                NSString *log = [NSString stringWithFormat:@"%@ %@ %@ %@ [%@%@]%@%@ %@", threadInfo, sdkName, sdkVersion, [MSIDDeviceId deviceOSId], dateStr, correlationIdStr, componentStr, sourceInfo, message];
-                
-                BOOL lineContainsPII = self.PiiLoggingEnabled ? containsPII : NO;
                 self.callback(level, log, lineContainsPII);
             }
-            
-            dispatch_semaphore_signal(self.queueSemaphore);
+                
         }
-    });
+    };
+    
+    BOOL loggingQueueEnabled = YES;
+    if (loggerConnector) loggingQueueEnabled = loggerConnector.loggingQueueEnabled;
+    
+    if (loggingQueueEnabled)
+    {
+        // Prevent queue from growing infinitely large.
+        dispatch_semaphore_wait(self.queueSemaphore, DISPATCH_TIME_FOREVER);
+        
+        dispatch_async(self.loggerQueue, ^{
+            @autoreleasepool
+            {
+                logBlock();
+                
+                dispatch_semaphore_signal(self.queueSemaphore);
+            }
+        });
+        return;
+    }
+    
+    logBlock();
 }
 
 - (NSString*)stringForLogLevel:(MSIDLogLevel)level

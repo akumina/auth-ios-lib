@@ -21,15 +21,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-extern NSString *MSIDErrorDescriptionKey;
-extern NSString *MSIDOAuthErrorKey;
-extern NSString *MSIDOAuthSubErrorKey;
-extern NSString *MSIDCorrelationIdKey;
-extern NSString *MSIDHTTPHeadersKey;
-extern NSString *MSIDHTTPResponseCodeKey;
-extern NSString *MSIDUserDisplayableIdkey;
-extern NSString *MSIDHomeAccountIdkey;
-extern NSString *MSIDBrokerVersionKey;
+extern NSString * _Nonnull MSIDErrorDescriptionKey;
+extern NSString * _Nonnull MSIDOAuthErrorKey;
+extern NSString * _Nonnull MSIDOAuthSubErrorKey;
+extern NSString * _Nonnull MSIDCorrelationIdKey;
+extern NSString * _Nonnull MSIDHTTPHeadersKey;
+extern NSString * _Nonnull MSIDHTTPResponseCodeKey;
+extern NSString * _Nonnull MSIDUserDisplayableIdkey;
+extern NSString * _Nonnull MSIDHomeAccountIdkey;
+extern NSString * _Nonnull MSIDBrokerVersionKey;
 
 /*!
  ADAL and MSID use different error domains and error codes.
@@ -38,10 +38,12 @@ extern NSString *MSIDBrokerVersionKey;
  domain mapping and error code mapping should be added to ADAuthenticationErrorConverter
  and MSIDErrorConveter in corresponding project.
  */
-extern NSString *MSIDErrorDomain;
-extern NSString *MSIDOAuthErrorDomain;
-extern NSString *MSIDKeychainErrorDomain;
-extern NSString *MSIDHttpErrorCodeDomain;
+extern NSString * _Nonnull MSIDErrorDomain;
+extern NSString * _Nonnull MSIDOAuthErrorDomain;
+extern NSString * _Nonnull MSIDKeychainErrorDomain;
+extern NSString * _Nonnull MSIDHttpErrorCodeDomain;
+
+extern NSExceptionName const _Nonnull MSIDGenericException;
 
 /*!
  List of scopes that were requested from MSAL, but not granted in the response.
@@ -53,28 +55,33 @@ extern NSString *MSIDHttpErrorCodeDomain;
  * Requested scope is not supported for a particular account (Organizational scopes when it is a consumer account)
 
  */
-extern NSString *MSIDDeclinedScopesKey;
+extern NSString * _Nonnull MSIDDeclinedScopesKey;
 
 /*!
  List of granted scopes in case some scopes weren't granted (see MSALDeclinedScopesKey for more info)
  */
-extern NSString *MSIDGrantedScopesKey;
+extern NSString * _Nonnull MSIDGrantedScopesKey;
 
 /*!
  This flag will be set if server is unavailable
  */
-extern NSString *MSIDServerUnavailableStatusKey;
+extern NSString * _Nonnull MSIDServerUnavailableStatusKey;
 
 /*!
  This flag will be set if we received a valid token response, but returned data mismatched.
  */
-extern NSString *MSIDInvalidTokenResultKey;
+extern NSString * _Nonnull MSIDInvalidTokenResultKey;
 
 /*!
  SSO extension failed with underlying error.
  This error defined under ASAuthorizationErrorDomain.
  */
 extern NSInteger const MSIDSSOExtensionUnderlyingError;
+
+/*!
+ This flag will be set to log the method and line number where the error occcured.
+ */
+extern NSString * _Nonnull MSIDErrorMethodAndLineKey;
 
 typedef NS_ENUM(NSInteger, MSIDErrorCode)
 {
@@ -137,6 +144,7 @@ typedef NS_ENUM(NSInteger, MSIDErrorCode)
     MSIDErrorServerUnauthorizedClient   = -51414,
     MSIDErrorServerDeclinedScopes       = -51415,
     MSIDErrorServerAccessDenied         = -51416,
+    MSIDErrorServerError                = -51417,
     
     // State verification has failed
     MSIDErrorServerInvalidState         = -51420,
@@ -241,13 +249,94 @@ typedef NS_ENUM(NSInteger, MSIDErrorCode)
     
     MSIDErrorBrokerApplicationTokenReadFailed      =   -51813,
     
-    MSIDErrorBrokerNotAvailable                    =   -51814
+    MSIDErrorBrokerNotAvailable                    =   -51814,
+    
+    // SSO Extension internal error
+    MSIDErrorSSOExtensionUnexpectedError           =   -51815,
+    
+    // JIT - Link - Timeout while waiting for server confirmation
+    MSIDErrorJITLinkServerConfirmationTimeout      =   -51816,
+    
+    // JIT - Link - Error while waiting for server confirmation
+    MSIDErrorJITLinkServerConfirmationError        =   -51817,
+    
+    // JIT - Link - Error while acquiring intune token
+    MSIDErrorJITLinkAcquireTokenError              =   -51818,
+    
+    // JIT - Link - Token acquired for wrong tenant
+    MSIDErrorJITLinkTokenAcquiredWrongTenant       =   -51819,
+    
+    // JIT - Link - Error during linking
+    MSIDErrorJITLinkError                          =   -51820,
+    
+    // JIT - Compliance Check - Device not compliant
+    MSIDErrorJITComplianceCheckResultNotCompliant  =   -51821,
+    
+    // JIT - Compliance Check - CP timeout
+    MSIDErrorJITComplianceCheckResultTimeout       =   -51822,
+    
+    // JIT - Compliance Check - Result unknown
+    MSIDErrorJITComplianceCheckResultUnknown       =   -51823,
+    
+    // JIT - Compliance Check - Invalid linkPayload from SSO configuration
+    MSIDErrorJITComplianceCheckInvalidLinkPayload  =   -51824,
+
+    // JIT - Compliance Check - Could not create compliance check web view controller
+    MSIDErrorJITComplianceCheckCreateController    =   -51825,
+
+    // JIT - Link - LinkConfig not found
+    MSIDErrorJITLinkConfigNotFound                 =   -51826,
+
+    // JIT - Link - Invalid LinkTokenConfig
+    MSIDErrorJITInvalidLinkTokenConfig             =   -51827,
+
+    // JIT - WPJ - Device Registration Failed
+    MSIDErrorJITWPJDeviceRegistrationFailed        =   -51828,
+
+    // JIT - WPJ - AccountIdentifier is nil
+    MSIDErrorJITWPJAccountIdentifierNil            =   -51829,
+
+    // JIT - WPJ - Failed to acquire broker token
+    MSIDErrorJITWPJAcquireTokenError               =   -51830,
+    
+    // JIT - Retry JIT process (WPJ or Link)
+    MSIDErrorJITRetryRequired                      =   -51831,
+    
+    // JIT - Unexpected status received from webCP troubleshooting flow
+    MSIDErrorJITUnknownStatusWebCP                 =   -51832,
+
+    // JIT - Troubleshooting flow needed
+    MSIDErrorJITTroubleshootingRequired            =   -51833,
+
+    // JIT - Troubleshooting - Could not create web view controller
+    MSIDErrorJITTroubleshootingCreateController    =   -51834,
+
+    // JIT - Troubleshooting - Result unknown
+    MSIDErrorJITTroubleshootingResultUnknown       =   -51835,
+    
+    // JIT - Troubleshooting - Acquire token error
+    MSIDErrorJITTroubleshootingAcquireToken        =   -51836,
+    
+    // Throttling errors
+    MSIDErrorThrottleCacheNoRecord = -51900,
+    MSIDErrorThrottleCacheInvalidSignature = -51901,
+    
+    // App state while failed to open broker error
+    MSIDErrorBrokerAppIsInactive = -51902,
+    MSIDErrorBrokerAppIsInBackground = -51903,
+
 };
 
-extern NSError *MSIDCreateError(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError *underlyingError, NSUUID *correlationId, NSDictionary *additionalUserInfo, BOOL logErrorDescription);
+extern NSError * _Nonnull MSIDCreateError(NSString * _Nonnull domain, NSInteger code, NSString * _Nullable errorDescription, NSString * _Nullable oauthError, NSString * _Nullable subError, NSError * _Nullable underlyingError, NSUUID * _Nullable correlationId, NSDictionary * _Nullable additionalUserInfo, BOOL logErrorDescription);
 
-extern MSIDErrorCode MSIDErrorCodeForOAuthError(NSString *oauthError, MSIDErrorCode defaultCode);
+extern MSIDErrorCode MSIDErrorCodeForOAuthError(NSString * _Nullable oauthError, MSIDErrorCode defaultCode);
 
-extern NSDictionary<NSString *, NSArray *> *MSIDErrorDomainsAndCodes(void);
+extern MSIDErrorCode MSIDErrorCodeForOAuthErrorWithSubErrorCode(NSString * _Nullable oauthError, MSIDErrorCode defaultCode, NSString * _Nullable subError);
 
-extern void MSIDFillAndLogError(NSError **error, MSIDErrorCode errorCode, NSString *errorDescription, NSUUID *correlationID);
+extern NSDictionary<NSString *, NSArray *> * _Nonnull MSIDErrorDomainsAndCodes(void);
+
+extern void MSIDFillAndLogError(NSError * _Nullable __autoreleasing * _Nullable error, MSIDErrorCode errorCode, NSString * _Nullable errorDescription, NSUUID * _Nullable correlationID);
+
+#define MSIDException(name, message, info) [NSException exceptionWithName:name reason:[NSString stringWithFormat:@"%@ (function:%s line:%i)", message, __PRETTY_FUNCTION__, __LINE__]  userInfo:info]
+
+extern NSString * _Nullable MSIDErrorCodeToString(MSIDErrorCode errorCode);

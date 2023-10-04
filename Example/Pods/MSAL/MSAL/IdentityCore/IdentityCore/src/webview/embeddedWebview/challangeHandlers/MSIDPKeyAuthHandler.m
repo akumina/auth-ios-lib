@@ -30,11 +30,18 @@
 #import "MSIDDeviceId.h"
 #import "MSIDConstants.h"
 #import "NSDictionary+MSIDExtensions.h"
+#if !EXCLUDE_FROM_MSALCPP
+#import "MSIDCurrentRequestTelemetry.h"
+#import "MSIDRequestTelemetryConstants.h"
+#endif
+#import "MSIDWorkPlaceJoinUtil.h"
 
 @implementation MSIDPKeyAuthHandler
 
 + (BOOL)handleChallenge:(NSString *)challengeUrl
                 context:(id<MSIDRequestContext>)context
+          customHeaders:(NSDictionary<NSString *, NSString *> *)customHeaders
+     externalSSOContext:(MSIDExternalSSOContext *)externalSSOContext
       completionHandler:(void (^)(NSURLRequest *challengeResponse, NSError *error))completionHandler
 {
     MSID_LOG_WITH_CTX(MSIDLogLevelInfo, context, @"Handling PKeyAuth Challenge.");
@@ -56,6 +63,7 @@
     // Extract authority from submit url    
     NSString *authHeader = [MSIDPkeyAuthHelper createDeviceAuthResponse:[NSURL URLWithString:submitUrl]
                                                           challengeData:queryParamsMap
+                                                     externalSSOContext:externalSSOContext
                                                                 context:context];
     
     // Attach client version to response url
@@ -72,12 +80,38 @@
     NSMutableURLRequest *responseReq = [[NSMutableURLRequest alloc] initWithURL:responseUrlComp.URL];
     [responseReq setValue:kMSIDPKeyAuthHeaderVersion forHTTPHeaderField:kMSIDPKeyAuthHeader];
     [responseReq setValue:authHeader forHTTPHeaderField:MSID_OAUTH2_AUTHORIZATION];
+    
+#if !EXCLUDE_FROM_MSALCPP
+    MSIDCurrentRequestTelemetry *telemetry = [MSIDCurrentRequestTelemetry new];
+    telemetry.schemaVersion = HTTP_REQUEST_TELEMETRY_SCHEMA_VERSION;
+    BOOL v2GroupEntitled = [MSIDWorkPlaceJoinUtil v2AccessGroupAllowedWithContext:context];
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, context, @"v2 WPJ group is allowed %d", v2GroupEntitled);
+    NSMutableArray *platformFields = [NSMutableArray new];
+    [platformFields addObject:v2GroupEntitled ? MSID_WPJ_V2_TELEMETRY_KEY : MSID_WPJ_V1_TELEMETRY_KEY];
+    telemetry.platformFields = platformFields;
+    NSString *currentRequestTelemetryString = [telemetry telemetryString];
+    [responseReq setValue:currentRequestTelemetryString forHTTPHeaderField:MSID_CURRENT_TELEMETRY_HEADER_NAME];
+#endif
+    
+    // Adding refreshTokenCredential (PRT) header to the challenge response. Header is available in customheaders dictionary
+    NSString *credentialHeader = [customHeaders objectForKey:MSID_REFRESH_TOKEN_CREDENTIAL];
+    if (credentialHeader)
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, context, @"Added refresh token to the PkeyAuth response.");
+        [responseReq setValue:credentialHeader forHTTPHeaderField:MSID_REFRESH_TOKEN_CREDENTIAL];
+    }
+    else
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelWarning, context, @"CredentialHeader is nil while responding to PKeyAuth Challenge.");
+    }
+
     completionHandler(responseReq, nil);
     return YES;
 }
 
 + (void)handleWwwAuthenticateHeader:(NSString *)wwwAuthHeaderValue
                          requestUrl:(NSURL *)requestUrl
+                 externalSSOContext:(MSIDExternalSSOContext *)externalSSOContext
                             context:(id<MSIDRequestContext>)context
                   completionHandler:(void (^)(NSString *authHeader, NSError *error))completionHandler
 {
@@ -85,12 +119,13 @@
     
     if (!authHeaderParams)
     {
-        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, context, @"Unparseable wwwAuthHeader received %@", MSID_PII_LOG_MASKABLE(wwwAuthHeaderValue));
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, context, @"Unparseable wwwAuthHeader received %@", MSID_EUII_ONLY_LOG_MASKABLE(wwwAuthHeaderValue));
     }
     
     NSError *error = nil;
     NSString *authHeader = [MSIDPkeyAuthHelper createDeviceAuthResponse:requestUrl
                                                           challengeData:authHeaderParams
+                                                     externalSSOContext:externalSSOContext
                                                                 context:context];
     if (completionHandler)
     {

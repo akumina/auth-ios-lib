@@ -33,12 +33,14 @@
 #import "MSIDAuthorizationCodeResult.h"
 #import "MSIDAuthorizationCodeGrantRequest.h"
 #import "MSIDOauth2Factory.h"
+#import "MSIDAccountIdentifier.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDAppExtensionUtil.h"
+#import "MSIDBackgroundTaskManager.h"
 #endif
 
-#if TARGET_OS_OSX
+#if TARGET_OS_OSX && !EXCLUDE_FROM_MSALCPP
 #import "MSIDExternalAADCacheSeeder.h"
 #endif
 
@@ -55,6 +57,7 @@
                             tokenResponseValidator:(nonnull MSIDTokenResponseValidator *)tokenResponseValidator
                                         tokenCache:(nonnull id<MSIDCacheAccessor>)tokenCache
                               accountMetadataCache:(nullable MSIDAccountMetadataCacheAccessor *)accountMetadataCache
+                                extendedTokenCache:(nullable id<MSIDExtendedTokenCacheDataSource>)extendedTokenCache
 {
     self = [super initWithRequestParameters:parameters oauthFactory:oauthFactory];
 
@@ -64,13 +67,19 @@
         _tokenCache = tokenCache;
         _accountMetadataCache = accountMetadataCache;
         _tokenResponseHandler = [MSIDTokenResponseHandler new];
+        _extendedTokenCache = extendedTokenCache;
     }
 
     return self;
 }
 
-- (void)executeRequestWithCompletion:(nonnull MSIDInteractiveRequestCompletionBlock)completionBlock
+- (void)executeRequestWithCompletion:(nonnull MSIDInteractiveRequestCompletionBlock) __unused completionBlock
 {
+#if !EXCLUDE_FROM_MSALCPP
+#if TARGET_OS_IPHONE
+    [[MSIDBackgroundTaskManager sharedInstance] startOperationWithType:MSIDBackgroundTaskTypeInteractiveRequest];
+#endif
+    
     [super getAuthCodeWithCompletion:^(MSIDAuthorizationCodeResult * _Nullable result, NSError * _Nullable error, MSIDWebWPJResponse * _Nullable installBrokerResponse)
     {
         if (!result)
@@ -79,15 +88,19 @@
             return;
         }
         
+        [self.requestParameters updateAppRequestMetadata:result.accountIdentifier];
+        
         [self acquireTokenWithCodeResult:result completion:completionBlock];
     }];
+#endif
 }
 
 #pragma mark - Helpers
 
-- (void)acquireTokenWithCodeResult:(MSIDAuthorizationCodeResult *)authCodeResult
-                        completion:(MSIDInteractiveRequestCompletionBlock)completionBlock
+- (void)acquireTokenWithCodeResult:(MSIDAuthorizationCodeResult *) __unused authCodeResult
+                        completion:(MSIDInteractiveRequestCompletionBlock) __unused completionBlock
 {
+#if !EXCLUDE_FROM_MSALCPP
     MSIDAuthorizationCodeGrantRequest *tokenRequest = [self.oauthFactory authorizationGrantRequestWithRequestParameters:self.requestParameters
                                                                                                            codeVerifier:authCodeResult.pkceVerifier
                                                                                                                authCode:authCodeResult.authCode
@@ -95,8 +108,10 @@
 
     [tokenRequest sendWithBlock:^(MSIDTokenResponse *tokenResponse, NSError *error)
     {
-#if TARGET_OS_OSX
-        self.tokenResponseHandler.externalCacheSeeder = self.externalCacheSeeder;
+#if TARGET_OS_IPHONE
+    [[MSIDBackgroundTaskManager sharedInstance] stopOperationWithType:MSIDBackgroundTaskTypeInteractiveRequest];
+#elif TARGET_OS_OSX
+    self.tokenResponseHandler.externalCacheSeeder = self.externalCacheSeeder;
 #endif
         [self.tokenResponseHandler handleTokenResponse:tokenResponse
                                      requestParameters:self.requestParameters
@@ -108,11 +123,19 @@
                                        validateAccount:self.requestParameters.shouldValidateResultAccount
                                       saveSSOStateOnly:NO
                                                  error:error
-                                       completionBlock:^(MSIDTokenResult *result, NSError *error)
+                                       completionBlock:^(MSIDTokenResult *result, NSError *localError)
          {
-            completionBlock(result, error, nil);
+            completionBlock(result, localError, nil);
         }];
     }];
+#endif
+}
+
+- (void)dealloc
+{
+#if TARGET_OS_IPHONE
+    [[MSIDBackgroundTaskManager sharedInstance] stopOperationWithType:MSIDBackgroundTaskTypeInteractiveRequest];
+#endif
 }
 
 @end

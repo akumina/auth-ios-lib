@@ -28,6 +28,9 @@
 #import "MSIDIdTokenClaims.h"
 #import "MSIDAuthority.h"
 
+static NSUInteger kDefaultPRTRefreshInterval = 10800;
+static NSString *kMinSupportedPRTVersion = @"3.0";
+
 @implementation MSIDPrimaryRefreshToken
 
 - (instancetype)initWithTokenCacheItem:(MSIDCredentialCacheItem *)tokenCacheItem
@@ -42,15 +45,26 @@
         
         _deviceID = [jsonDictionary msidObjectForKey:MSID_DEVICE_ID_CACHE_KEY ofClass:[NSString class]];
         
-        if (!_sessionKey)
+        _prtProtocolVersion = [jsonDictionary msidObjectForKey:MSID_PRT_PROTOCOL_VERSION_CACHE_KEY ofClass:[NSString class]];
+        
+        if ([_prtProtocolVersion floatValue] < [kMinSupportedPRTVersion floatValue])
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelWarning, nil, @"Upgrading PRT from version %@ to min required version %@", _prtProtocolVersion, kMinSupportedPRTVersion);
+            _prtProtocolVersion = kMinSupportedPRTVersion;
+        }
+        
+        _expiresOn = tokenCacheItem.expiresOn;
+        _cachedAt = tokenCacheItem.cachedAt;
+        _lastRecoveryAttempt = tokenCacheItem.lastRecoveryAttempt;
+        _expiryInterval = [tokenCacheItem.expiryInterval integerValue];
+        
+        _externalKeyLocationType = (MSIDExternalPRTKeyLocationType)[[jsonDictionary msidObjectForKey:MSID_PRT_EXTERNAL_KEY_TYPE_CACHE_KEY ofClass:[NSString class]] integerValue];
+        
+        if (!_sessionKey && _externalKeyLocationType == MSIDExternalPRTKeyLocationTypeNone)
         {
             MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"Trying to initialize primary refresh token when missing session key field");
             return nil;
         }
-        
-        _prtProtocolVersion = [jsonDictionary msidObjectForKey:MSID_PRT_PROTOCOL_VERSION_CACHE_KEY ofClass:[NSString class]];
-        _expiresOn = tokenCacheItem.expiresOn;
-        _cachedAt = tokenCacheItem.cachedAt;
     }
     
     return self;
@@ -70,6 +84,9 @@
     prtCacheItem.prtProtocolVersion = self.prtProtocolVersion;
     prtCacheItem.expiresOn = self.expiresOn;
     prtCacheItem.cachedAt = self.cachedAt;
+    prtCacheItem.lastRecoveryAttempt = self.lastRecoveryAttempt;
+    prtCacheItem.expiryInterval = [NSString stringWithFormat:@"%lu", (long)self.expiryInterval];
+    prtCacheItem.externalKeyLocationType = self.externalKeyLocationType;
     return prtCacheItem;
 }
 
@@ -127,6 +144,7 @@
     hash = hash * 31 + self.sessionKey.hash;
     hash = hash * 31 + self.deviceID.hash;
     hash = hash * 31 + self.prtProtocolVersion.hash;
+    hash = hash * 31 + self.externalKeyLocationType;
     return hash;
 }
 
@@ -141,6 +159,7 @@
     result &= (!self.sessionKey && !token.sessionKey) || [self.sessionKey isEqualToData:token.sessionKey];
     result &= (!self.deviceID && !token.deviceID) || [self.deviceID isEqualToString:token.deviceID];
     result &= (!self.prtProtocolVersion && !token.prtProtocolVersion) || [self.prtProtocolVersion isEqualToString:token.prtProtocolVersion];
+    result &= self.externalKeyLocationType == token.externalKeyLocationType;
     return result;
 }
 
@@ -154,6 +173,9 @@
     item->_prtProtocolVersion = [_prtProtocolVersion copyWithZone:zone];
     item->_expiresOn = [_expiresOn copyWithZone:zone];
     item->_cachedAt = [_cachedAt copyWithZone:zone];
+    item->_lastRecoveryAttempt = [_lastRecoveryAttempt copyWithZone:zone];
+    item->_expiryInterval = _expiryInterval;
+    item->_externalKeyLocationType = _externalKeyLocationType;
     return item;
 }
 
@@ -169,7 +191,7 @@
 - (NSString *)description
 {
     NSString *baseDescription = [super description];
-    return [baseDescription stringByAppendingFormat:@"(primary refresh token=%@)", [_refreshToken msidSecretLoggingHash]];
+    return [baseDescription stringByAppendingFormat:@"(primary refresh token=%@, key location type %d)", [_refreshToken msidSecretLoggingHash], (int)_externalKeyLocationType];
 }
 
 #pragma mark - Utils
@@ -197,6 +219,16 @@
     
     BOOL shouldRefresh = [[NSDate date] timeIntervalSinceDate:self.cachedAt] >= refreshInterval;
     return shouldRefresh;
+}
+
+- (NSUInteger)refreshInterval
+{
+    if (self.expiryInterval > 0)
+    {
+        return self.expiryInterval / 30;
+    }
+    
+    return kDefaultPRTRefreshInterval;
 }
 
 @end

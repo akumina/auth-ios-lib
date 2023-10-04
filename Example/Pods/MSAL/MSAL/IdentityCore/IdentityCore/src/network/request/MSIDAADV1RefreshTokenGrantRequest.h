@@ -21,6 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
+@class MSIDExternalSSOContext;
+
 #import <Foundation/Foundation.h>
 #import "MSIDAADRefreshTokenGrantRequest.h"
 
@@ -31,14 +35,19 @@
                                    clientId:(nonnull NSString *)clientId
                                       scope:(nullable NSString *)scope
                                refreshToken:(nonnull NSString *)refreshToken
+                                redirectUri:(nonnull NSString *)redirectUri
                                    resource:(nonnull NSString *)resource
                             extraParameters:(nullable NSDictionary *)extraParameters
+                                 ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                                     context:(nullable id<MSIDRequestContext>)context NS_DESIGNATED_INITIALIZER;
 
 - (instancetype _Nullable )initWithEndpoint:(nonnull NSURL *)endpoint
                                    clientId:(nonnull NSString *)clientId
                                       scope:(nullable NSString *)scope
                                refreshToken:(nonnull NSString *)refreshToken
+                                 ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                                     context:(nullable id<MSIDRequestContext>)context NS_UNAVAILABLE;
 
 @end
+
+#endif

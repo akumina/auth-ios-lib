@@ -52,7 +52,7 @@
 
 + (MSIDProviderType)providerType
 {
-    @throw @"Abstract method was invoked.";
+    @throw MSIDException(MSIDGenericException, @"Abstract method was invoked.", nil);
 }
 
 #pragma mark - Response
@@ -72,8 +72,9 @@
     {
         if (error)
         {
-            *error = MSIDCreateError(MSIDErrorDomain,
-                                     MSIDErrorInternal, @"processTokenResponse called without a response dictionary", nil, nil, nil, context.correlationId, nil, YES);
+            NSMutableDictionary *additionalUserInfo = [NSMutableDictionary new];
+            additionalUserInfo[MSIDErrorMethodAndLineKey] = METHODANDLINE;
+            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"processTokenResponse called without a response dictionary", nil, nil, nil, context.correlationId, additionalUserInfo, YES);
         }
         return NO;
     }
@@ -97,11 +98,13 @@
         return NO;
     }
     
-    if (![self verifyAccessToken:response.accessToken])
+    if (![self verifyToken:response.accessToken] && ![self verifyToken:response.idToken])
     {
         if (error)
         {
-            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Authentication response received without expected accessToken", nil, nil, nil, context.correlationId, nil, YES);
+            NSMutableDictionary *additionalUserInfo = [NSMutableDictionary new];
+            additionalUserInfo[MSIDErrorMethodAndLineKey] = METHODANDLINE;
+            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInternal, @"Authentication response received without expected accessToken and idToken", nil, nil, nil, context.correlationId, additionalUserInfo, YES);
         }
         return NO;
     }
@@ -109,9 +112,9 @@
     return YES;
 }
 
-- (BOOL)verifyAccessToken:(NSString *)accessToken
+- (BOOL)verifyToken:(NSString *)token
 {
-    return ![NSString msidIsStringNilOrBlank:accessToken];
+    return ![NSString msidIsStringNilOrBlank:token];
 }
 
 #pragma mark - Tokens
@@ -287,7 +290,7 @@
     
     if (!token.refreshToken)
     {
-        MSID_LOG_WITH_CTX(MSIDLogLevelWarning,nil, @"Trying to initialize refresh token when missing refresh token field");
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Trying to initialize refresh token when missing refresh token field");
         return NO;
     }
 
@@ -419,6 +422,8 @@
 
 #pragma mark - Network requests
 
+#if !EXCLUDE_FROM_MSALCPP
+
 - (MSIDAuthorizationCodeGrantRequest *)authorizationGrantRequestWithRequestParameters:(MSIDRequestParameters *)parameters
                                                                          codeVerifier:(NSString *)pkceCodeVerifier
                                                                              authCode:(NSString *)authCode
@@ -436,6 +441,7 @@
                                                                                                            claims:claims
                                                                                                      codeVerifier:pkceCodeVerifier
                                                                                                   extraParameters:parameters.extraTokenRequestParameters
+                                                                                                       ssoContext:parameters.ssoContext
                                                                                                           context:parameters];
     tokenRequest.responseSerializer = [[MSIDTokenResponseSerializer alloc] initWithOauth2Factory:self];
     
@@ -452,12 +458,16 @@
                                                                                                clientId:parameters.clientId
                                                                                                   scope:allScopes
                                                                                            refreshToken:refreshToken
+                                                                                            redirectUri:parameters.redirectUri
                                                                                         extraParameters:parameters.extraTokenRequestParameters
+                                                                                             ssoContext:parameters.ssoContext
                                                                                                 context:parameters];
     tokenRequest.responseSerializer = [[MSIDTokenResponseSerializer alloc] initWithOauth2Factory:self];
     
     return tokenRequest;
 }
+
+#endif
 
 #pragma mark - Common identifiers
 

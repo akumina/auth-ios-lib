@@ -24,6 +24,7 @@
 #import <Foundation/Foundation.h>
 #import "MSIDCredentialType.h"
 #import "MSIDAccountType.h"
+#import "MSIDExtendedTokenCacheDataSource.h"
 
 @class MSIDAccountCacheItem;
 @class MSIDAppMetadataCacheItem;
@@ -37,6 +38,8 @@
 @protocol MSIDExtendedTokenCacheDataSource;
 
 @interface MSIDAccountCredentialCache : NSObject
+
+@property (nonatomic, readonly) id<MSIDExtendedTokenCacheDataSource> _Nonnull dataSource;
 
 - (nonnull instancetype)initWithDataSource:(nonnull id<MSIDExtendedTokenCacheDataSource>)dataSource;
 
@@ -106,6 +109,13 @@
  Removes credentials matching parameters specified in the query
  */
 - (BOOL)removeCredentialsWithQuery:(nonnull MSIDDefaultCredentialCacheQuery *)cacheQuery
+                          context:(nullable id<MSIDRequestContext>)context
+                            error:(NSError * _Nullable * _Nullable)error;
+
+/*
+ Removes credentials matching parameters specified in the query
+ */
+- (BOOL)removeExpiredAccessTokensCredentialsWithQuery:(nonnull MSIDDefaultCredentialCacheQuery *)cacheQuery
                           context:(nullable id<MSIDRequestContext>)context
                             error:(NSError * _Nullable * _Nullable)error;
 

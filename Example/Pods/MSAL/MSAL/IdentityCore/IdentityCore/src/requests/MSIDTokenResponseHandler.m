@@ -25,10 +25,13 @@
 #import "MSIDTokenResponse.h"
 #import "MSIDRequestParameters.h"
 #import "MSIDTokenResponseValidator.h"
-#import "MSIDExternalAADCacheSeeder.h"
 #import "MSIDAccountIdentifier.h"
 #import "MSIDTokenResult.h"
 #import "MSIDAccount.h"
+
+#if TARGET_OS_OSX && !EXCLUDE_FROM_MSALCPP
+#import "MSIDExternalAADCacheSeeder.h"
+#endif
 
 @implementation MSIDTokenResponseHandler
 
@@ -89,17 +92,17 @@
     {
         if (validateAccount)
         {
-            NSError *validationError;
+            NSError *tokenResponseValidatorError;
             BOOL accountChecked = [tokenResponseValidator validateAccount:requestParameters.accountIdentifier
                                                               tokenResult:tokenResult
                                                             correlationID:requestParameters.correlationId
-                                                                    error:&validationError];
+                                                                    error:&tokenResponseValidatorError];
             
             MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, requestParameters, @"Validated result account with result %d, old account %@, new account %@", accountChecked, MSID_PII_LOG_TRACKABLE(requestParameters.accountIdentifier.uid), MSID_PII_LOG_TRACKABLE(tokenResult.account.accountIdentifier.uid));
             
             if (!accountChecked)
             {
-                completionBlock(nil, validationError);
+                completionBlock(nil, tokenResponseValidatorError);
                 return;
             }
         }
@@ -107,7 +110,7 @@
         completionBlock(tokenResult, nil);
     };
     
-#if TARGET_OS_OSX
+#if TARGET_OS_OSX && !EXCLUDE_FROM_MSALCPP
     if (self.externalCacheSeeder != nil)
     {
         [self.externalCacheSeeder seedTokenResponse:tokenResponse

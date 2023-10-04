@@ -1,0 +1,6 @@
+framework module AkuminaAuthiOSLib {
+  umbrella header "AkuminaAuthiOSLib-umbrella.h"
+
+  export *
+  module * { export * }
+}

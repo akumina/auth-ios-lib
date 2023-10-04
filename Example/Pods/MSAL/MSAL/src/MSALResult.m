@@ -43,10 +43,11 @@
 #import "MSALTenantProfile+Internal.h"
 #import "MSIDDevicePopManager.h"
 #import "MSALAuthenticationSchemeProtocol.h"
+#import "MSALAuthenticationSchemeProtocolInternal.h"
 
 @interface MSALResult()
 
-@property id<MSALAuthenticationSchemeProtocol> authScheme;
+@property (atomic) id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal> authScheme;
 
 @end
 
@@ -54,6 +55,11 @@
 
 - (NSString *)authorizationHeader
 {
+    if ([NSString msidIsStringNilOrBlank:self.accessToken])
+    {
+        return @"";
+    }
+    
     return [self.authScheme getAuthorizationHeader:self.accessToken];
 }
 
@@ -77,7 +83,7 @@
                                scopes:(NSArray<NSString *> *)scopes
                             authority:(MSALAuthority *)authority
                         correlationId:(NSUUID *)correlationId
-                           authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                           authScheme:(id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authScheme
 {
     MSALResult *result = [MSALResult new];
     result->_accessToken = accessToken;
@@ -97,7 +103,7 @@
 
 + (MSALResult *)resultWithMSIDTokenResult:(MSIDTokenResult *)tokenResult
                                 authority:(MSALAuthority *)authority
-                               authScheme:(id<MSALAuthenticationSchemeProtocol>)authScheme
+                               authScheme:(id<MSALAuthenticationSchemeProtocol, MSALAuthenticationSchemeProtocolInternal>)authScheme
                                popManager:(MSIDDevicePopManager *)popManager
                                     error:(NSError **)error
 {
@@ -133,13 +139,21 @@
         account.accountClaims = claims.jsonDictionary;
     }
     
-    NSString *accessToken = [authScheme getClientAccessToken:tokenResult.accessToken popManager:popManager error:error];
-    if (!accessToken)
-    {
-        return nil;
-    }
+    NSString *resultAccessToken = @"";
+    NSArray *resultScopes = @[];
     
-    return [self resultWithAccessToken:accessToken
+    if (![NSString msidIsStringNilOrBlank:tokenResult.accessToken.accessToken])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Parsing result access token");
+        resultAccessToken = [authScheme getClientAccessToken:tokenResult.accessToken popManager:popManager error:error];
+        resultScopes = [tokenResult.accessToken.scopes array];
+    }
+    else
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Access token missing in token result. Continuing without it");
+    }
+        
+    return [self resultWithAccessToken:resultAccessToken
                              expiresOn:tokenResult.accessToken.expiresOn
                isExtendedLifetimeToken:tokenResult.extendedLifeTimeToken
                               tenantId:tenantProfile.tenantId
@@ -147,7 +161,7 @@
                                account:account
                                idToken:tokenResult.rawIdToken
                               uniqueId:tenantProfile.identifier
-                                scopes:[tokenResult.accessToken.scopes array]
+                                scopes:resultScopes
                              authority:authority
                          correlationId:tokenResult.correlationId
                             authScheme:authScheme];

@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDB2CAuthority.h"
 #import "MSIDB2CAuthorityResolver.h"
 #import "MSIDTelemetryEventStrings.h"
@@ -117,7 +119,11 @@
 
 - (nonnull NSString *)telemetryAuthorityType
 {
+#if !EXCLUDE_FROM_MSALCPP
     return MSID_TELEMETRY_VALUE_AUTHORITY_B2C;
+#else // MSAL CPP
+    return @"";
+#endif
 }
 
 - (BOOL)supportsBrokeredAuthentication
@@ -203,3 +209,5 @@
 }
 
 @end
+
+#endif

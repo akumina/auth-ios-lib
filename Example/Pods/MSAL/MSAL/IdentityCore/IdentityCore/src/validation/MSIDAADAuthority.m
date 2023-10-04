@@ -29,6 +29,7 @@
 #import "MSIDAuthority+Internal.h"
 #import "MSIDIntuneEnrollmentIdsCache.h"
 #import "MSIDB2CAuthority.h"
+#import "MSIDCIAMAuthority.h"
 #import "MSIDADFSAuthority.h"
 #import "NSURL+MSIDAADUtils.h"
 #import "MSIDJsonSerializableFactory.h"
@@ -173,7 +174,8 @@
     if (![super isAuthorityFormatValid:url context:context error:error]) return NO;
     
     __auto_type tenant = [self tenantFromAuthorityUrl:url context:context error:error];
-    
+
+#if !EXCLUDE_FROM_MSALCPP
     if ([MSIDADFSAuthority isAuthorityFormatValid:url context:context error:nil])
     {
         if (error)
@@ -183,7 +185,7 @@
         }
         return NO;
     }
-    
+
     if ([MSIDB2CAuthority isAuthorityFormatValid:url context:context error:nil])
     {
         if (error)
@@ -194,6 +196,17 @@
         return NO;
     }
     
+    if ([MSIDCIAMAuthority isAuthorityFormatValid:url context:context error:nil])
+    {
+        if (error)
+        {
+            __auto_type message = [NSString stringWithFormat:@"Trying to initialize AAD authority with CIAM authority url."];
+            *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorInvalidDeveloperParameter, message, nil, nil, nil, context.correlationId, nil, YES);
+        }
+        return NO;
+    }
+#endif
+
     return tenant != nil;
 }
 
@@ -221,7 +234,11 @@
 
 - (nonnull NSString *)telemetryAuthorityType
 {
+#if !EXCLUDE_FROM_MSALCPP
     return MSID_TELEMETRY_VALUE_AUTHORITY_AAD;
+#else // MSAL CPP
+    return @"";
+#endif
 }
 
 - (BOOL)supportsBrokeredAuthentication
@@ -231,7 +248,21 @@
 
 - (BOOL)supportsMAMScenarios
 {
+#if TARGET_OS_IPHONE
     return YES;
+#else
+    return NO;
+#endif
+}
+
+- (BOOL)checkTokenEndpointForRTRefresh:(NSURL *)tokenEndpoint
+{
+    NSArray *environmentAliases = self.defaultCacheEnvironmentAliases;
+    
+    if (!tokenEndpoint || ![environmentAliases count])
+        return YES;
+    
+    return [tokenEndpoint.host.msidNormalizedString msidIsEquivalentWithAnyAlias:environmentAliases];
 }
 
 #pragma mark - NSCopying

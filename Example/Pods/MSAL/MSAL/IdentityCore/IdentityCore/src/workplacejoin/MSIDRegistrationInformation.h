@@ -22,11 +22,11 @@
 // THE SOFTWARE.
 
 #import <Foundation/Foundation.h>
-#import "MSIDAssymetricKeyPairWithCert.h"
+#import "MSIDWPJKeyPairWithCert.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MSIDRegistrationInformation : MSIDAssymetricKeyPairWithCert
+@interface MSIDRegistrationInformation : MSIDWPJKeyPairWithCert
 {
     SecIdentityRef _securityIdentity;
 }
@@ -35,14 +35,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithIdentity:(SecIdentityRef)identity
                       privateKey:(SecKeyRef)privateKey
-                       publicKey:(SecKeyRef)publicKey
                      certificate:(SecCertificateRef)certificate
-               certificateIssuer:(NSString *)issuer;
+               certificateIssuer:(nullable NSString *)issuer;
 
 - (nullable instancetype)initWithPrivateKey:(SecKeyRef)privateKey
-                                  publicKey:(SecKeyRef)publicKey
                                 certificate:(SecCertificateRef)certificate
-                          certificateIssuer:(NSString *)issuer NS_UNAVAILABLE;
+                          certificateIssuer:(nullable NSString *)issuer NS_UNAVAILABLE;
 
 - (BOOL)isWorkPlaceJoined;
 

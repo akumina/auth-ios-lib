@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDTokenRequest.h"
 #import "MSIDAuthenticationScheme.h"
 
@@ -30,6 +32,7 @@
                       authScheme:(MSIDAuthenticationScheme *)authScheme
                         clientId:(NSString *)clientId
                            scope:(NSString *)scope
+                      ssoContext:(MSIDExternalSSOContext *)ssoContext
                          context:(nullable id<MSIDRequestContext>)context
 {
     self = [super init];
@@ -39,6 +42,7 @@
         NSParameterAssert(endpoint);
         
         self.context = context;
+        self.externalSSOContext = ssoContext;
         
         NSMutableDictionary *parameters = [NSMutableDictionary new];
         parameters[MSID_OAUTH2_CLIENT_ID] = clientId;
@@ -62,3 +66,5 @@
 }
 
 @end
+
+#endif

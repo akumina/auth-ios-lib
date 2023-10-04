@@ -27,7 +27,8 @@
 #import <Security/SecKey.h>
 #import "NSString+MSIDExtensions.h"
 #import "MSIDLogger+Internal.h"
-#import "NSData+JWT.h"
+#import "NSData+MSIDExtensions.h"
+#import "MSIDKeyOperationUtil.h"
 
 @implementation MSIDJWTHelper
 
@@ -45,43 +46,16 @@
     return [NSString stringWithFormat:@"%@.%@", signingInput, signedEncodedDataString];
 }
 
-+ (NSString *)decryptJWT:(NSData *)jwtData
-           decryptionKey:(SecKeyRef)decryptionKey
-{
-#if TARGET_OS_IPHONE
-    size_t cipherBufferSize = SecKeyGetBlockSize(decryptionKey);
-#endif // TARGET_OS_IPHONE
-    size_t keyBufferSize = [jwtData length];
-
-    NSMutableData *bits = [NSMutableData dataWithLength:keyBufferSize];
-    OSStatus status = errSecAuthFailed;
-#if TARGET_OS_IPHONE
-    status = SecKeyDecrypt(decryptionKey,
-                           kSecPaddingPKCS1,
-                           (const uint8_t *) [jwtData bytes],
-                           cipherBufferSize,
-                           [bits mutableBytes],
-                           &keyBufferSize);
-#else // !TARGET_OS_IPHONE
-    (void)decryptionKey;
-    // TODO: SecKeyDecrypt is not available on OS X
-#endif // TARGET_OS_IPHONE
-    if(status != errSecSuccess)
-    {
-        return nil;
-    }
-
-    [bits setLength:keyBufferSize];
-    return [[NSString alloc] initWithData:bits encoding:NSUTF8StringEncoding];
-}
-
 + (NSData *)sign:(SecKeyRef)privateKey
             data:(NSData *)plainData
 {
-
-    NSMutableData *hashData = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256(plainData.bytes, (CC_LONG)plainData.length, [hashData mutableBytes]);
-    return [hashData msidSignHashWithPrivateKey:privateKey];
+    SecKeyAlgorithm alg = kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA256;
+    NSString *signingAlg = [[MSIDKeyOperationUtil sharedInstance] getJwtAlgorithmForKey:privateKey context:nil error:nil];
+    if (signingAlg == MSID_JWT_ALG_ES256)
+    {
+        alg = kSecKeyAlgorithmECDSASignatureMessageX962SHA256;
+    }
+    return [[MSIDKeyOperationUtil sharedInstance] getSignatureForDataWithKey:plainData privateKey:privateKey signingAlgorithm:alg context:nil error:nil];
 }
 
 + (NSString *)JSONFromDictionary:(NSDictionary *)dictionary

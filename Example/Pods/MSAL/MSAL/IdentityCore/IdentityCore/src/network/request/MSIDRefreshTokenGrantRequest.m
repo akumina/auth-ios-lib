@@ -21,7 +21,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDRefreshTokenGrantRequest.h"
+#import "MSIDThumbprintCalculator.h"
+
+@interface MSIDRefreshTokenGrantRequest ()
+
+@property (nonatomic) NSMutableDictionary *thumbprintParameters;
+
+@end
 
 @implementation MSIDRefreshTokenGrantRequest
 
@@ -30,10 +39,12 @@
                                   clientId:(nonnull NSString *)clientId
                                      scope:(nullable NSString *)scope
                               refreshToken:(nonnull NSString *)refreshToken
+                               redirectUri:(NSString *)redirectUri
                            extraParameters:(nullable NSDictionary *)extraParameters
+                                ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                                    context:(nullable id<MSIDRequestContext>)context
 {
-    self = [super initWithEndpoint:endpoint authScheme:authScheme clientId:clientId scope:scope context:context];
+    self = [super initWithEndpoint:endpoint authScheme:authScheme clientId:clientId scope:scope ssoContext:ssoContext context:context];
     if (self)
     {
         NSParameterAssert(refreshToken);
@@ -41,6 +52,7 @@
         NSMutableDictionary *parameters = [_parameters mutableCopy];
         parameters[MSID_OAUTH2_GRANT_TYPE] = MSID_OAUTH2_REFRESH_TOKEN;
         parameters[MSID_OAUTH2_REFRESH_TOKEN] = refreshToken;
+        parameters[MSID_OAUTH2_REDIRECT_URI] = redirectUri;
         
         if (extraParameters)
         {
@@ -48,9 +60,54 @@
         }
         
         _parameters = parameters;
+        _thumbprintParameters = [_parameters mutableCopy];
+        _thumbprintParameters[MSID_OAUTH2_REQUEST_ENDPOINT] = endpoint;
     }
     
     return self;
 }
 
+- (NSString *)fullRequestThumbprint
+{
+    return [MSIDThumbprintCalculator calculateThumbprint:self.thumbprintParameters
+                                            filteringSet:[MSIDRefreshTokenGrantRequest fullRequestThumbprintExcludeParams]
+                                       shouldIncludeKeys:NO];
+}
+
+- (NSString *)strictRequestThumbprint
+{
+    return [MSIDThumbprintCalculator calculateThumbprint:self.thumbprintParameters
+                                            filteringSet:[MSIDRefreshTokenGrantRequest strictRequestThumbprintIncludeParams]
+                                       shouldIncludeKeys:YES];
+}
+
++ (NSSet *)fullRequestThumbprintExcludeParams
+{
+    static dispatch_once_t once_token;
+    static NSSet *excludeSet;
+    
+    dispatch_once(&once_token, ^{
+        excludeSet = [NSSet setWithArray:@[MSID_OAUTH2_GRANT_TYPE]];
+    });
+    return excludeSet;
+    
+}
+
++ (NSSet *)strictRequestThumbprintIncludeParams
+{
+    static dispatch_once_t once_token;
+    static NSSet *includeSet;
+    
+    dispatch_once(&once_token, ^{
+        includeSet = [NSSet setWithArray:@[MSID_OAUTH2_CLIENT_ID,
+                                           MSID_OAUTH2_REQUEST_ENDPOINT, //resource + environment
+                                           MSID_OAUTH2_REFRESH_TOKEN, //home account id also embedded within RT, albeit decrypted.
+                                           MSID_OAUTH2_SCOPE]];
+    });
+    return includeSet;
+    
+}
+
 @end
+
+#endif

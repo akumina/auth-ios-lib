@@ -42,8 +42,18 @@ void MSIDDeviceCopySerialNumber(CFStringRef *serialNumber)
     {
         *serialNumber = NULL;
         
-        io_service_t    platformExpert = IOServiceGetMatchingService(kIOMasterPortDefault,
-                                                                     IOServiceMatching("IOPlatformExpertDevice"));
+        io_service_t    platformExpert;
+        if (@available(macOS 12.0, iOS 15.0, *))
+        {
+            platformExpert = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPlatformExpertDevice"));
+        }
+        else
+        {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            platformExpert = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"));
+#pragma clang diagnostic pop
+        }
         
         if (platformExpert)
         {
@@ -158,7 +168,7 @@ void MSIDDeviceCopySerialNumber(CFStringRef *serialNumber)
 + (NSString *)deviceTelemetryId
 {
 #if TARGET_OS_IPHONE
-    return [[[UIDevice currentDevice] identifierForVendor] UUIDString];
+    return nil;
 #else
     CFStringRef macSerialNumber = nil;
     MSIDDeviceCopySerialNumber(&macSerialNumber);

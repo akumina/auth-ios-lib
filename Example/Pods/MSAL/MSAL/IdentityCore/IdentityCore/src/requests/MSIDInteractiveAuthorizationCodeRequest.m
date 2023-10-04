@@ -38,14 +38,19 @@
 #import "MSIDWebviewAuthorization.h"
 #import "MSIDAuthorizationCodeResult.h"
 #import "MSIDPkce.h"
+#import "MSIDWebResponseOperationFactory.h"
+#import "MSIDWebResponseBaseOperation.h"
 
 #if TARGET_OS_IPHONE
 #import "MSIDAppExtensionUtil.h"
+#import "MSIDWebviewInteracting.h"
+
 #endif
 
 @interface MSIDInteractiveAuthorizationCodeRequest()
-
+#if !EXCLUDE_FROM_MSALCPP
 @property (nonatomic) MSIDLastRequestTelemetry *lastRequestTelemetry;
+#endif
 @property (nonatomic) MSIDClientInfo *authCodeClientInfo;
 @property (nonatomic) MSIDAuthorizeWebRequestConfiguration *webViewConfiguration;
 
@@ -62,7 +67,9 @@
     {
         _requestParameters = parameters;
         _oauthFactory = oauthFactory;
+#if !EXCLUDE_FROM_MSALCPP
         _lastRequestTelemetry = [MSIDLastRequestTelemetry sharedInstance];
+#endif
     }
 
     return self;
@@ -85,11 +92,11 @@
          }
 
          [self.requestParameters.authority loadOpenIdMetadataWithContext:self.requestParameters
-                                                         completionBlock:^(__unused MSIDOpenIdProviderMetadata *metadata, NSError *error)
+                                                         completionBlock:^(__unused MSIDOpenIdProviderMetadata *metadata, NSError *loadError)
           {
-              if (error)
+              if (loadError)
               {
-                  completionBlock(nil, error, nil);
+                  completionBlock(nil, loadError, nil);
                   return;
               }
 
@@ -102,17 +109,19 @@
 {
     void (^webAuthCompletion)(MSIDWebviewResponse *, NSError *) = ^void(MSIDWebviewResponse *response, NSError *error)
     {
-        void (^returnErrorBlock)(NSError *) = ^(NSError *error)
+        void (^returnErrorBlock)(NSError *) = ^(NSError *localError)
         {
-            NSString *errorString = [error msidServerTelemetryErrorString];
+            NSString *errorString = [localError msidServerTelemetryErrorString];
             if (errorString)
             {
+#if !EXCLUDE_FROM_MSALCPP
                 [self.lastRequestTelemetry updateWithApiId:[self.requestParameters.telemetryApiId integerValue]
                                                errorString:errorString
                                                    context:self.requestParameters];
+#endif
             }
             
-            completionBlock(nil, error, nil);
+            completionBlock(nil, localError, nil);
         };
         
         if (error)
@@ -160,24 +169,33 @@
         }
         else if ([response isKindOfClass:MSIDWebOpenBrowserResponse.class])
         {
-            NSURL *browserURL = ((MSIDWebOpenBrowserResponse *)response).browserURL;
-
-#if TARGET_OS_IPHONE
-            if (![MSIDAppExtensionUtil isExecutingInAppExtension])
+            error = nil;
+            MSIDWebResponseBaseOperation *operation = [MSIDWebResponseOperationFactory createOperationForResponse:response
+                                                                                                            error:&error];
+            if (error)
             {
-                MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Opening a browser - %@", MSID_PII_LOG_MASKABLE(browserURL));
-                [MSIDAppExtensionUtil sharedApplicationOpenURL:browserURL];
-            }
-            else
-            {
-                NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorAttemptToOpenURLFromExtension, @"unable to redirect to browser from extension", nil, nil, nil, self.requestParameters.correlationId, nil, YES);
                 returnErrorBlock(error);
                 return;
             }
-#else
-            [[NSWorkspace sharedWorkspace] openURL:browserURL];
-#endif
-            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorSessionCanceledProgrammatically, @"Authorization session was cancelled programatically.", nil, nil, nil, self.requestParameters.correlationId, nil, YES);
+            
+            BOOL isCurrentFlowFinished = [operation doActionWithCorrelationId:self.requestParameters.correlationId
+                                                                        error:&error];
+            if (isCurrentFlowFinished && error)
+            {
+                returnErrorBlock(error);
+                return;
+            }
+            
+            // This should never happen, create a new error here just in case it would hang if somehow falls into this part
+            error = MSIDCreateError(MSIDErrorDomain,
+                                    MSIDErrorInternal,
+                                    @"Authorization session was not canceled successfully",
+                                    nil,
+                                    nil,
+                                    nil,
+                                    self.requestParameters.correlationId,
+                                    nil,
+                                    YES);
             returnErrorBlock(error);
             return;
         }
@@ -191,6 +209,7 @@
 {
     NSObject<MSIDWebviewInteracting> *webView = [self.oauthFactory.webviewFactory webViewWithConfiguration:self.webViewConfiguration
                                                                                          requestParameters:self.requestParameters
+                                                                      externalDecidePolicyForBrowserAction:self.externalDecidePolicyForBrowserAction
                                                                                                    context:self.requestParameters];
     
     if (!webView)
@@ -217,7 +236,6 @@
     result.authCode = authCode;
     result.accountIdentifier = self.authCodeClientInfo.accountIdentifier;
     result.pkceVerifier = self.webViewConfiguration.pkce.codeVerifier;
-    
     completionBlock(result, nil, nil);
 }
 

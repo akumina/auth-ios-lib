@@ -35,7 +35,7 @@ static NSUInteger s_expirationBuffer = 300;
 
 @interface MSIDAccessToken()
 
-@property (readwrite) NSString *target;
+@property (atomic, readwrite) NSString *target;
 
 @end
 
@@ -48,12 +48,15 @@ static NSUInteger s_expirationBuffer = 300;
     MSIDAccessToken *item = [super copyWithZone:zone];
     item->_expiresOn = [_expiresOn copyWithZone:zone];
     item->_extendedExpiresOn = [_extendedExpiresOn copyWithZone:zone];
+    item->_refreshOn = [_refreshOn copyWithZone:zone];
     item->_cachedAt = [_cachedAt copyWithZone:zone];
     item->_enrollmentId = [_enrollmentId copyWithZone:zone];
     item->_accessToken = [_accessToken copyWithZone:zone];
     item->_target = [_target copyWithZone:zone];
     item->_enrollmentId = [_enrollmentId copyWithZone:zone];
     item->_applicationIdentifier = [_applicationIdentifier copyWithZone:zone];
+    item->_requestedClaims = [_requestedClaims copyWithZone:zone];
+    item->_redirectUri = [_redirectUri copyWithZone:zone];
     return item;
 }
 
@@ -79,10 +82,13 @@ static NSUInteger s_expirationBuffer = 300;
     NSUInteger hash = [super hash];
     hash = hash * 31 + self.expiresOn.hash;
     hash = hash * 31 + self.extendedExpiresOn.hash;
+    hash = hash * 31 + self.refreshOn.hash;
     hash = hash * 31 + self.accessToken.hash;
     hash = hash * 31 + self.target.hash;
     hash = hash * 31 + self.cachedAt.hash;
     hash = hash * 31 + self.applicationIdentifier.hash;
+    hash = hash * 31 + self.requestedClaims.hash;
+    hash = hash * 31 + self.redirectUri.hash;
     return hash;
 }
 
@@ -96,10 +102,13 @@ static NSUInteger s_expirationBuffer = 300;
     BOOL result = [super isEqualToItem:token];
     result &= (!self.expiresOn && !token.expiresOn) || [self.expiresOn isEqualToDate:token.expiresOn];
     result &= (!self.extendedExpiresOn && !token.extendedExpiresOn) || [self.extendedExpiresOn isEqualToDate:token.extendedExpiresOn];
+    result &= (!self.refreshOn && !token.refreshOn) || [self.refreshOn isEqualToDate:token.refreshOn];
     result &= (!self.accessToken && !token.accessToken) || [self.accessToken isEqualToString:token.accessToken];
     result &= (!self.target && !token.target) || [self.target isEqualToString:token.target];
     result &= (!self.cachedAt && !token.cachedAt) || [self.cachedAt isEqualToDate:token.cachedAt];
     result &= (!self.applicationIdentifier && !token.applicationIdentifier) || [self.applicationIdentifier isEqualToString:token.applicationIdentifier];
+    result &= (!self.requestedClaims && !token.requestedClaims) || [self.requestedClaims isEqualToString:token.requestedClaims];
+    result &= (!self.redirectUri && !token.redirectUri) || [self.redirectUri isEqualToString:token.redirectUri];
     return result;
 }
 
@@ -113,9 +122,12 @@ static NSUInteger s_expirationBuffer = 300;
     {
         _expiresOn = tokenCacheItem.expiresOn;
         _extendedExpiresOn = tokenCacheItem.extendedExpiresOn;
+        _refreshOn = tokenCacheItem.refreshOn;
         _cachedAt = tokenCacheItem.cachedAt;
         _enrollmentId = tokenCacheItem.enrollmentId;
         _accessToken = tokenCacheItem.secret;
+        _requestedClaims = tokenCacheItem.requestedClaims;
+        _redirectUri = tokenCacheItem.redirectUri;
 
         if (!_accessToken)
         {
@@ -143,6 +155,7 @@ static NSUInteger s_expirationBuffer = 300;
     MSIDCredentialCacheItem *cacheItem = [super tokenCacheItem];
     cacheItem.expiresOn = self.expiresOn;
     cacheItem.extendedExpiresOn = self.extendedExpiresOn;
+    cacheItem.refreshOn = self.refreshOn;
     cacheItem.cachedAt = self.cachedAt;
     cacheItem.secret = self.accessToken;
     cacheItem.target = self.target;
@@ -150,6 +163,8 @@ static NSUInteger s_expirationBuffer = 300;
     cacheItem.credentialType = [self credentialType];
     cacheItem.enrollmentId = self.enrollmentId;
     cacheItem.applicationIdentifier = self.applicationIdentifier;
+    cacheItem.requestedClaims = self.requestedClaims;
+    cacheItem.redirectUri = self.redirectUri;
     return cacheItem;
 }
 
@@ -158,6 +173,22 @@ static NSUInteger s_expirationBuffer = 300;
 - (MSIDCredentialType)credentialType
 {
     return MSIDAccessTokenType;
+}
+
+#pragma mark - RefreshNeeded
+
+-(BOOL)refreshNeeded
+{
+    if (self.cachedAt && [[NSDate date] compare:self.cachedAt] == NSOrderedAscending)
+    {
+        return YES;
+    }
+    
+    if (self.refreshOn)
+    {
+        return [self.refreshOn compare:[NSDate date]] == NSOrderedAscending;
+    }
+    return NO;
 }
 
 #pragma mark - Expiry
@@ -218,8 +249,8 @@ static NSUInteger s_expirationBuffer = 300;
 - (NSString *)description
 {
     NSString *baseDescription = [super description];
-    return [baseDescription stringByAppendingFormat:@"(access token=%@, expiresOn=%@, extendedExpiresOn=%@, target=%@, enrollmentId=%@, applicationIdentfier=%@)",
-            [_accessToken msidSecretLoggingHash], _expiresOn, _extendedExpiresOn, _target, [_enrollmentId msidSecretLoggingHash], _applicationIdentifier];
+    return [baseDescription stringByAppendingFormat:@"(access token=%@, expiresOn=%@, extendedExpiresOn=%@,refreshOn=%@, target=%@, enrollmentId=%@, applicationIdentfier=%@, redirectUri=%@)",
+            [_accessToken msidSecretLoggingHash], _expiresOn, _extendedExpiresOn, _refreshOn, _target, [_enrollmentId msidSecretLoggingHash], _applicationIdentifier, MSID_PII_LOG_TRACKABLE(_redirectUri)];
 }
 
 @end

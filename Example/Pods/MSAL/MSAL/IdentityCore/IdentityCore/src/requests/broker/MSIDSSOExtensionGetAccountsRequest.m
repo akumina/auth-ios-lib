@@ -33,7 +33,13 @@
 #import "NSDictionary+MSIDQueryItems.h"
 #import "MSIDBrokerOperationGetAccountsResponse.h"
 #import "MSIDDeviceInfo.h"
+#import "ASAuthorizationController+MSIDExtensions.h"
 
+#if !EXCLUDE_FROM_MSALCPP
+#import "MSIDLastRequestTelemetry.h"
+#endif
+
+// TODO: 1656998 This file can be refactored and use MSIDSSOExtensionGetDataBaseRequest as super class
 @interface MSIDSSOExtensionGetAccountsRequest()
 
 @property (nonatomic) ASAuthorizationController *authorizationController;
@@ -42,6 +48,10 @@
 @property (nonatomic) ASAuthorizationSingleSignOnProvider *ssoProvider;
 @property (nonatomic) MSIDRequestParameters *requestParameters;
 @property (nonatomic) BOOL returnOnlySignedInAccounts;
+@property (nonatomic) NSDate *requestSentDate;
+#if !EXCLUDE_FROM_MSALCPP
+@property (nonatomic) MSIDLastRequestTelemetry *lastRequestTelemetry;
+#endif
  
 @end
 
@@ -71,15 +81,14 @@
         _extensionDelegate = [MSIDSSOExtensionOperationRequestDelegate new];
         _extensionDelegate.context = requestParameters;
         __typeof__(self) __weak weakSelf = self;
-        _extensionDelegate.completionBlock = ^(MSIDBrokerNativeAppOperationResponse *operationResponse, NSError *error)
+        _extensionDelegate.completionBlock = ^(MSIDBrokerNativeAppOperationResponse *operationResponse, NSError *resultError)
         {
             NSArray *resultAccounts = nil;
             BOOL returnBrokerAccountsOnly = NO;
-            NSError *resultError = error;
             
             if (!operationResponse.success)
             {
-                MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"Finished get accounts request with error %@", MSID_PII_LOG_MASKABLE(error));
+                MSID_LOG_WITH_CTX_PII(MSIDLogLevelError, requestParameters, @"Finished get accounts request with error %@", MSID_PII_LOG_MASKABLE(resultError));
             }
             else if (![operationResponse isKindOfClass:[MSIDBrokerOperationGetAccountsResponse class]])
             {
@@ -92,13 +101,24 @@
                 returnBrokerAccountsOnly = operationResponse.deviceInfo.deviceMode == MSIDDeviceModeShared;
             }
             
-            MSIDGetAccountsRequestCompletionBlock completionBlock = weakSelf.requestCompletionBlock;
-            weakSelf.requestCompletionBlock = nil;
+            __typeof__(self) strongSelf = weakSelf;
+            
+#if !EXCLUDE_FROM_MSALCPP
+            [operationResponse trackPerfTelemetryWithLastRequest:strongSelf.lastRequestTelemetry
+                                                requestStartDate:strongSelf.requestSentDate
+                                                   telemetryType:MSID_PERF_TELEMETRY_GETACCOUNTS_TYPE];
+#endif
+            
+            MSIDGetAccountsRequestCompletionBlock completionBlock = strongSelf.requestCompletionBlock;
+            strongSelf.requestCompletionBlock = nil;
             
             if (completionBlock) completionBlock(resultAccounts, returnBrokerAccountsOnly, resultError);
         };
         
         _ssoProvider = [ASAuthorizationSingleSignOnProvider msidSharedProvider];
+#if !EXCLUDE_FROM_MSALCPP
+        _lastRequestTelemetry = [MSIDLastRequestTelemetry sharedInstance];
+#endif
     }
     
     return self;
@@ -115,6 +135,7 @@
     NSError *error;
     ASAuthorizationSingleSignOnRequest *ssoRequest = [self.ssoProvider createSSORequestWithOperationRequest:getAccountsRequest
                                                                                           requestParameters:self.requestParameters
+                                                                                                 requiresUI:NO
                                                                                                       error:&error];
     
     if (!ssoRequest)
@@ -122,10 +143,12 @@
         completionBlock(nil, NO, error);
         return;
     }
-    
+        
     self.authorizationController = [self controllerWithRequest:ssoRequest];
     self.authorizationController.delegate = self.extensionDelegate;
-    [self.authorizationController performRequests];
+    
+    self.requestSentDate = [NSDate date];
+    [self.authorizationController msidPerformRequests];
     
     self.requestCompletionBlock = completionBlock;
 }

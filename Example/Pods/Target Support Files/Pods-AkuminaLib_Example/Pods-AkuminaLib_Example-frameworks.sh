@@ -41,7 +41,7 @@ install_framework()
 
   if [ -L "${source}" ]; then
     echo "Symlinked..."
-    source="$(readlink "${source}")"
+    source="$(readlink -f "${source}")"
   fi
 
   if [ -d "${source}/${BCSYMBOLMAP_DIR}" ]; then
@@ -176,20 +176,16 @@ code_sign_if_enabled() {
 }
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/AkuminaLib/AkuminaLib.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/AkuminaAuthiOSLib/AkuminaAuthiOSLib.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/MSAL/MSAL.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/Rollbar/Rollbar.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/Schedule/Schedule.framework"
-  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwift.framework"
-  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwiftStub.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaAuthiOSLib/IntuneMAMSwift.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaAuthiOSLib/IntuneMAMSwiftStub.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/AkuminaLib/AkuminaLib.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/AkuminaAuthiOSLib/AkuminaAuthiOSLib.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/MSAL/MSAL.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/Rollbar/Rollbar.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/Schedule/Schedule.framework"
-  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwift.framework"
-  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwiftStub.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaAuthiOSLib/IntuneMAMSwift.framework"
+  install_framework "${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaAuthiOSLib/IntuneMAMSwiftStub.framework"
 fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait

@@ -22,8 +22,8 @@
 // THE SOFTWARE.
 
 #import "MSIDRequestParameters.h"
+#import "MSIDRequestParameters+Internal.h"
 #import "MSIDVersion.h"
-#import "MSIDConstants.h"
 #import "MSIDAuthority.h"
 #import "NSOrderedSet+MSIDExtensions.h"
 #import "MSIDOpenIdProviderMetadata.h"
@@ -105,8 +105,9 @@
     _tokenExpirationBuffer = 300;
     _extendedLifetimeEnabled = NO;
     _logComponent = [MSIDVersion sdkName];
+#if !EXCLUDE_FROM_MSALCPP
     _telemetryRequestId = [[MSIDTelemetry sharedInstance] generateRequestId];
-
+#endif
     NSDictionary *metadata = [[NSBundle mainBundle] infoDictionary];
 
     NSString *appName = metadata[@"CFBundleDisplayName"];
@@ -123,6 +124,15 @@
                             MSID_APP_VER_KEY: appVer ? appVer : @""};
     
     _authScheme = [MSIDAuthenticationScheme new];
+}
+
+- (void)setAccountIdentifier:(MSIDAccountIdentifier *)accountIdentifier
+{
+    if ([_accountIdentifier isEqual:accountIdentifier]) return;
+    
+    _accountIdentifier = accountIdentifier;
+    
+    [self updateAppRequestMetadata:nil];
 }
 
 #pragma mark - Helpers
@@ -190,6 +200,24 @@
     [self updateMSIDConfiguration];
 }
 
+- (void)setRedirectUri:(NSString *)redirectUri
+{
+    _redirectUri = redirectUri;
+    [self updateMSIDConfiguration];
+}
+
+- (void)setNestedAuthBrokerClientId:(NSString *)nestedAuthBrokerClientId
+{
+    _nestedAuthBrokerClientId = nestedAuthBrokerClientId;
+    [self updateMSIDConfiguration];
+}
+
+- (void)setNestedAuthBrokerRedirectUri:(NSString *)nestedAuthBrokerRedirectUri
+{
+    _nestedAuthBrokerRedirectUri = nestedAuthBrokerRedirectUri;
+    [self updateMSIDConfiguration];
+}
+
 - (void)setTarget:(NSString *)target
 {
     _target = target;
@@ -221,7 +249,9 @@
     MSIDConfiguration *config = [[MSIDConfiguration alloc] initWithAuthority:authority
                                                                  redirectUri:self.redirectUri
                                                                     clientId:self.clientId
-                                                                      target:self.target];
+                                                                      target:self.target
+                                                    nestedAuthBrokerClientId:self.nestedAuthBrokerClientId
+                                                 nestedAuthBrokerRedirectUri:self.nestedAuthBrokerRedirectUri];
     
     config.applicationIdentifier = [MSIDIntuneApplicationStateManager intuneApplicationIdentifierForAuthority:authority
                                                                                                 appIdentifier:self.intuneApplicationIdentifier];
@@ -237,6 +267,59 @@
     }
 
     return _msidConfiguration;
+}
+
+- (void)updateAppRequestMetadata:(NSString *)homeAccountId
+{
+    MSIDAccountIdentifier *accountIdentifier = self.accountIdentifier;
+    
+    if (![NSString msidIsStringNilOrBlank:homeAccountId])
+    {
+        accountIdentifier = [[MSIDAccountIdentifier alloc] initWithDisplayableId:nil homeAccountId:homeAccountId];
+    }
+    
+    NSMutableDictionary *appRequestMetadata = [self.appRequestMetadata mutableCopy];
+    [appRequestMetadata removeObjectForKey:MSID_CCS_HINT_KEY];
+    
+    NSString *uid = accountIdentifier.uid;
+    NSString *utid = accountIdentifier.utid;
+    
+    if (![NSString msidIsStringNilOrBlank:uid] && ![NSString msidIsStringNilOrBlank:utid])
+    {
+        NSString *oidHeader = [NSString stringWithFormat:@"Oid:%@@%@", uid, utid];
+        appRequestMetadata[MSID_CCS_HINT_KEY] = oidHeader;
+    }
+    else
+    {
+        appRequestMetadata[MSID_CCS_HINT_KEY] = [self ccsHintHeaderWithUpn:accountIdentifier.displayableId];
+    }
+    
+    self.appRequestMetadata = appRequestMetadata;
+}
+
+- (BOOL)isNestedAuthProtocol
+{
+    if (![NSString msidIsStringNilOrBlank:self.nestedAuthBrokerClientId] && ![NSString msidIsStringNilOrBlank:self.nestedAuthBrokerRedirectUri])
+    {
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (void)reverseNestedAuthParametersIfNeeded
+{
+    // Nested auth protocol - Reverse client id & redirect uri if it hasn't been done yet
+    if ([self isNestedAuthProtocol] && [self.nestedAuthBrokerRedirectUri hasPrefix:@"brk-"])
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Nested auth protocol - Reversing client id & redirect uri");
+        NSString *tempClientId = self.nestedAuthBrokerClientId;
+        NSString *tempRedirectUri = self.nestedAuthBrokerRedirectUri;
+        self.nestedAuthBrokerClientId = self.clientId;
+        self.nestedAuthBrokerRedirectUri = self.redirectUri;
+        self.clientId = tempClientId;
+        self.redirectUri = tempRedirectUri;
+    }
 }
 
 #pragma mark - Validate
@@ -280,6 +363,8 @@
     parameters->_cloudAuthority = [_cloudAuthority copyWithZone:zone];
     parameters->_redirectUri = [_redirectUri copyWithZone:zone];
     parameters->_clientId = [_clientId copyWithZone:zone];
+    parameters->_nestedAuthBrokerClientId = [_nestedAuthBrokerClientId copyWithZone:zone];
+    parameters->_nestedAuthBrokerRedirectUri = [_nestedAuthBrokerRedirectUri copyWithZone:zone];
     parameters->_target = [_target copyWithZone:zone];
     parameters->_oidcScope = [_oidcScope copyWithZone:zone];
     parameters->_accountIdentifier = [_accountIdentifier copyWithZone:zone];
@@ -302,6 +387,18 @@
     parameters->_keychainAccessGroup = [_keychainAccessGroup copyWithZone:zone];
 
     return parameters;
+}
+
+#pragma mark - Private
+
+- (NSString *)ccsHintHeaderWithUpn:(NSString *)upn
+{
+    if (![NSString msidIsStringNilOrBlank:upn])
+    {
+        return [NSString stringWithFormat:@"UPN:%@", upn];
+    }
+    
+    return nil;
 }
 
 @end

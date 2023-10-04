@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDAADAuthorizationCodeRequest.h"
 #import "MSIDHttpRequest.h"
 #import "MSIDAADRequestConfigurator.h"
@@ -32,6 +34,7 @@
                      redirectUri:(NSString *)redirectUri
                            scope:(NSString *)scope
                        loginHint:(NSString *)loginHint
+                      ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                          context:(nullable id<MSIDRequestContext>)context
 {
     self = [super init];
@@ -42,6 +45,7 @@
         NSParameterAssert(redirectUri);
         
         self.context =  context;
+        self.externalSSOContext = ssoContext;
         
         NSMutableDictionary *parameters = [NSMutableDictionary new];
         parameters[MSID_OAUTH2_CLIENT_ID] = clientId;
@@ -65,3 +69,5 @@
 }
 
 @end
+
+#endif

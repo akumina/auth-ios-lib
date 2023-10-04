@@ -172,6 +172,11 @@ typedef NS_ENUM(NSInteger, MSALError)
      Handling of this error is optional.
      */
     MSALErrorUserCanceled                        = -50005,
+    
+    /**
+    The server error happens when server returns server_error
+     */
+    MSALErrorServerError                         = -50006,
 };
 
 /**
@@ -378,5 +383,111 @@ typedef NS_ENUM(NSInteger, MSALInternalError)
     /**
      Broker is either not found on device or not available for this configuration.
     */
-    MSALInternalBrokerNotAvailable                      = -42714
+    MSALInternalBrokerNotAvailable                      = -42714,
+    
+    /**
+     JIT - Link - Timeout while waiting for server confirmation.
+    */
+    MSALInternalErrorJITLinkServerConfirmationTimeout   = -42714,
+    
+    /**
+     JIT - Link - Error while waiting for server confirmation
+     */
+    MSALInternalErrorJITLinkServerConfirmationError     =   -42715,
+    
+    /**
+     JIT - Link - Error while acquiring intune token
+     */
+    MSALInternalErrorJITLinkAcquireTokenError           =   -42716,
+    
+    /**
+     JIT - Link - Token acquired for wrong tenant
+     */
+    MSALInternalErrorJITLinkTokenAcquiredWrongTenant    =   -42717,
+    
+    /**
+     JIT - Link - Error during linking
+     */
+    MSALInternalErrorJITLinkError                       =   -42718,
+    
+    /**
+     JIT - Compliance Check - Device not compliant
+     */
+    MSALInternalErrorJITComplianceCheckResultNotCompliant =   -42719,
+    
+    /**
+     JIT - Compliance Check - CP timeout
+     */
+    MSALInternalErrorJITComplianceCheckResultTimeout    =   -42720,
+    
+    /**
+     JIT - Compliance Check - Result unknown
+     */
+    MSALInternalErrorJITComplianceCheckResultUnknown    =   -42721,
+
+    /**
+     JIT - JIT - Compliance Check - Invalid linkPayload from SSO configuration
+     */
+    MSALErrorJITComplianceCheckInvalidLinkPayload       =   -42722,
+
+    /**
+     JIT - Compliance Check - Could not create compliance check web view controller
+     */
+    MSALErrorJITComplianceCheckCreateController         =   -42723,
+
+    /**
+     JIT - Link - LinkConfig not found
+     */
+    MSALErrorJITLinkConfigNotFound                      =   -42724,
+
+    /**
+     JIT - Link - Invalid LinkTokenConfig
+     */
+    MSALErrorJITInvalidLinkTokenConfig                  =   -42725,
+
+    /**
+     JIT - WPJ - Device Registration Failed
+     */
+    MSALErrorJITWPJDeviceRegistrationFailed             =   -42726,
+
+    /**
+     JIT - WPJ - AccountIdentifier is nil
+     */
+    MSALErrorJITWPJAccountIdentifierNil                 =   -42727,
+
+    /**
+     JIT - WPJ - Failed to acquire broker token
+     */
+    MSALErrorJITWPJAcquireTokenError                    =   -42728,
+    
+    /**
+     JIT - Retry JIT process (WPJ or Link)
+     */
+    MSALErrorJITRetryRequired                           = -42729,
+    
+    /**
+     JIT - Unexpected status received from webCP troubleshooting flow
+     */
+    MSALErrorJITUnknownStatusWebCP                      = -42730,
+
+    /**
+     JIT - Troubleshooting flow needed
+     */
+    MSALErrorJITTroubleshootingRequired                 = -42730,
+
+    /**
+     JIT - Troubleshooting - Could not create web view controller
+     */
+    MSALErrorJITTroubleshootingCreateController         = -42731,
+
+    /**
+     JIT - Troubleshooting - Result unknown
+     */
+    MSALErrorJITTroubleshootingResultUnknown         = -42731,
+    
+    /**
+     JIT - Troubleshooting - Acquire token error
+     */
+    MSALErrorJITTroubleshootingAcquireToken          = -42732,
+    
 };

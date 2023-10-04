@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDRefreshTokenGrantRequest.h"
 /**
  Refreshing the access token.
@@ -32,11 +34,15 @@
 - (instancetype _Nullable)initWithEndpoint:(nonnull NSURL *)endpoint
                                 authScheme:(nonnull MSIDAuthenticationScheme *)authScheme
                                   clientId:(nonnull NSString *)clientId
+                               redirectUri:(nonnull NSString *)redirectUri
                               enrollmentId:(nullable NSString *)enrollmentId
                                      scope:(nullable NSString *)scope
                               refreshToken:(nonnull NSString *)refreshToken
                                     claims:(nullable NSString *)claims
                            extraParameters:(nullable NSDictionary *)extraParameters
+                                ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                                    context:(nullable id<MSIDRequestContext>)context;
 
 @end
+
+#endif

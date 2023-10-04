@@ -316,19 +316,15 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AkuminaLib_Example/Pods-AkuminaLib_Example-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/AkuminaLib/AkuminaLib.framework",
+				"${BUILT_PRODUCTS_DIR}/AkuminaAuthiOSLib/AkuminaAuthiOSLib.framework",
 				"${BUILT_PRODUCTS_DIR}/MSAL/MSAL.framework",
-				"${BUILT_PRODUCTS_DIR}/Rollbar/Rollbar.framework",
-				"${BUILT_PRODUCTS_DIR}/Schedule/Schedule.framework",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwift.framework/IntuneMAMSwift",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaLib/IntuneMAMSwiftStub.framework/IntuneMAMSwiftStub",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaAuthiOSLib/IntuneMAMSwift.framework/IntuneMAMSwift",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/AkuminaAuthiOSLib/IntuneMAMSwiftStub.framework/IntuneMAMSwiftStub",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AkuminaLib.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AkuminaAuthiOSLib.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MSAL.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Rollbar.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Schedule.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IntuneMAMSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IntuneMAMSwiftStub.framework",
 			);

@@ -25,6 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
+#if TARGET_OS_IPHONE
+#import <UIKit/UIKit.h>
+#else
+#import <Cocoa/Cocoa.h>
+#endif
 #import "MSALTokenParameters.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -50,12 +55,6 @@ NS_ASSUME_NONNULL_BEGIN
  in the completion block is not guaranteed to match the loginHint.
  */
 @property (nonatomic, nullable) NSString *loginHint;
-
-/**
- Key-value pairs to pass to the authentication server during
- the interactive authentication flow. This should not be url-encoded value.
- */
-@property (nonatomic, nullable) NSDictionary <NSString *, NSString *> *extraQueryParameters;
 
 /**
  Permissions you want the account to consent to in the same
@@ -104,7 +103,7 @@ Modal presentation style for displaying authentication web content.
  
  @param scopes      Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
+ guaranteed to be included in the access token returned.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes DEPRECATED_MSG_ATTRIBUTE("Use -initWithScopes:webviewParameters: instead");
 #else
@@ -113,7 +112,7 @@ Modal presentation style for displaying authentication web content.
  
  @param scopes      Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
+ guaranteed to be included in the access token returned.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes;
 #endif
@@ -123,7 +122,7 @@ Modal presentation style for displaying authentication web content.
  
  @param scopes      Permissions you want included in the access token received
  in the result in the completionBlock. Not all scopes are
- gauranteed to be included in the access token returned.
+ guaranteed to be included in the access token returned.
  @param webviewParameters   User Interface configuration that MSAL uses when getting a token interactively or authorizing an end user.
  */
 - (instancetype)initWithScopes:(NSArray<NSString *> *)scopes

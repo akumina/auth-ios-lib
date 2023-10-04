@@ -21,7 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDTokenRequest.h"
+
+@class MSIDExternalSSOContext;
 
 @interface MSIDAuthorizationCodeGrantRequest : MSIDTokenRequest
 
@@ -34,12 +38,16 @@
                                      claims:(nullable NSString *)claims
                                codeVerifier:(nullable NSString *)codeVerifier
                             extraParameters:(nullable NSDictionary *)extraParameters
+                                 ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                                     context:(nullable id<MSIDRequestContext>)context NS_DESIGNATED_INITIALIZER;
 
 - (instancetype _Nullable )initWithEndpoint:(nonnull NSURL *)endpoint
                                  authScheme:(nonnull MSIDAuthenticationScheme *)authScheme
                                    clientId:(nonnull NSString *)clientId
                                       scope:(nullable NSString *)scope
+                                 ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                                     context:(nullable id<MSIDRequestContext>)context NS_UNAVAILABLE;
 
 @end
+
+#endif

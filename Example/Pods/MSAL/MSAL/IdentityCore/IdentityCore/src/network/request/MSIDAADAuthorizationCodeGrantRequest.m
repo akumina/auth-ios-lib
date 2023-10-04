@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDAADAuthorizationCodeGrantRequest.h"
 #import "MSIDAADRequestConfigurator.h"
 
@@ -36,6 +38,7 @@
                           claims:(NSString *)claims
                     codeVerifier:(NSString *)codeVerifier
                  extraParameters:(NSDictionary *)extraParameters
+                      ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                          context:(nullable id<MSIDRequestContext>)context
 {
     self = [super initWithEndpoint:endpoint
@@ -47,6 +50,7 @@
                             claims:claims
                       codeVerifier:codeVerifier
                    extraParameters:extraParameters
+                        ssoContext:ssoContext
                            context:context];
     if (self)
     {
@@ -65,3 +69,5 @@
 }
 
 @end
+
+#endif

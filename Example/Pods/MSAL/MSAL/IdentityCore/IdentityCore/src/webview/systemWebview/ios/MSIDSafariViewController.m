@@ -60,26 +60,13 @@
     {
         _startURL = url;
         _context = context;
-        
-        if (@available(iOS 11.0, *))
-        {
-            __auto_type config = [SFSafariViewControllerConfiguration new];
-            _safariViewController = [[SFSafariViewController alloc] initWithURL:url configuration:config];
-        }
-#if !TARGET_OS_MACCATALYST
-        else
-        {
-            _safariViewController = [[SFSafariViewController alloc] initWithURL:url entersReaderIfAvailable:NO];
-        }
-#endif
-
+        __auto_type config = [SFSafariViewControllerConfiguration new];
+        config.entersReaderIfAvailable = NO;
+        _safariViewController = [[SFSafariViewController alloc] initWithURL:url configuration:config];
         _safariViewController.delegate = self;
         _safariViewController.modalPresentationStyle = presentationType;
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 130000
-        if (@available(iOS 13.0, *)) {
-            _safariViewController.modalInPresentation = YES;
-        }
-#endif
+        
+        _safariViewController.modalInPresentation = YES;
 
         _parentController = parentController;
     }
@@ -111,16 +98,16 @@
     
     [MSIDMainThreadUtil executeOnMainThreadIfNeeded:^{
         
-        UIViewController *viewController = [UIApplication msidCurrentViewController:_parentController];
+        UIViewController *viewController = [UIApplication msidCurrentViewController:self.parentController];
         if (!viewController)
         {
-            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorNoMainViewController, @"Failed to start an interactive session - main viewcontroller is nil", nil, nil, nil, _context.correlationId, nil, YES);
+            NSError *error = MSIDCreateError(MSIDErrorDomain, MSIDErrorNoMainViewController, @"Failed to start an interactive session - main viewcontroller is nil", nil, nil, nil, self->_context.correlationId, nil, YES);
             completionHandler(nil, error);
             return;
         }
         
-        _completionHandler = [completionHandler copy];
-        [viewController presentViewController:_safariViewController animated:YES completion:nil];
+        self->_completionHandler = [completionHandler copy];
+        [viewController presentViewController:self->_safariViewController animated:YES completion:nil];
     }];
 }
 
@@ -143,8 +130,8 @@
 - (void)dismiss
 {
     [MSIDMainThreadUtil executeOnMainThreadIfNeeded:^{
-        [_safariViewController dismissViewControllerAnimated:YES completion:^{
-            _safariViewController = nil;
+        [self->_safariViewController dismissViewControllerAnimated:YES completion:^{
+            self->_safariViewController = nil;
         }];
     }];
 }

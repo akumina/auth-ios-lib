@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDAuthorizationCodeGrantRequest.h"
 
 @implementation MSIDAuthorizationCodeGrantRequest
@@ -34,9 +36,10 @@
                           claims:(NSString *)claims
                     codeVerifier:(NSString *)codeVerifier
                  extraParameters:(NSDictionary *)extraParameters
+                      ssoContext:(MSIDExternalSSOContext *)ssoContext
                          context:(nullable id<MSIDRequestContext>)context
 {
-    self = [super initWithEndpoint:endpoint authScheme:authScheme clientId:clientId scope:scope context:context];
+    self = [super initWithEndpoint:endpoint authScheme:authScheme clientId:clientId scope:scope ssoContext:ssoContext context:context];
     if (self)
     {
         NSParameterAssert(redirectUri);
@@ -61,3 +64,5 @@
 }
 
 @end
+
+#endif

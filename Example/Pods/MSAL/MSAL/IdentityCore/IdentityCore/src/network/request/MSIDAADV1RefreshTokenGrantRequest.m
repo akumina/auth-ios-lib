@@ -21,7 +21,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import "MSIDAADV1RefreshTokenGrantRequest.h"
+#import "MSIDThumbprintCalculator.h"
+
+@interface MSIDAADV1RefreshTokenGrantRequest ()
+
+@property (nonatomic) NSMutableDictionary *thumbprintParameters;
+
+@end
 
 @implementation MSIDAADV1RefreshTokenGrantRequest
 
@@ -30,11 +39,13 @@
                         clientId:(NSString *)clientId
                            scope:(NSString *)scope
                     refreshToken:(NSString *)refreshToken
+                     redirectUri:(NSString *)redirectUri
                         resource:(NSString *)resource
                  extraParameters:(NSDictionary *)extraParameters
+                      ssoContext:(nullable MSIDExternalSSOContext *)ssoContext
                          context:(nullable id<MSIDRequestContext>)context
 {
-    self = [super initWithEndpoint:endpoint authScheme:authScheme clientId:clientId scope:scope refreshToken:refreshToken extraParameters:extraParameters context:context];
+    self = [super initWithEndpoint:endpoint authScheme:authScheme clientId:clientId scope:scope refreshToken:refreshToken redirectUri:redirectUri extraParameters:extraParameters ssoContext:ssoContext context:context];
     if (self)
     {
         NSParameterAssert(resource);
@@ -42,8 +53,27 @@
         NSMutableDictionary *parameters = [_parameters mutableCopy];
         parameters[MSID_OAUTH2_RESOURCE] = resource;
         _parameters = parameters;
+        _thumbprintParameters = [_parameters mutableCopy];
+        _thumbprintParameters[MSID_OAUTH2_REQUEST_ENDPOINT] = endpoint;
     }
     
     return self;
 }
+
+- (NSString *)fullRequestThumbprint
+{
+    return [MSIDThumbprintCalculator calculateThumbprint:self.thumbprintParameters
+                                            filteringSet:[MSIDRefreshTokenGrantRequest fullRequestThumbprintExcludeParams]
+                                       shouldIncludeKeys:NO];
+}
+
+- (NSString *)strictRequestThumbprint
+{
+    return [MSIDThumbprintCalculator calculateThumbprint:self.thumbprintParameters
+                                            filteringSet:[MSIDRefreshTokenGrantRequest strictRequestThumbprintIncludeParams]
+                                       shouldIncludeKeys:YES];
+}
+
 @end
+
+#endif

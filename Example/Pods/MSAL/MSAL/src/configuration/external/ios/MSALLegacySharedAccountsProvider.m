@@ -28,7 +28,7 @@
 #import "MSALLegacySharedAccountFactory.h"
 #import "MSIDJsonObject.h"
 #import "MSALLegacySharedAccount.h"
-#import "MSALAccountEnumerationParameters.h"
+#import "MSALAccountEnumerationParameters+Private.h"
 #import "MSIDConstants.h"
 #import "MSALErrorConverter.h"
 #import "MSALAccount.h"
@@ -60,7 +60,7 @@
         self.applicationIdentifier = applicationIdentifier;
         
         NSString *queueName = [NSString stringWithFormat:@"com.microsoft.legacysharedaccountsprovider-%@", [NSUUID UUID].UUIDString];
-        _synchronizationQueue = dispatch_queue_create([queueName cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_CONCURRENT);
+        _synchronizationQueue = dispatch_queue_create([queueName cStringUsingEncoding:NSASCIIStringEncoding], DISPATCH_QUEUE_SERIAL);
     }
     
     return self;
@@ -182,7 +182,7 @@
 
 - (BOOL)updateAccount:(id<MSALAccount>)account idTokenClaims:(NSDictionary *)idTokenClaims error:(__unused NSError **)error
 {
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_PII_LOG_MASKABLE(account));
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Updating account %@", MSID_EUII_ONLY_LOG_MASKABLE(account));
     
     [self updateAccountAsync:account
                idTokenClaims:idTokenClaims
@@ -244,19 +244,23 @@
 #pragma mark - Removal
 
 - (BOOL)removeAccount:(id<MSALAccount>)account
+          wipeAccount:(BOOL)wipeAccount
        tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
                 error:(NSError * _Nullable * _Nullable)error
 {
-    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Removing account %@", MSID_PII_LOG_MASKABLE(account));
+    MSID_LOG_WITH_CTX_PII(MSIDLogLevelInfo, nil, @"Removing account %@", MSID_EUII_ONLY_LOG_MASKABLE(account));
     
     __block BOOL result = YES;
     __block NSError *removeError;
     
     dispatch_barrier_sync(self.synchronizationQueue, ^{
+        
+        MSALLegacySharedAccountWriteOperation operation = wipeAccount ? MSALLegacySharedAccountWipeOperation : MSALLegacySharedAccountRemoveOperation;
+        
         result = [self updateAccountImpl:account
                            idTokenClaims:nil
                           tenantProfiles:tenantProfiles
-                               operation:MSALLegacySharedAccountRemoveOperation
+                               operation:operation
                                    error:&removeError];
         
         if (!result)
@@ -273,6 +277,20 @@
     return result;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-implementations"
+- (BOOL)removeAccount:(nonnull id<MSALAccount>)account
+       tenantProfiles:(nullable NSArray<MSALTenantProfile *> *)tenantProfiles
+                error:(NSError * _Nullable __autoreleasing * _Nullable)error
+{
+    return [self removeAccount:account
+                   wipeAccount:NO
+                tenantProfiles:tenantProfiles
+                         error:error];
+}
+#pragma clang diagnostic pop
+
+
 - (nullable NSArray<MSALLegacySharedAccount *> *)removableAccountsFromJsonObject:(NSDictionary *)jsonDictionary
                                                                      msalAccount:(id<MSALAccount>)account
                                                                   tenantProfiles:(NSArray<MSALTenantProfile *> *)tenantProfiles
@@ -282,6 +300,7 @@
     {
         MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account
                                                                                     tenantProfileIdentifier:account.accountClaims[@"oid"]];
+        parameters.ignoreSignedInStatus = YES;
         
         if (!parameters)
         {
@@ -299,6 +318,7 @@
     {
         MSALAccountEnumerationParameters *parameters = [MSALLegacySharedAccountFactory parametersForAccount:account
                                                                                     tenantProfileIdentifier:tenantProfile.identifier];
+        parameters.ignoreSignedInStatus = YES;
         
         if (!parameters)
         {
@@ -375,19 +395,19 @@
         
         NSArray<MSALLegacySharedAccount *> *accounts = nil;
         
-        if (operation == MSALLegacySharedAccountRemoveOperation)
-        {
-            accounts = [self removableAccountsFromJsonObject:[jsonObject jsonDictionary]
-                                                 msalAccount:account
-                                              tenantProfiles:tenantProfiles
-                                                       error:&updateError];
-        }
-        else
+        if (operation == MSALLegacySharedAccountUpdateOperation)
         {
             accounts = [self updatableAccountsFromJsonObject:[jsonObject jsonDictionary]
                                                  msalAccount:account
                                                idTokenClaims:idTokenClaims
                                                      version:version
+                                                       error:&updateError];
+        }
+        else
+        {
+            accounts = [self removableAccountsFromJsonObject:[jsonObject jsonDictionary]
+                                                 msalAccount:account
+                                              tenantProfiles:tenantProfiles
                                                        error:&updateError];
         }
         
@@ -398,7 +418,7 @@
             return NO;
         }
         
-        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts %@", MSID_PII_LOG_MASKABLE(accounts));
+        MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts %@", MSID_EUII_ONLY_LOG_MASKABLE(accounts));
         
         NSError *saveError = nil;
         BOOL saveResult = [self saveUpdatedAccount:account
@@ -432,10 +452,16 @@
     NSString *versionIdentifier = [self accountVersionIdentifier:version];
     NSMutableDictionary *resultDictionary = jsonObject ? [[jsonObject jsonDictionary] mutableCopy] : [NSMutableDictionary new];
     
-    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts %@", MSID_PII_LOG_MASKABLE(accounts));
+    MSID_LOG_WITH_CTX(MSIDLogLevelInfo, nil, @"Updating accounts %@", MSID_EUII_ONLY_LOG_MASKABLE(accounts));
     
     for (MSALLegacySharedAccount *sharedAccount in accounts)
     {
+        if (operation == MSALLegacySharedAccountWipeOperation)
+        {
+            resultDictionary[sharedAccount.accountIdentifier] = nil;
+            continue;
+        }
+        
         NSError *updateError = nil;
         BOOL updateResult = [sharedAccount updateAccountWithMSALAccount:account
                                                         applicationName:self.applicationIdentifier

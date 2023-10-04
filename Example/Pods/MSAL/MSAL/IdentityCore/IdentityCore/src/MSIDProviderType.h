@@ -30,6 +30,7 @@ typedef NS_ENUM(NSInteger, MSIDProviderType)
     MSIDProviderTypeAADV2,
     MSIDProviderTypeAADV1,
     MSIDProviderTypeB2C,
+    MSIDProviderTypeCIAM
 };
 
 extern NSString * _Nonnull MSIDProviderTypeToString(MSIDProviderType type);

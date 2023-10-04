@@ -41,7 +41,10 @@ NSString *MSIDOAuthErrorDomain = @"MSIDOAuthErrorDomain";
 NSString *MSIDKeychainErrorDomain = @"MSIDKeychainErrorDomain";
 NSString *MSIDHttpErrorCodeDomain = @"MSIDHttpErrorCodeDomain";
 NSString *MSIDInvalidTokenResultKey = @"MSIDInvalidTokenResultKey";
+NSString *MSIDErrorMethodAndLineKey = @"MSIDMethodAndLineKey";
 NSInteger const MSIDSSOExtensionUnderlyingError = -6000;
+
+NSExceptionName const MSIDGenericException = @"MSIDGenericException";
 
 NSError *MSIDCreateError(NSString *domain, NSInteger code, NSString *errorDescription, NSString *oauthError, NSString *subError, NSError *underlyingError, NSUUID *correlationId, NSDictionary *additionalUserInfo, BOOL logErrorDescription)
 {
@@ -97,11 +100,39 @@ MSIDErrorCode MSIDErrorCodeForOAuthError(NSString *oauthError, MSIDErrorCode def
     {
         return MSIDErrorServerAccessDenied;
     }
-    
+    if (oauthError && [oauthError caseInsensitiveCompare:@"tokenTransferFailedOTC"] == NSOrderedSame)
+    {   // Account Transfer session time out, When the token's time is expired
+        return MSIDErrorUserCancel;
+    }
+    if (oauthError && [oauthError caseInsensitiveCompare:@"server_error"] == NSOrderedSame)
+    {
+        return MSIDErrorServerError;
+    }
     return defaultCode;
 }
 
-NSDictionary* MSIDErrorDomainsAndCodes()
+MSIDErrorCode MSIDErrorCodeForOAuthErrorWithSubErrorCode(NSString *oauthError, MSIDErrorCode defaultCode, NSString *subError)
+{
+    if (subError == nil)
+    {
+        return MSIDErrorCodeForOAuthError(oauthError, defaultCode);
+    }
+    if (oauthError && [oauthError caseInsensitiveCompare:@"invalid_grant"] == NSOrderedSame && [subError caseInsensitiveCompare:@"transfer_token_expired"] == NSOrderedSame)
+    {   // When account Transfter Token is expired.
+        return MSIDErrorUserCancel;
+    }
+    if (oauthError && [oauthError caseInsensitiveCompare:@"access_denied"] == NSOrderedSame && [subError caseInsensitiveCompare:@"tts_denied"] == NSOrderedSame)
+    {   //when user cancels, this is the same error we return to mobile app for Account Transfer
+        return MSIDErrorUserCancel;
+    }
+    if (oauthError && [oauthError caseInsensitiveCompare:@"access_denied"] == NSOrderedSame && [subError caseInsensitiveCompare:@"user_skipped"] == NSOrderedSame)
+    {   //Account Transfter, when user skips the QR code page.
+        return MSIDErrorUserCancel;
+    }
+    return MSIDErrorCodeForOAuthError(oauthError, defaultCode);
+}
+
+NSDictionary* MSIDErrorDomainsAndCodes(void)
 {
     return @{ MSIDErrorDomain : @[// General Errors
                       @(MSIDErrorInternal),
@@ -144,6 +175,26 @@ NSDictionary* MSIDErrorDomainsAndCodes()
                       @(MSIDErrorBrokerUnknown),
                       @(MSIDErrorBrokerApplicationTokenWriteFailed),
                       @(MSIDErrorBrokerApplicationTokenReadFailed),
+                      @(MSIDErrorJITLinkServerConfirmationTimeout),
+                      @(MSIDErrorJITLinkServerConfirmationError),
+                      @(MSIDErrorJITLinkAcquireTokenError),
+                      @(MSIDErrorJITLinkTokenAcquiredWrongTenant),
+                      @(MSIDErrorJITLinkError),
+                      @(MSIDErrorJITComplianceCheckResultNotCompliant),
+                      @(MSIDErrorJITComplianceCheckResultTimeout),
+                      @(MSIDErrorJITComplianceCheckResultUnknown),
+                      @(MSIDErrorJITComplianceCheckInvalidLinkPayload),
+                      @(MSIDErrorJITLinkConfigNotFound),
+                      @(MSIDErrorJITInvalidLinkTokenConfig),
+                      @(MSIDErrorJITWPJDeviceRegistrationFailed),
+                      @(MSIDErrorJITWPJAccountIdentifierNil),
+                      @(MSIDErrorJITWPJAcquireTokenError),
+                      @(MSIDErrorJITRetryRequired),
+                      @(MSIDErrorJITUnknownStatusWebCP),
+                      @(MSIDErrorJITTroubleshootingRequired),
+                      @(MSIDErrorJITTroubleshootingCreateController),
+                      @(MSIDErrorJITTroubleshootingResultUnknown),
+                      @(MSIDErrorJITTroubleshootingAcquireToken),
 
                       ],
               MSIDOAuthErrorDomain : @[// Server Errors
@@ -159,6 +210,7 @@ NSDictionary* MSIDErrorDomainsAndCodes()
                       @(MSIDErrorServerInvalidState),
                       @(MSIDErrorServerProtectionPoliciesRequired),
                       @(MSIDErrorAuthorizationFailed),
+                      @(MSIDErrorServerError),
                       ],
               MSIDHttpErrorCodeDomain : @[
                       @(MSIDErrorServerUnhandledResponse)
@@ -176,4 +228,182 @@ void MSIDFillAndLogError(NSError **error, MSIDErrorCode errorCode, NSString *err
     }
 
     MSID_LOG_WITH_CORR_PII(MSIDLogLevelError, correlationID, @"Encountered error with code %ld, description %@", (long)errorCode, MSID_PII_LOG_MASKABLE(errorDescription));
+}
+
+NSString *MSIDErrorCodeToString(MSIDErrorCode errorCode)
+{
+    switch (errorCode)
+    {
+            // General errors
+        case MSIDErrorInternal:
+            return @"MSIDErrorInternal";
+        case MSIDErrorInvalidInternalParameter:
+            return @"MSIDErrorInvalidInternalParameter";
+        case MSIDErrorInvalidDeveloperParameter:
+            return @"MSIDErrorInvalidDeveloperParameter";
+        case MSIDErrorMissingAccountParameter:
+            return @"MSIDErrorMissingAccountParameter";
+        case MSIDErrorUnsupportedFunctionality:
+            return @"MSIDErrorUnsupportedFunctionality";
+        case MSIDErrorInteractionRequired:
+            return @"MSIDErrorInteractionRequired";
+        case MSIDErrorServerNonHttpsRedirect:
+            return @"MSIDErrorServerNonHttpsRedirect";
+        case MSIDErrorMismatchedAccount:
+            return @"MSIDErrorMismatchedAccount";
+        case MSIDErrorRedirectSchemeNotRegistered:
+            return @"MSIDErrorRedirectSchemeNotRegistered";
+            // Cache errors
+        case MSIDErrorCacheMultipleUsers:
+            return @"MSIDErrorCacheMultipleUsers";
+        case MSIDErrorCacheBadFormat:
+            return @"MSIDErrorCacheBadFormat";
+            // Server errors
+        case MSIDErrorServerOauth:
+            return @"MSIDErrorServerOauth";
+        case MSIDErrorServerInvalidResponse:
+            return @"MSIDErrorServerInvalidResponse";
+        case MSIDErrorServerRefreshTokenRejected:
+            return @"MSIDErrorServerRefreshTokenRejected";
+        case MSIDErrorServerInvalidRequest:
+            return @"MSIDErrorServerInvalidRequest";
+        case MSIDErrorServerInvalidClient:
+            return @"MSIDErrorServerInvalidClient";
+        case MSIDErrorServerInvalidGrant:
+            return @"MSIDErrorServerInvalidGrant";
+        case MSIDErrorServerInvalidScope:
+            return @"MSIDErrorServerInvalidScope";
+        case MSIDErrorServerUnauthorizedClient:
+            return @"MSIDErrorServerUnauthorizedClient";
+        case MSIDErrorServerDeclinedScopes:
+            return @"MSIDErrorServerDeclinedScopes";
+        case MSIDErrorServerAccessDenied:
+            return @"MSIDErrorServerAccessDenied";
+        case MSIDErrorServerError:
+            return @"MSIDErrorServerError";
+        case MSIDErrorServerInvalidState:
+            return @"MSIDErrorServerInvalidState";
+        case MSIDErrorServerProtectionPoliciesRequired:
+            return @"MSIDErrorServerProtectionPoliciesRequired";
+        case MSIDErrorAuthorizationFailed:
+            return @"MSIDErrorAuthorizationFailed";
+            // HTTP errors
+        case MSIDErrorServerUnhandledResponse:
+            return @"MSIDErrorServerUnhandledResponse";
+            // Authority validation errors
+        case MSIDErrorAuthorityValidation:
+            return @"MSIDErrorAuthorityValidation";
+            // Interactive flow errors
+        case MSIDErrorUserCancel:
+            return @"MSIDErrorUserCancel";
+        case MSIDErrorSessionCanceledProgrammatically:
+            return @"MSIDErrorSessionCanceledProgrammatically";
+        case MSIDErrorInteractiveSessionStartFailure:
+            return @"MSIDErrorInteractiveSessionStartFailure";
+        case MSIDErrorInteractiveSessionAlreadyRunning:
+            return @"MSIDErrorInteractiveSessionAlreadyRunning";
+        case MSIDErrorNoMainViewController:
+            return @"MSIDErrorNoMainViewController";
+        case MSIDErrorAttemptToOpenURLFromExtension:
+            return @"MSIDErrorAttemptToOpenURLFromExtension";
+        case MSIDErrorUINotSupportedInExtension:
+            return @"MSIDErrorUINotSupportedInExtension";
+            // Broker flow errors
+        case MSIDErrorBrokerResponseNotReceived:
+            return @"MSIDErrorBrokerResponseNotReceived";
+        case MSIDErrorBrokerNoResumeStateFound:
+            return @"MSIDErrorBrokerNoResumeStateFound";
+        case MSIDErrorBrokerBadResumeStateFound:
+            return @"MSIDErrorBrokerBadResumeStateFound";
+        case MSIDErrorBrokerMismatchedResumeState:
+            return @"MSIDErrorBrokerMismatchedResumeState";
+        case MSIDErrorBrokerResponseHashMissing:
+            return @"MSIDErrorBrokerResponseHashMissing";
+            // Valid broker response not present
+        case MSIDErrorBrokerCorruptedResponse:
+            return @"MSIDErrorBrokerCorruptedResponse";
+            // Failed to decrypt broker response
+        case MSIDErrorBrokerResponseDecryptionFailed:
+            return @"MSIDErrorBrokerResponseDecryptionFailed";
+            // Broker hash mismatched in result after decryption
+        case MSIDErrorBrokerResponseHashMismatch:
+            return @"MSIDErrorBrokerResponseHashMismatch";
+            // Failed to create broker encryption key
+        case MSIDErrorBrokerKeyFailedToCreate:
+            return @"MSIDErrorBrokerKeyFailedToCreate";
+            // Couldn't read broker key
+        case MSIDErrorBrokerKeyNotFound :
+            return @"MSIDErrorBrokerKeyNotFound";
+        case MSIDErrorWorkplaceJoinRequired:
+            return @"MSIDErrorWorkplaceJoinRequired";
+            // Unknown broker error returned
+        case MSIDErrorBrokerUnknown:
+            return @"MSIDErrorBrokerUnknown";
+            // Failed to save broker application token
+        case MSIDErrorBrokerApplicationTokenWriteFailed :
+            return @"MSIDErrorBrokerApplicationTokenWriteFailed";
+        case MSIDErrorBrokerApplicationTokenReadFailed :
+            return @"MSIDErrorBrokerApplicationTokenReadFailed";
+        case MSIDErrorBrokerNotAvailable:
+            return @"MSIDErrorBrokerNotAvailable";
+            // SSO Extension internal error
+        case MSIDErrorSSOExtensionUnexpectedError:
+            return @"MSIDErrorSSOExtensionUnexpectedError";
+            // JIT - Link errors
+        case MSIDErrorJITLinkServerConfirmationTimeout:
+            return @"MSIDErrorJITLinkServerConfirmationTimeout";
+        case MSIDErrorJITLinkServerConfirmationError:
+            return @"MSIDErrorJITLinkServerConfirmationError";
+        case MSIDErrorJITLinkAcquireTokenError:
+            return @"MSIDErrorJITLinkAcquireTokenError";
+        case MSIDErrorJITLinkTokenAcquiredWrongTenant:
+            return @"MSIDErrorJITLinkTokenAcquiredWrongTenant";
+        case MSIDErrorJITLinkError:
+            return @"MSIDErrorJITLinkError";
+            // JIT - Compliance errors
+        case MSIDErrorJITComplianceCheckResultNotCompliant:
+            return @"MSIDErrorJITComplianceCheckResultNotCompliant";
+        case MSIDErrorJITComplianceCheckResultTimeout:
+            return @"MSIDErrorJITComplianceCheckResultTimeout";
+        case MSIDErrorJITComplianceCheckResultUnknown:
+            return @"MSIDErrorJITComplianceCheckResultUnknown";
+        case MSIDErrorJITComplianceCheckInvalidLinkPayload:
+            return @"MSIDErrorJITComplianceCheckInvalidLinkPayload";
+        case MSIDErrorJITComplianceCheckCreateController:
+            return @"MSIDErrorJITComplianceCheckCreateController";
+            // JIT - Link errors
+        case MSIDErrorJITLinkConfigNotFound:
+            return @"MSIDErrorJITLinkConfigNotFound";
+        case MSIDErrorJITInvalidLinkTokenConfig:
+            return @"MSIDErrorJITInvalidLinkTokenConfig";
+            // JIT - WPJ errors
+        case MSIDErrorJITWPJDeviceRegistrationFailed:
+            return @"MSIDErrorJITWPJDeviceRegistrationFailed";
+        case MSIDErrorJITWPJAccountIdentifierNil:
+            return @"MSIDErrorJITWPJAccountIdentifierNil";
+        case MSIDErrorJITWPJAcquireTokenError:
+            return @"MSIDErrorJITWPJAcquireTokenError";
+        case MSIDErrorJITUnknownStatusWebCP:
+            return @"MSIDErrorJITUnknownStatusWebCP";
+        case MSIDErrorJITRetryRequired:
+            return @"MSIDErrorJITRetryRequired";
+        case MSIDErrorJITTroubleshootingRequired:
+            return @"MSIDErrorJITTroubleshootingRequired";
+        case MSIDErrorJITTroubleshootingCreateController:
+            return @"MSIDErrorJITTroubleshootingCreateController";
+        case MSIDErrorJITTroubleshootingResultUnknown:
+            return @"MSIDErrorJITTroubleshootingResultUnknown";
+        case MSIDErrorJITTroubleshootingAcquireToken:
+            return @"MSIDErrorJITTroubleshootingAcquireToken";
+            // Throttling errors
+        case MSIDErrorThrottleCacheNoRecord:
+            return @"MSIDErrorThrottleCacheNoRecord";
+        case MSIDErrorThrottleCacheInvalidSignature:
+            return @"MSIDErrorThrottleCacheInvalidSignature";
+        case MSIDErrorBrokerAppIsInactive:
+            return @"MSIDErrorBrokerAppIsInactive";
+        case MSIDErrorBrokerAppIsInBackground:
+            return @"MSIDErrorBrokerAppIsInBackground";
+    }
+    return @"Unknown";
 }

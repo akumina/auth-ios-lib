@@ -21,6 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+#if !EXCLUDE_FROM_MSALCPP
+
 #import <Foundation/Foundation.h>
 #import "MSIDCurrentRequestTelemetrySerializedItem.h"
 
@@ -30,6 +32,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithSchemaVersion:(NSNumber *)schemaVersion defaultFields:(NSArray * _Nullable)defaultFields errorInfo:(NSArray * _Nullable)errorsInfo platformFields:(NSArray * _Nullable)platformFields;
 
+- (NSArray<MSIDRequestTelemetryErrorInfo *> *)getUnserializedTelemetry;
+
 @end
 
 NS_ASSUME_NONNULL_END
+
+#endif

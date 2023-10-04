@@ -43,7 +43,7 @@
 
 @interface MSIDCredentialCacheItem()
 
-@property (readwrite) NSDictionary *json;
+@property (atomic, readwrite) NSDictionary *json;
 
 @end
 
@@ -51,9 +51,9 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"MSIDCredentialCacheItem: clientId: %@, credentialType: %@, target: %@, realm: %@, environment: %@, expiresOn: %@, extendedExpiresOn: %@, cachedAt: %@, familyId: %@, homeAccountId: %@, enrollmentId: %@, speInfo: %@, secret: %@",
+    return [NSString stringWithFormat:@"MSIDCredentialCacheItem: clientId: %@, credentialType: %@, target: %@, realm: %@, environment: %@, expiresOn: %@, extendedExpiresOn: %@, refreshOn: %@, cachedAt: %@, last recovery attempted at: %@, familyId: %@, homeAccountId: %@, enrollmentId: %@, speInfo: %@, secret: %@, redirectUri: %@",
             self.clientId, [MSIDCredentialTypeHelpers credentialTypeAsString:self.credentialType], self.target, self.realm, self.environment, self.expiresOn,
-            self.extendedExpiresOn, self.cachedAt, self.familyId, self.homeAccountId, self.enrollmentId, self.speInfo, [self.secret msidSecretLoggingHash]];
+            self.extendedExpiresOn, self.refreshOn, self.cachedAt, self.lastRecoveryAttempt, self.familyId, self.homeAccountId, self.enrollmentId, self.speInfo, [self.secret msidSecretLoggingHash], MSID_PII_LOG_TRACKABLE(self.redirectUri)];
 }
 
 #pragma mark - MSIDCacheItem
@@ -84,6 +84,7 @@
     result &= (!self.environment && !item.environment) || [self.environment isEqualToString:item.environment];
     result &= (!self.expiresOn && !item.expiresOn) || [self.expiresOn isEqual:item.expiresOn];
     result &= (!self.extendedExpiresOn && !item.extendedExpiresOn) || [self.extendedExpiresOn isEqual:item.extendedExpiresOn];
+    result &= (!self.refreshOn && !item.refreshOn) || [self.refreshOn isEqual:item.refreshOn];
     result &= (!self.cachedAt && !item.cachedAt) || [self.cachedAt isEqual:item.cachedAt];
     result &= (!self.familyId && !item.familyId) || [self.familyId isEqualToString:item.familyId];
     result &= (!self.homeAccountId && !item.homeAccountId) || [self.homeAccountId isEqualToString:item.homeAccountId];
@@ -91,6 +92,8 @@
     result &= (!self.speInfo && !item.speInfo) || [self.speInfo isEqual:item.speInfo];
     result &= (!self.tokenType && !item.tokenType) || [self.tokenType isEqual:item.tokenType];
     result &= (!self.kid && !item.kid) || [self.kid isEqual:item.kid];
+    result &= (!self.requestedClaims && !item.requestedClaims) || [self.requestedClaims isEqual:item.requestedClaims];
+    result &= (!self.redirectUri && !item.redirectUri) || [self.redirectUri isEqual:item.redirectUri];
     // Ignore the lastMod properties (two otherwise-identical items with different
     // last modification informational values should be considered equal)
     return result;
@@ -109,13 +112,17 @@
     hash = hash * 31 + self.environment.hash;
     hash = hash * 31 + self.expiresOn.hash;
     hash = hash * 31 + self.extendedExpiresOn.hash;
+    hash = hash * 31 + self.refreshOn.hash;
     hash = hash * 31 + self.cachedAt.hash;
+    hash = hash * 31 + self.lastRecoveryAttempt.hash;
     hash = hash * 31 + self.familyId.hash;
     hash = hash * 31 + self.homeAccountId.hash;
     hash = hash * 31 + self.speInfo.hash;
     hash = hash * 31 + self.applicationIdentifier.hash;
     hash = hash * 31 + self.tokenType.hash;
     hash = hash * 31 + self.kid.hash;
+    hash = hash * 31 + self.requestedClaims.hash;
+    hash = hash * 31 + self.redirectUri.hash;
     return hash;
 }
 
@@ -132,7 +139,10 @@
     item.environment = [self.environment copyWithZone:zone];
     item.expiresOn = [self.expiresOn copyWithZone:zone];
     item.extendedExpiresOn = [self.extendedExpiresOn copyWithZone:zone];
+    item.refreshOn = [self.refreshOn copyWithZone:zone];
     item.cachedAt = [self.cachedAt copyWithZone:zone];
+    item.lastRecoveryAttempt = [self.lastRecoveryAttempt copyWithZone:zone];
+    item.expiryInterval = [self.expiryInterval copyWithZone:zone];
     item.familyId = [self.familyId copyWithZone:zone];
     item.homeAccountId = [self.homeAccountId copyWithZone:zone];
     item.speInfo = [self.speInfo copyWithZone:zone];
@@ -142,6 +152,8 @@
     item.applicationIdentifier = [self.applicationIdentifier copyWithZone:zone];
     item.tokenType = [self.tokenType copyWithZone:zone];
     item.kid = [self.kid copyWithZone:zone];
+    item.requestedClaims = [self.requestedClaims copyWithZone:zone];
+    item.redirectUri = [self.redirectUri copyWithZone:zone];
     return item;
 }
 
@@ -178,7 +190,9 @@
     _environment = [json msidStringObjectForKey:MSID_ENVIRONMENT_CACHE_KEY];
     _expiresOn = [NSDate msidDateFromTimeStamp:[json msidStringObjectForKey:MSID_EXPIRES_ON_CACHE_KEY]];
     _extendedExpiresOn = [NSDate msidDateFromTimeStamp:[json msidStringObjectForKey:MSID_EXTENDED_EXPIRES_ON_CACHE_KEY]];
+    _refreshOn = [NSDate msidDateFromTimeStamp:[json msidStringObjectForKey:MSID_REFRESH_ON_CACHE_KEY]];
     _cachedAt = [NSDate msidDateFromTimeStamp:[json msidStringObjectForKey:MSID_CACHED_AT_CACHE_KEY]];
+    _lastRecoveryAttempt = [NSDate msidDateFromTimeStamp:[json msidStringObjectForKey:MSID_LAST_RECOVERY_ATTEMPT_CACHE_KEY]];
     _familyId = [json msidStringObjectForKey:MSID_FAMILY_ID_CACHE_KEY];
     _homeAccountId = [json msidStringObjectForKey:MSID_HOME_ACCOUNT_ID_CACHE_KEY];
     _enrollmentId = [json msidStringObjectForKey:MSID_ENROLLMENT_ID_CACHE_KEY];
@@ -192,6 +206,9 @@
     _applicationIdentifier = [json msidStringObjectForKey:MSID_APPLICATION_IDENTIFIER_CACHE_KEY];
     _kid = [json msidStringObjectForKey:MSID_KID_CACHE_KEY];
     _tokenType = [json msidStringObjectForKey:MSID_OAUTH2_TOKEN_TYPE];
+    _expiryInterval = [json msidStringObjectForKey:MSID_EXPIRES_IN_CACHE_KEY];
+    _requestedClaims = [json msidStringObjectForKey:MSID_REQUESTED_CLAIMS_CACHE_KEY];
+    _redirectUri = [json msidStringObjectForKey:MSID_OAUTH2_REDIRECT_URI];
     return self;
 }
 
@@ -213,18 +230,23 @@
     dictionary[MSID_ENVIRONMENT_CACHE_KEY] = _environment;
     dictionary[MSID_EXPIRES_ON_CACHE_KEY] = _expiresOn.msidDateToTimestamp;
     dictionary[MSID_EXTENDED_EXPIRES_ON_CACHE_KEY] = _extendedExpiresOn.msidDateToTimestamp;
+    dictionary[MSID_REFRESH_ON_CACHE_KEY] = _refreshOn.msidDateToTimestamp;
     dictionary[MSID_CACHED_AT_CACHE_KEY] = _cachedAt.msidDateToTimestamp;
+    dictionary[MSID_LAST_RECOVERY_ATTEMPT_CACHE_KEY] = _lastRecoveryAttempt.msidDateToTimestamp;
     dictionary[MSID_FAMILY_ID_CACHE_KEY] = _familyId;
     dictionary[MSID_HOME_ACCOUNT_ID_CACHE_KEY] = _homeAccountId;
     dictionary[MSID_ENROLLMENT_ID_CACHE_KEY] = _enrollmentId;
     dictionary[MSID_SPE_INFO_CACHE_KEY] = _speInfo;
-
+    dictionary[MSID_EXPIRES_IN_CACHE_KEY] = _expiryInterval;
+    
     // Last Modification info (currently used on macOS only)
     dictionary[MSID_LAST_MOD_TIME_CACHE_KEY] = [_lastModificationTime msidDateToFractionalTimestamp:3];
     dictionary[MSID_LAST_MOD_APP_CACHE_KEY] = _lastModificationApp;
     dictionary[MSID_APPLICATION_IDENTIFIER_CACHE_KEY] = _applicationIdentifier;
     dictionary[MSID_KID_CACHE_KEY] = _kid;
     dictionary[MSID_OAUTH2_TOKEN_TYPE] = _tokenType;
+    dictionary[MSID_REQUESTED_CLAIMS_CACHE_KEY] = _requestedClaims;
+    dictionary[MSID_OAUTH2_REDIRECT_URI] = _redirectUri;
     return dictionary;
 }
 
@@ -250,6 +272,8 @@
             return [inputSet isSubsetOfOrderedSet:tokenSet];
         case MSIDIntersect:
             return [inputSet intersectsOrderedSet:tokenSet];
+        case MSIDAny:
+            return YES;
         case MSIDExactStringMatch:
         default:
             return NO;
@@ -265,6 +289,7 @@
     if (homeAccountId && 
         ![self.homeAccountId.msidNormalizedString isEqualToString:homeAccountId.msidNormalizedString])
     {
+        MSID_LOG_WITH_CTX_PII(MSIDLogLevelVerbose, nil, @"(%@) cached item did not have a valid home account Id. Actual: %@, expected: %@", NSStringFromClass(self.class), MSID_PII_LOG_TRACKABLE(self.homeAccountId), MSID_PII_LOG_TRACKABLE(homeAccountId));
         return NO;
     }
 
@@ -277,12 +302,14 @@
     if (environment && 
         ![self.environment.msidNormalizedString isEqualToString:environment.msidNormalizedString])
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item did not have a valid environment. Actual: %@, expected: %@", NSStringFromClass(self.class), self.environment, environment);
         return NO;
     }
 
     if ([environmentAliases count] && 
         ![self.environment.msidNormalizedString msidIsEquivalentWithAnyAlias:environmentAliases])
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item did not have a valid environment that matches with any of the environment aliases.", NSStringFromClass(self.class));
         return NO;
     }
 
@@ -293,22 +320,40 @@
                 clientId:(nullable NSString *)clientId
                 familyId:(nullable NSString *)familyId
                   target:(nullable NSString *)target
+         requestedClaims:(nullable NSString *)requestedClaims
           targetMatching:(MSIDComparisonOptions)matchingOptions
         clientIdMatching:(MSIDComparisonOptions)clientIDMatchingOptions
 {
     if (realm && ![self.realm.msidNormalizedString isEqualToString:realm.msidNormalizedString])
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item did not have a valid realm. Actual: %@, expected: %@", NSStringFromClass(self.class), self.realm, realm);
         return NO;
     }
 
     if (![self matchesTarget:target comparisonOptions:matchingOptions])
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item did not have a valid target value. %@", NSStringFromClass(self.class), target);
         return NO;
     }
 
     if (!clientId && !familyId)
     {
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item had neither clientID nor family Id.", NSStringFromClass(self.class));
         return YES;
+    }
+    
+    if (matchingOptions == MSIDAny)
+    {
+        if ((clientId && [self.clientId.msidNormalizedString isEqualToString:clientId.msidNormalizedString]))
+        {
+            MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item any match; actual client ID: %@, expected client ID: %@, actual family ID: %@, expected family ID: %@", NSStringFromClass(self.class), self.clientId, clientId, self.familyId, familyId);
+            return YES;
+        }
+    }
+    if (!([NSString msidIsStringNilOrBlank:self.requestedClaims] && [NSString msidIsStringNilOrBlank:requestedClaims]) && !([self.requestedClaims isEqualToString:requestedClaims]))
+    {
+        MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item did not have valid requestedClaims.", NSStringFromClass(self.class));
+        return NO;
     }
 
     if (clientIDMatchingOptions == MSIDSuperSet)
@@ -316,25 +361,30 @@
         if ((clientId && [self.clientId.msidNormalizedString isEqualToString:clientId.msidNormalizedString])
             || (familyId && [self.familyId.msidNormalizedString isEqualToString:familyId.msidNormalizedString]))
         {
-            return YES;
+            MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item supserset match; actual client ID: %@, expected client ID: %@, actual family ID: %@, expected family ID: %@", NSStringFromClass(self.class), self.clientId, clientId, self.familyId, familyId);
+            return YES;       
         }
-
+        
+            MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item superset mismatch; cached item had both invalid clientID and familyID. actual client ID: %@, expected client ID: %@, actual family ID: %@, expected family ID: %@", NSStringFromClass(self.class), self.clientId, clientId, self.familyId, familyId);
         return NO;
     }
     else
     {
         if (clientId && ![self.clientId.msidNormalizedString isEqualToString:clientId.msidNormalizedString])
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item clientID mismatch; actual client ID: %@, expected client ID: %@", NSStringFromClass(self.class), self.clientId, clientId);
             return NO;
         }
 
         if (familyId && ![self.familyId.msidNormalizedString isEqualToString:familyId.msidNormalizedString])
         {
+            MSID_LOG_WITH_CTX(MSIDLogLevelVerbose, nil, @"(%@) cached item familyID mismatch; actual family ID: %@, expected family ID: %@", NSStringFromClass(self.class), self.familyId, familyId);
             return NO;
         }
     }
 
     return YES;
+    
 }
 
 - (BOOL)isTombstone

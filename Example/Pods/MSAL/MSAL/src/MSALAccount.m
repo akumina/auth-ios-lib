@@ -89,10 +89,13 @@
                                                                            objectId:account.accountIdentifier.uid
                                                                            tenantId:account.accountIdentifier.utid];
     
-    return [self initWithUsername:account.username
-                    homeAccountId:homeAccountId
-                      environment:account.storageEnvironment ?: account.environment
-                   tenantProfiles:tenantProfiles];
+    MSALAccount *msalAccount = [self initWithUsername:account.username
+                                        homeAccountId:homeAccountId
+                                          environment:account.storageEnvironment ?: account.environment
+                                       tenantProfiles:tenantProfiles];
+    
+    msalAccount.isSSOAccount = account.isSSOAccount;
+    return msalAccount;
 }
 
 - (instancetype)initWithMSALExternalAccount:(id<MSALAccount>)externalAccount
@@ -158,7 +161,8 @@
 - (NSUInteger)hash
 {
     NSUInteger hash = 0;
-    hash = hash * 31 + self.environment.hash;
+    // Equality of MSALAccount is depending on equality of homeAccountId or username
+    // So we are not able to calculate a precise hash
     return hash;
 }
 
@@ -177,7 +181,6 @@
         result &= [self.username.lowercaseString isEqualToString:user.username.lowercaseString];
     }
     
-    result &= (!self.environment && !user.environment) || [self.environment isEqualToString:user.environment];
     return result;
 }
 
