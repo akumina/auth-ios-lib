@@ -242,7 +242,7 @@ class MSALUtils {
         
         AppSettings.saveAccount(account: self.mAccount!);
         if (withIntune) {
-            let delegate =  EnrollmentDelegateClass(viewController: parentViewController!, completionHandler: self.completionHandler,loggingHandler: self.loggingHandler);
+            let delegate =  EnrollmentDelegateClass(viewController: parentViewController!,app: app, completionHandler: self.completionHandler,loggingHandler: self.loggingHandler);
             let manager: IntuneMAMEnrollmentManager = IntuneMAMEnrollmentManager.instance();
             
             manager.delegate = delegate

@@ -1,4 +1,5 @@
 import IntuneMAMSwift
+import MSAL
 /*
  This enrollment delegate class can be initialized and set as the enrollment delegate of the IntuneMAMEnrollmentManager
  Doing this will trigger the enrollmentRequestWithStatus method whenever an enrollment is attempted.
@@ -12,6 +13,7 @@ class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
     var presentingViewController: UIViewController?
     var completionHandler: (MSALResponse) -> Void  = {_ in }
     var loggingHandler: (String, Bool) -> Void = {_,_ in }
+    var app: MSALPublicClientApplication?
     override init() {
         super.init()
         self.presentingViewController = nil
@@ -22,9 +24,10 @@ class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
      
      @param viewController - the view controller this class should use when triggered
      */
-    init(viewController : UIViewController, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void){
+    init(viewController : UIViewController, app: MSALPublicClientApplication, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void){
         super.init()
         self.presentingViewController = viewController
+        self.app = app;
         self.completionHandler = completionHandler
         self.loggingHandler = loggingHandler
     }
@@ -41,14 +44,14 @@ class EnrollmentDelegateClass: NSObject, IntuneMAMEnrollmentDelegate {
         if status.didSucceed{
             self.loggingHandler("Intune Enrollment success for user \(String(describing: AppSettings.getAccount().mUPN))", false );
             
-            MSALUtils.instance.getSharePointAccessTokenAsync();
+            MSALUtils.instance.getSharePointAccessTokenAsync(app: self.app!);
             
         } else if IntuneMAMEnrollmentStatusCode.loginCanceled != status.statusCode {
             
             if(status.statusCode == IntuneMAMEnrollmentStatusCode.alreadyEnrolled) {
                 let msg = "Application already enrolled, so proceed to get token";
                 self.loggingHandler(msg,false);
-                MSALUtils.instance.getSharePointAccessTokenAsync();
+                MSALUtils.instance.getSharePointAccessTokenAsync(app: self.app!);
                 return
                 
             }
