@@ -30,7 +30,7 @@ class MSALUtils {
     let dateFormatter = DateFormatter();
     var loggingHandler: (String, Bool) -> Void = {_,_ in }
     
-    var lazy window : UIWindow;
+    var window : UIWindow?;
     
     typealias AccountCompletion = (MSALAccount?) -> Void
     

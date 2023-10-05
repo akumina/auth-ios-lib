@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AkuminaAuthiOSLib'
-  s.version          = '0.1.80'
+  s.version          = '0.1.81'
   s.summary          = 'iOS Auth Library for Akumina App'
 
 # This description is used to generate tags and improve search results.
