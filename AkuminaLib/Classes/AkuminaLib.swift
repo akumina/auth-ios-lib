@@ -19,9 +19,9 @@ public final class AkuminaLib {
         
 //        Constants.ROLL_BAR = true;
 //    }
-    public func authenticateWithMSALAndMAM(parentViewController: UIViewController, clientDetails: ClientDetails,completionHandler: @escaping (MSALResponse) -> Void, loggingHandler: @escaping (String, Bool) -> Void) throws {
+    public func authenticateWithMSALAndMAM(parentViewController: UIViewController, window: UIWindow, clientDetails: ClientDetails,completionHandler: @escaping (MSALResponse) -> Void, loggingHandler: @escaping (String, Bool) -> Void) throws {
         do {
-            try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: true,completionHandler: completionHandler, loggingHandler: loggingHandler)
+            try MSALUtils.instance.initMSAL(parentViewController: parentViewController, window: window, clientDetails: clientDetails, withIntune: true,completionHandler: completionHandler, loggingHandler: loggingHandler)
         }catch {
             throw MSALException.TokenFailedException(error: error)
         }
@@ -34,10 +34,10 @@ public final class AkuminaLib {
             throw MSALException.TokenFailedException(error: error)
         }
     }
-    public func authenticateWithMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void, loggingHandler: @escaping (String, Bool) -> Void) throws {
+    public func authenticateWithMSAL(parentViewController: UIViewController, window: UIWindow, clientDetails: ClientDetails, completionHandler: @escaping (MSALResponse) -> Void, loggingHandler: @escaping (String, Bool) -> Void) throws {
         
         do {
-            try MSALUtils.instance.initMSAL(parentViewController: parentViewController, clientDetails: clientDetails, withIntune: false,completionHandler: completionHandler, loggingHandler: loggingHandler)
+            try MSALUtils.instance.initMSAL(parentViewController: parentViewController, window: window, clientDetails: clientDetails, withIntune: false,completionHandler: completionHandler, loggingHandler: loggingHandler)
         }catch {
             throw MSALException.TokenFailedException(error: error)
         }
