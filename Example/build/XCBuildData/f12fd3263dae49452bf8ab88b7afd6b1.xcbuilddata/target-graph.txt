@@ -1,0 +1,9 @@
+Target dependency graph (4 targets)
+MSAL in Pods, no dependencies
+AkuminaAuthiOSLib in Pods, depends on:
+MSAL in Pods (explicit)
+Pods-AkuminaLib_Example in Pods, depends on:
+AkuminaAuthiOSLib in Pods (explicit)
+MSAL in Pods (explicit)
+Pods-AkuminaLib_Tests in Pods, depends on:
+Pods-AkuminaLib_Example in Pods (explicit)

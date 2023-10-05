@@ -13,8 +13,8 @@ class MSALUtils {
     
     static let instance = MSALUtils();
     
-    var applicationContext : MSALPublicClientApplication?
-    var webViewParamaters : MSALWebviewParameters?
+    //    var applicationContext : MSALPublicClientApplication?
+    //    var webViewParamaters : MSALWebviewParameters?
     var parentViewController: UIViewController?;
     var postParamenters = [Dictionary<String, String>]();
     
@@ -49,49 +49,55 @@ class MSALUtils {
         self.parentViewController = parentViewController;
         self.withIntune = withIntune;
         let authority = try MSALAADAuthority(url: clientDetails.authority)
-        let msalConfiguration = MSALPublicClientApplicationConfig(
-            clientId: clientDetails.clientId,
-            redirectUri: clientDetails.redirectUri,
-            authority: authority);
-        self.applicationContext = try MSALPublicClientApplication(configuration: msalConfiguration);
-        self.initWebViewParams();
-        try self.callGraphAPI();
+        //        let msalConfiguration = MSALPublicClientApplicationConfig(
+        //            clientId: clientDetails.clientId,
+        //            redirectUri: clientDetails.redirectUri,
+        //            authority: authority);
+        let config = MSALPublicClientApplicationConfig(clientId: clientDetails.clientId)
+        let application = try? MSALPublicClientApplication(configuration: config);
+        //        self.applicationContext = try MSALPublicClientApplication(configuration: msalConfiguration);
+        //        self.initWebViewParams();
+        try self.callGraphAPI(app: application!);
         
     }
-    func initWebViewParams() {
-        self.webViewParamaters = MSALWebviewParameters(authPresentationViewController: self.parentViewController!)
+    
+    
+    func initWebViewParams()  -> MSALWebviewParameters{
+        return  MSALWebviewParameters(authPresentationViewController: self.parentViewController!)
     }
     private func updateCurrentAccount(account: MSALAccount?) {
         self.currentAccount = account
         self.accessToken = ""
     }
-    public func callGraphAPI() throws {
+    public func callGraphAPI(app: MSALPublicClientApplication) throws {
         
-        self.loadCurrentAccount { [self] (account) in
-            
+        self.loadCurrentAccount(app: app,completion: {
+            (account) in
             guard let currentAccount = account else {
-                callAcquireTokenInteractively();
+                self.callAcquireTokenInteractively(app: app);
                 return
+                
             }
-            self.acquireTokenSilently(currentAccount)
-        }
+            self.acquireTokenSilently(app: app, currentAccount)
+        })
+        
     }
-    func callAcquireTokenInteractively() {
-        self.acquireTokenInteractively { tokenResult in
+    func callAcquireTokenInteractively(app: MSALPublicClientApplication) {
+        self.acquireTokenInteractively(app: app, completion:  { tokenResult in
             switch tokenResult {
             case .success(let result):
                 self.currentAccount =  result.account;
-                self.getContentWithToken(result: result);
+                self.getContentWithToken(app: app, result: result)
             case .error(let error):
                 let errorMsg = "Unable to acquire MSAL token \(error)"
                 self.updateLogging(text: errorMsg, error: true)
                 self.completionHandler(MSALResponse(token: "", error: TokenError.customError(errorMsg)))
             }
-        }
+        })
     }
-    func acquireTokenSilently(_ account : MSALAccount!) {
+    func acquireTokenSilently(app: MSALPublicClientApplication,_ account : MSALAccount!) {
         
-        guard let applicationContext = self.applicationContext else { return }
+        //        guard let applicationContext = self.applicationContext else { return }
         
         let parameters = MSALSilentTokenParameters(scopes: clientDetails.scopes, account: account)
         
@@ -99,7 +105,7 @@ class MSALUtils {
         
         parameters.forceRefresh = true;
         
-        applicationContext.acquireTokenSilent(with: parameters) { (result, error) in
+        app.acquireTokenSilent(with: parameters) { (result, error) in
             
             if let error = error {
                 
@@ -110,7 +116,7 @@ class MSALUtils {
                     if (nsError.code == MSALError.interactionRequired.rawValue) {
                         
                         DispatchQueue.main.async {
-                            self.callAcquireTokenInteractively()
+                            self.callAcquireTokenInteractively(app: app)
                         }
                         return
                     }else {
@@ -132,21 +138,21 @@ class MSALUtils {
             
             self.accessToken = result.accessToken
             self.updateLogging(text: "Refreshed Access token is \(self.accessToken)", error: false)
-            self.getContentWithToken(result: result);
+            self.getContentWithToken(app:app,result: result);
         }
     }
     
-    func acquireTokenInteractively(completion: @escaping (TokenResult)  -> (Void)) {
+    func acquireTokenInteractively(app: MSALPublicClientApplication, completion: @escaping (TokenResult)  -> (Void)) {
         
-        guard let applicationContext = self.applicationContext else { return }
-        guard let webViewParameters = self.webViewParamaters else { return }
+        //        guard let applicationContext = self.applicationContext else { return }
+        let webViewParameters = self.initWebViewParams();
         let parameters = MSALInteractiveTokenParameters(scopes: clientDetails.scopes, webviewParameters: webViewParameters)
         parameters.loginHint = clientDetails.userId
         parameters.promptType = .promptIfNecessary
         
         self.updateLogging(text: "->> acquireTokenInteractively \(String(describing: AppSettings.getAccount().mUPN)) ",error:false);
         
-        applicationContext.acquireToken(with: parameters) { (result, error) in
+        app.acquireToken(with: parameters) { (result, error) in
             
             if let error = error {
                 completion(TokenResult.error(error: error))
@@ -166,10 +172,10 @@ class MSALUtils {
         }
         
     }
-    func loadCurrentAccount(completion: AccountCompletion? = nil) {
+    func loadCurrentAccount(app: MSALPublicClientApplication, completion: AccountCompletion? = nil) {
         
         self.postParamenters.removeAll();
-        guard let applicationContext = self.applicationContext else { return }
+        //        guard let applicationContext = self.applicationContext else { return }
         var appAcc: AppAccount ;
         appAcc =   AppSettings.getAccount();
         if( appAcc.mUPN == nil || appAcc.mUPN == "" ) {
@@ -182,7 +188,7 @@ class MSALUtils {
             if(appAcc.mUPN == clientDetails.userId && appAcc.mAuthority == clientDetails.authority.absoluteString ) {
                 self.updateLogging(text: "Welcome back ", error: false);
                 do {
-                    let acc : MSALAccount  = try applicationContext.account(forIdentifier: appAcc.uuid ?? clientDetails.userId);
+                    let acc : MSALAccount  = try app.account(forIdentifier: appAcc.uuid ?? clientDetails.userId);
                     completion!(acc)
                     return
                 }catch{
@@ -191,7 +197,7 @@ class MSALUtils {
                 }
             }else {
                 self.updateLogging(text: "Different user old user \(String(describing: appAcc.mUPN)) new user \(clientDetails.userId)", error: false);
-//                AppSettings.clearAll();
+                //                AppSettings.clearAll();
                 self.updateCurrentAccount(account: nil)
                 completion!(nil);
             }
@@ -199,7 +205,7 @@ class MSALUtils {
         
     }
     
-    func getContentWithToken(result: MSALResult) {
+    func getContentWithToken(app: MSALPublicClientApplication,result: MSALResult) {
         
         let account: MSALAccount =  result.account;
         self.currentAccount = account;
@@ -241,12 +247,12 @@ class MSALUtils {
             
             manager.delegate = delegate
             
-           
+            
             manager.loginAndEnrollAccount(upn);
             
             
         }else {
-            self.getSharePointAccessTokenAsync();
+            self.getSharePointAccessTokenAsync(app: app);
         }
         self.updateLogging(text: message, error:false);
         
@@ -264,16 +270,16 @@ class MSALUtils {
     }
     
     
-    func getSharePointAccessTokenAsync  () -> Void {
+    func getSharePointAccessTokenAsync  (app: MSALPublicClientApplication) -> Void {
         
-        guard let applicationContext = self.applicationContext else { return }
+        //        guard let applicationContext = self.applicationContext else { return }
         
         let parameters = MSALSilentTokenParameters(scopes: [clientDetails.sharePointURL], account: self.currentAccount!);
         do {
             
             parameters.authority = try  MSALAuthority(url:  clientDetails.authority)
             
-            applicationContext.acquireTokenSilent(with: parameters) { (result, error) in
+            app.acquireTokenSilent(with: parameters) { (result, error) in
                 
                 if let error = error {
                     let errorMsg = "Could not acquire sharepoint token silently: \(error)";
@@ -390,16 +396,18 @@ class MSALUtils {
     }
     
     func signOut(completionHandler: @escaping (MSALSignoutResponse) -> Void ) {
-        guard let applicationContext = self.applicationContext else { return }
+        //        guard let applicationContext = self.applicationContext else { return }
+        let config = MSALPublicClientApplicationConfig(clientId: clientDetails.clientId)
+        let application = try? MSALPublicClientApplication(configuration: config);
         guard let account = self.currentAccount else { return }
-        self.initWebViewParams();
-        let signoutParameters = MSALSignoutParameters(webviewParameters: self.webViewParamaters!);
+        let webViewParams =  self.initWebViewParams();
+        let signoutParameters = MSALSignoutParameters(webviewParameters: webViewParams);
         signoutParameters.signoutFromBrowser = false
         
-            if (self.withIntune) {
-                self.updateLogging(text: "\(self.clientDetails.userId) -> deRegisterAndUnenrollAccount ", error: false)
-            }
-            applicationContext.signout(with: account, signoutParameters: signoutParameters) { success, error in
+        if (self.withIntune) {
+            self.updateLogging(text: "\(self.clientDetails.userId) -> deRegisterAndUnenrollAccount ", error: false)
+        }
+        application!.signout(with: account, signoutParameters: signoutParameters) { success, error in
             completionHandler(MSALSignoutResponse(error: error))
             self.updateCurrentAccount(account: nil);
         }

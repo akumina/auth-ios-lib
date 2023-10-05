@@ -28,7 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0426AB0129CF522300367FD9 /* AkuminaAuthiOSLib.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; name = AkuminaAuthiOSLib.podspec; path = ../AkuminaAuthiOSLib.podspec; sourceTree = "<group>"; };
+		0426AB0129CF522300367FD9 /* AkuminaAuthiOSLib.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; name = AkuminaAuthiOSLib.podspec; path = ../AkuminaAuthiOSLib.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		0476D50C29C08A5C00C173A9 /* AkuminaLib_Example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AkuminaLib_Example.entitlements; sourceTree = "<group>"; };
 		2367D6C0AA9C0EBD3EE9039B /* Pods-AkuminaLib_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AkuminaLib_Example.release.xcconfig"; path = "Target Support Files/Pods-AkuminaLib_Example/Pods-AkuminaLib_Example.release.xcconfig"; sourceTree = "<group>"; };
 		4A1DE57B3FE7C83E1832BC1F /* Pods_AkuminaLib_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AkuminaLib_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
