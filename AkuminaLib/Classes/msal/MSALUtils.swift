@@ -30,6 +30,8 @@ class MSALUtils {
     let dateFormatter = DateFormatter();
     var loggingHandler: (String, Bool) -> Void = {_,_ in }
     
+    var lazy window : UIWindow;
+    
     typealias AccountCompletion = (MSALAccount?) -> Void
     
     private init(){
@@ -37,11 +39,12 @@ class MSALUtils {
         dateFormatter.dateFormat = "dd MMM yyyy HH:mm:ss Z"
     }
     
-    public func initMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, withIntune: Bool, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void) throws {
+    public func initMSAL(parentViewController: UIViewController, window: UIWindow, clientDetails: ClientDetails, withIntune: Bool, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void) throws {
         var  version = Bundle(for: AkuminaLib.self).infoDictionary!["CFBundleShortVersionString"]!
         var build = Bundle(for: AkuminaLib.self).infoDictionary!["CFBundleVersion"]!
         self.clientDetails = clientDetails;
         self.loggingHandler = loggingHandler;
+        self.window =  window;
         self.updateLogging(text: "Loading Akumina Lib Version  \(version) and Build \(build)" , error: false);
         version =  MSALPublicClientApplication.sdkVersion
         self.updateLogging(text: "Loading MSAL Version \(version)" , error: false);
@@ -249,7 +252,7 @@ class MSALUtils {
             
             manager.delegate = delegate
             
-            manager.loginAndEnrollAccount(account: account);
+            manager.loginAndEnrollAccount(upn, on: self.window);
             
         }else {
             self.getSharePointAccessTokenAsync(app: app);
