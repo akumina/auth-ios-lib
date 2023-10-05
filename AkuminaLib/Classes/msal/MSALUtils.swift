@@ -248,8 +248,7 @@ class MSALUtils {
             manager.delegate = delegate
             
             
-            manager.loginAndEnrollAccount(upn);
-            
+            manager.registerAndEnrollAccount(account.identifier!)
             
         }else {
             self.getSharePointAccessTokenAsync(app: app);
