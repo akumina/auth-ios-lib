@@ -29,7 +29,7 @@ public final class AkuminaLib {
     
     public func refreshToken() throws {
         do {
-            try MSALUtils.instance.callGraphAPI();
+            try MSALUtils.instance.refreshToken();
         }catch {
             throw MSALException.TokenFailedException(error: error)
         }

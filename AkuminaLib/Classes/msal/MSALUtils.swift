@@ -412,4 +412,10 @@ class MSALUtils {
             self.updateCurrentAccount(account: nil);
         }
     }
+    
+    public func refreshToken() throws {
+        let config = MSALPublicClientApplicationConfig(clientId: clientDetails.clientId)
+        let application = try? MSALPublicClientApplication(configuration: config);
+        try  self.callGraphAPI(app: application!);
+    }
 }
