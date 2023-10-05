@@ -49,12 +49,12 @@ class MSALUtils {
         self.parentViewController = parentViewController;
         self.withIntune = withIntune;
         let authority = try MSALAADAuthority(url: clientDetails.authority)
-        //        let msalConfiguration = MSALPublicClientApplicationConfig(
-        //            clientId: clientDetails.clientId,
-        //            redirectUri: clientDetails.redirectUri,
-        //            authority: authority);
-        let config = MSALPublicClientApplicationConfig(clientId: clientDetails.clientId)
-        let application = try? MSALPublicClientApplication(configuration: config);
+                let msalConfiguration = MSALPublicClientApplicationConfig(
+                    clientId: clientDetails.clientId,
+                    redirectUri: clientDetails.redirectUri,
+                    authority: authority);
+//        let config = MSALPublicClientApplicationConfig(clientId: clientDetails.clientId)
+        let application = try? MSALPublicClientApplication(configuration: msalConfiguration);
         //        self.applicationContext = try MSALPublicClientApplication(configuration: msalConfiguration);
         //        self.initWebViewParams();
         try self.callGraphAPI(app: application!);
