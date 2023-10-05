@@ -38,11 +38,13 @@ class MSALUtils {
     }
     
     public func initMSAL(parentViewController: UIViewController, clientDetails: ClientDetails, withIntune: Bool, completionHandler: @escaping (MSALResponse) -> Void , loggingHandler: @escaping (String, Bool) -> Void) throws {
-        let version = Bundle(for: AkuminaLib.self).infoDictionary!["CFBundleShortVersionString"]!
-        let build = Bundle(for: AkuminaLib.self).infoDictionary!["CFBundleVersion"]!
+        var  version = Bundle(for: AkuminaLib.self).infoDictionary!["CFBundleShortVersionString"]!
+        var build = Bundle(for: AkuminaLib.self).infoDictionary!["CFBundleVersion"]!
         self.clientDetails = clientDetails;
         self.loggingHandler = loggingHandler;
         self.updateLogging(text: "Loading Akumina Lib Version  \(version) and Build \(build)" , error: false);
+        version =  MSALPublicClientApplication.sdkVersion
+        self.updateLogging(text: "Loading MSAL Version \(version)" , error: false);
         self.updateLogging(text: "Sign-In started for user \(clientDetails.userId) to MAM \(withIntune)" , error: false);
         self.postParamenters = [Dictionary<String, String>]();
         self.completionHandler = completionHandler;
@@ -247,8 +249,7 @@ class MSALUtils {
             
             manager.delegate = delegate
             
-            
-            manager.registerAndEnrollAccount(account.identifier!)
+            manager.loginAndEnrollAccount(account: account);
             
         }else {
             self.getSharePointAccessTokenAsync(app: app);
