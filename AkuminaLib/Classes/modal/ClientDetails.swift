@@ -23,16 +23,16 @@ public struct ClientDetails {
             throw ClientDetailsError.invalidAuthorityURL(url: authority);
         }
         
-        if(!UIApplication.shared.canOpenURL(authorityURL)){
-            throw ClientDetailsError.invalidAuthorityURL(url: authority);
-        }
-        
+//        if(!UIApplication.shared.canOpenURL(authorityURL)){
+//            throw ClientDetailsError.invalidAuthorityURL(url: authority);
+//        }
+//
         guard let appManager  = URL(string:appManagerURL) else {
             throw ClientDetailsError.invalidAppMannager(url: appManagerURL)
         }
-        if(!UIApplication.shared.canOpenURL(appManager)){
-            throw ClientDetailsError.invalidAppMannager(url: appManagerURL)
-        }
+//        if(!UIApplication.shared.canOpenURL(appManager)){
+//            throw ClientDetailsError.invalidAppMannager(url: appManagerURL)
+//        }
         self.authority = authorityURL
         self.clientId = clientId;
         self.redirectUri = redirectUri;
