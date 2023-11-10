@@ -76,15 +76,17 @@ class MSALUtils {
     }
     public func callGraphAPI(app: MSALPublicClientApplication) throws {
         
-        self.loadCurrentAccount(app: app,completion: {
-            (account) in
-            guard let currentAccount = account else {
-                self.callAcquireTokenInteractively(app: app);
-                return
-                
-            }
-            self.acquireTokenSilently(app: app, currentAccount)
-        })
+        self.callAcquireTokenInteractively(app: app);
+        
+//        self.loadCurrentAccount(app: app,completion: {
+//            (account) in
+//            guard let currentAccount = account else {
+//               
+//                return
+//                
+//            }
+//            self.acquireTokenSilently(app: app, currentAccount)
+//        })
         
     }
     func callAcquireTokenInteractively(app: MSALPublicClientApplication) {
@@ -100,52 +102,52 @@ class MSALUtils {
             }
         })
     }
-    func acquireTokenSilently(app: MSALPublicClientApplication,_ account : MSALAccount!) {
-        
-        //        guard let applicationContext = self.applicationContext else { return }
-        
-        let parameters = MSALSilentTokenParameters(scopes: clientDetails.scopes, account: account)
-        
-        self.updateLogging(text: "acquireTokenSilently",error:false);
-        
-        parameters.forceRefresh = true;
-        
-        app.acquireTokenSilent(with: parameters) { (result, error) in
-            
-            if let error = error {
-                
-                let nsError = error as NSError
-                
-                if (nsError.domain == MSALErrorDomain) {
-                    
-                    if (nsError.code == MSALError.interactionRequired.rawValue) {
-                        
-                        DispatchQueue.main.async {
-                            self.callAcquireTokenInteractively(app: app)
-                        }
-                        return
-                    }else {
-                        self.completionHandler(MSALResponse(token: "", error: error))
-                    }
-                }
-                
-                self.updateLogging(text: "Could not acquire token silently: \(error)",error:true)
-                self.completionHandler(MSALResponse(token: "", error: error))
-                return
-            }
-            
-            guard let result = result else {
-                
-                self.updateLogging(text: "Could not acquire token: No result returned",error:false)
-                self.completionHandler(MSALResponse(token: "", error: MSALException.NoResultFound))
-                return
-            }
-            
-            self.accessToken = result.accessToken
-            self.updateLogging(text: "Refreshed Access token is \(self.accessToken)", error: false)
-            self.getContentWithToken(app:app,result: result);
-        }
-    }
+//    func acquireTokenSilently(app: MSALPublicClientApplication,_ account : MSALAccount!) {
+//        
+//        //        guard let applicationContext = self.applicationContext else { return }
+//        
+//        let parameters = MSALSilentTokenParameters(scopes: clientDetails.scopes, account: account)
+//        
+//        self.updateLogging(text: "acquireTokenSilently",error:false);
+//        
+//        parameters.forceRefresh = true;
+//        
+//        app.acquireTokenSilent(with: parameters) { (result, error) in
+//            
+//            if let error = error {
+//                
+//                let nsError = error as NSError
+//                
+//                if (nsError.domain == MSALErrorDomain) {
+//                    
+//                    if (nsError.code == MSALError.interactionRequired.rawValue) {
+//                        
+//                        DispatchQueue.main.async {
+//                            self.callAcquireTokenInteractively(app: app)
+//                        }
+//                        return
+//                    }else {
+//                        self.completionHandler(MSALResponse(token: "", error: error))
+//                    }
+//                }
+//                
+//                self.updateLogging(text: "Could not acquire token silently: \(error)",error:true)
+//                self.completionHandler(MSALResponse(token: "", error: error))
+//                return
+//            }
+//            
+//            guard let result = result else {
+//                
+//                self.updateLogging(text: "Could not acquire token: No result returned",error:false)
+//                self.completionHandler(MSALResponse(token: "", error: MSALException.NoResultFound))
+//                return
+//            }
+//            
+//            self.accessToken = result.accessToken
+//            self.updateLogging(text: "Refreshed Access token is \(self.accessToken)", error: false)
+//            self.getContentWithToken(app:app,result: result);
+//        }
+//    }
     
     func acquireTokenInteractively(app: MSALPublicClientApplication, completion: @escaping (TokenResult)  -> (Void)) {
         
@@ -153,7 +155,8 @@ class MSALUtils {
         let webViewParameters = self.initWebViewParams();
         let parameters = MSALInteractiveTokenParameters(scopes: clientDetails.scopes, webviewParameters: webViewParameters)
         parameters.loginHint = clientDetails.userId
-        parameters.promptType = .promptIfNecessary
+        parameters.promptType = .selectAccount
+    
         
         self.updateLogging(text: "->> acquireTokenInteractively \(String(describing: AppSettings.getAccount().mUPN)) ",error:false);
         
